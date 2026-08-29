@@ -1,0 +1,23 @@
+{
+  "item_id": "case06_changelog_internal_noise",
+  "item_type": "changelog_audit",
+  "title": "Audit CHANGELOG for acme/core v5.0.1 (HARD: many internal commits must NOT be flagged)",
+  "artifact": {
+    "repo": "acme/core",
+    "version": "5.0.1",
+    "commits": [
+      {"sha": "g50a01", "type": "fix", "subject": "fix memory leak in the cache eviction loop", "body": "Long-running processes no longer grow unbounded."},
+      {"sha": "g50a02", "type": "chore", "subject": "migrate CI from Travis to GitHub Actions", "body": "Internal infra only."},
+      {"sha": "g50a03", "type": "refactor", "subject": "split the god-object Manager class", "body": "No behavior change."},
+      {"sha": "g50a04", "type": "test", "subject": "add regression test for the cache leak", "body": "Test-only."},
+      {"sha": "g50a05", "type": "feat", "subject": "expose cache stats via getCacheStats()", "body": "New public API returning hit/miss counts."},
+      {"sha": "g50a06", "type": "chore", "subject": "update copyright year in headers", "body": "Cosmetic."}
+    ],
+    "changelog": [
+      {"line": 1, "section": "Fixed", "text": "Memory leak in cache eviction for long-running processes"}
+    ]
+  },
+  "ground_truth": [
+    {"type": "missing", "ref": "commit:g50a05"}
+  ]
+}

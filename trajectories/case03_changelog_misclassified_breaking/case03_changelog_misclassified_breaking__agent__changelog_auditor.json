@@ -1,0 +1,100 @@
+{
+  "agent": "changelog_auditor",
+  "item_id": "case03_changelog_misclassified_breaking",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system": "You are a release-notes auditor for a software repository.\n\nYour job: compare the CHANGELOG **as written** against the **actual commits** in\nthe release, and report only the DISCREPANCIES. Do not list lines that are fine.\n\nDiscrepancy types:\n- \"phantom\": a CHANGELOG line claims a change that no commit supports.\n- \"missing\": a commit made a user-facing change (feat / fix / breaking) that no\n  CHANGELOG line mentions. Ignore purely internal commits (chore, docs, test,\n  refactor with no user impact) -- those are not expected in the changelog.\n- \"misclassified\": a CHANGELOG line exists but sits under the wrong section for\n  the commit's true impact. The most important case: a BREAKING change listed\n  under an ordinary \"Added\"/\"Fixed\"/\"Changed\" heading instead of \"Breaking\".\n\nMethod:\n1. Call list_commits, then read_changelog.\n2. You CANNOT judge breaking-ness from a subject alone. Call get_commit to read\n   the body for EVERY commit that is even possibly breaking -- specifically any\n   whose subject mentions rename / remove / drop / delete / replace / change /\n   migrate, and (because major releases concentrate breaking changes) every\n   commit when the release version is a major bump (x.0.0). The BREAKING CHANGE\n   marker usually appears only in the body.\n3. Decide the discrepancies. Tie EACH to evidence: the commit sha and/or the\n   changelog line, and quote the exact text you relied on.\n\nOutput ONLY a JSON array (no prose) of objects:\n[\n  {\n    \"verdict\": \"phantom\" | \"missing\" | \"misclassified\",\n    \"subject\": \"changelog:<line>\"  (for phantom/misclassified)  or  \"commit:<sha>\" (for missing),\n    \"evidence\": [ {\"kind\": \"changelog_line\"|\"commit\", \"ref\": \"changelog:<line>\"|\"commit:<sha>\", \"quote\": \"<exact text>\"} ],\n    \"confidence\": 0.0-1.0,\n    \"rationale\": \"<one sentence>\"\n  }\n]\nIf there are no discrepancies, output [].",
+  "input_tokens": 2293,
+  "output_tokens": 378,
+  "steps": [
+    {
+      "kind": "model",
+      "step": 0,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_n9KC3SDnjjZr59OLvHl9P8XO",
+          "name": "list_commits",
+          "input": {}
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 0,
+      "name": "list_commits",
+      "input": {},
+      "result": "[\n  {\n    \"sha\": \"c30a01\",\n    \"type\": \"feat\",\n    \"subject\": \"rename --timeout flag to --timeout-ms\"\n  },\n  {\n    \"sha\": \"c30a02\",\n    \"type\": \"feat\",\n    \"subject\": \"add --json output mode\"\n  },\n  {\n    \"sha\": \"c30a03\",\n    \"type\": \"docs\",\n    \"subject\": \"expand the quickstart guide\"\n  }\n]",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 1,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_0cGNSEZOwE3i0ZxcdZhmo9i3",
+          "name": "get_commit",
+          "input": {
+            "sha": "c30a01"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_PDAHLKqw0y8AqepttW2bzlZ4",
+          "name": "get_commit",
+          "input": {
+            "sha": "c30a02"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_z3mFc1KMkHBe8iX1tJwaZbua",
+          "name": "read_changelog",
+          "input": {}
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "get_commit",
+      "input": {
+        "sha": "c30a01"
+      },
+      "result": "{\n  \"sha\": \"c30a01\",\n  \"type\": \"feat\",\n  \"subject\": \"rename --timeout flag to --timeout-ms\",\n  \"body\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n}",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "get_commit",
+      "input": {
+        "sha": "c30a02"
+      },
+      "result": "{\n  \"sha\": \"c30a02\",\n  \"type\": \"feat\",\n  \"subject\": \"add --json output mode\",\n  \"body\": \"Machine-readable output for all commands.\"\n}",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "read_changelog",
+      "input": {},
+      "result": "[\n  {\n    \"line\": 1,\n    \"section\": \"Changed\",\n    \"text\": \"Renamed the --timeout flag to --timeout-ms\"\n  },\n  {\n    \"line\": 2,\n    \"section\": \"Added\",\n    \"text\": \"New --json output mode for all commands\"\n  }\n]",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 2,
+      "stop_reason": "end_turn",
+      "content": [
+        {
+          "type": "text",
+          "text": "[\n  {\n    \"verdict\": \"misclassified\",\n    \"subject\": \"changelog:Renamed the --timeout flag to --timeout-ms\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:Renamed the --timeout flag to --timeout-ms\",\n        \"quote\": \"Renamed the --timeout flag to --timeout-ms\"\n      },\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog entry states 'Renamed the --timeout flag to --timeout-ms', but this is a breaking change due to the removal of the original flag.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"commit:c30a01\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The commit indicates a breaking change due to flag removal, but there is no corresponding changelog entry for this breaking change.\"\n  }\n]"
+        }
+      ]
+    }
+  ]
+}

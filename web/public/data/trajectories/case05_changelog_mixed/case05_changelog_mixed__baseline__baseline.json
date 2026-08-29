@@ -1,0 +1,22 @@
+{
+  "agent": "baseline",
+  "item_id": "case05_changelog_mixed",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
+  "input_tokens": 454,
+  "output_tokens": 201,
+  "steps": [
+    {
+      "kind": "model",
+      "step": 0,
+      "stop_reason": "end_turn",
+      "content": [
+        {
+          "type": "text",
+          "text": "[\n    {\n        \"verdict\": \"missing\",\n        \"subject\": \"feat: add offline message queue\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"f43a03\",\n                \"quote\": \"add offline message queue: Messages composed offline send automatically on reconnect.\"\n            }\n        ],\n        \"confidence\": 0.9,\n        \"rationale\": \"The commit for adding the offline message queue is present, but its entry is missing from the CHANGELOG.\"\n    },\n    {\n        \"verdict\": \"phantom\",\n        \"subject\": \"in-app video calling\",\n        \"evidence\": [\n            {\n                \"kind\": \"changelog\",\n                \"ref\": \"line 3\",\n                \"quote\": \"In-app video calling\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The changelog entry for in-app video calling has no corresponding commit present.\"\n    }\n]"
+        }
+      ]
+    }
+  ]
+}

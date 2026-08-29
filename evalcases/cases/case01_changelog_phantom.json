@@ -1,0 +1,22 @@
+{
+  "item_id": "case01_changelog_phantom",
+  "item_type": "changelog_audit",
+  "title": "Audit CHANGELOG for acme/widgets v1.4.0",
+  "artifact": {
+    "repo": "acme/widgets",
+    "version": "1.4.0",
+    "commits": [
+      {"sha": "a1b2c3", "type": "feat", "subject": "add CSV export to reports view", "body": "Users can download any report as CSV."},
+      {"sha": "d4e5f6", "type": "fix", "subject": "correct timezone offset in daily digest", "body": "Digest was sent one hour late for UTC+1 users."},
+      {"sha": "77aa88", "type": "chore", "subject": "bump eslint to 9.2", "body": "Dev-only tooling update."}
+    ],
+    "changelog": [
+      {"line": 1, "section": "Added", "text": "CSV export for the reports view"},
+      {"line": 2, "section": "Fixed", "text": "Daily digest timezone offset for UTC+1 users"},
+      {"line": 3, "section": "Added", "text": "Dark mode for the settings page"}
+    ]
+  },
+  "ground_truth": [
+    {"type": "phantom", "ref": "changelog:3"}
+  ]
+}

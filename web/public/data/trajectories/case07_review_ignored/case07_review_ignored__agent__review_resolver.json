@@ -1,0 +1,190 @@
+{
+  "agent": "review_resolver",
+  "item_id": "case07_review_ignored",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system": "You verify whether a pull request actually addressed its review comments.\n\nYou are given a PR's reviewer comments and the diff the author pushed in\nresponse. For EACH comment, decide one verdict:\n- \"addressed\": a diff hunk makes exactly the change the comment requested.\n- \"partial\": the diff moves toward the request but leaves part of it undone.\n- \"ignored\": no pushed hunk addresses the comment. A reply of \"done\" with only\n  a cosmetic/unrelated change is still \"ignored\" -- judge the code, not claims.\n\nMethod:\n1. Call list_review_comments.\n2. For each comment, call get_diff_for_path on the comment's file to see what\n   actually changed there; call get_hunk for detail if needed.\n3. Judge each comment against the real diff. Tie the verdict to evidence: the\n   hunk id and a quote of the changed lines (or note that no hunk touches it).\n\nOutput ONLY a JSON array (no prose), exactly one object per review comment:\n[\n  {\n    \"verdict\": \"addressed\" | \"partial\" | \"ignored\",\n    \"subject\": \"comment:<id>\",\n    \"evidence\": [ {\"kind\": \"diff_hunk\"|\"review_comment\", \"ref\": \"hunk:<id>\"|\"comment:<id>\", \"quote\": \"<exact text>\"} ],\n    \"confidence\": 0.0-1.0,\n    \"rationale\": \"<one sentence>\"\n  }\n]",
+  "input_tokens": 4107,
+  "output_tokens": 380,
+  "steps": [
+    {
+      "kind": "model",
+      "step": 0,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_nCNMsJAAtKt486JEkVgdE5Oy",
+          "name": "list_review_comments",
+          "input": {}
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 0,
+      "name": "list_review_comments",
+      "input": {},
+      "result": "[\n  {\n    \"id\": \"c1\",\n    \"path\": \"src/auth.py\",\n    \"line\": 42,\n    \"body\": \"authenticate() will crash if `user` is None. Please add a guard before accessing user.role.\"\n  },\n  {\n    \"id\": \"c2\",\n    \"path\": \"src/auth.py\",\n    \"line\": 88,\n    \"body\": \"Typo in the error message: 'unathorized' should be 'unauthorized'.\"\n  }\n]",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 1,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_Z8pAPGYXuCFPsvTOSdMnSIE1",
+          "name": "get_diff_for_path",
+          "input": {
+            "path": "src/auth.py"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_cmTwHRoysQ4YB2rtGvHO8oDV",
+          "name": "get_hunk",
+          "input": {
+            "hunk_id": "hunk:1"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_v7RMSMKtzFJZ1frn41dphboS",
+          "name": "get_hunk",
+          "input": {
+            "hunk_id": "hunk:2"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "get_diff_for_path",
+      "input": {
+        "path": "src/auth.py"
+      },
+      "result": "[\n  {\n    \"id\": \"h1\",\n    \"path\": \"src/auth.py\",\n    \"header\": \"@@ -38,7 +38,7 @@ def authenticate(request):\",\n    \"patch\": \"-    u = request.user\\n-    return u.role in ALLOWED_ROLES\\n+    user = request.user\\n+    return user.role in ALLOWED_ROLES\"\n  },\n  {\n    \"id\": \"h2\",\n    \"path\": \"src/auth.py\",\n    \"header\": \"@@ -86,7 +86,7 @@ def _deny():\",\n    \"patch\": \"-    raise AuthError(\\\"unathorized\\\")\\n+    raise AuthError(\\\"unauthorized\\\")\"\n  }\n]",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "get_hunk",
+      "input": {
+        "hunk_id": "hunk:1"
+      },
+      "result": "Error: no hunk hunk:1",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "get_hunk",
+      "input": {
+        "hunk_id": "hunk:2"
+      },
+      "result": "Error: no hunk hunk:2",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 2,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_h5Yoc1NGja05o0oqOAQnqGGF",
+          "name": "get_diff_for_path",
+          "input": {
+            "path": "src/auth.py"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_dK2af26dgQRCNTMKTT4sIjky",
+          "name": "get_hunk",
+          "input": {
+            "hunk_id": "hunk:0"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 2,
+      "name": "get_diff_for_path",
+      "input": {
+        "path": "src/auth.py"
+      },
+      "result": "[\n  {\n    \"id\": \"h1\",\n    \"path\": \"src/auth.py\",\n    \"header\": \"@@ -38,7 +38,7 @@ def authenticate(request):\",\n    \"patch\": \"-    u = request.user\\n-    return u.role in ALLOWED_ROLES\\n+    user = request.user\\n+    return user.role in ALLOWED_ROLES\"\n  },\n  {\n    \"id\": \"h2\",\n    \"path\": \"src/auth.py\",\n    \"header\": \"@@ -86,7 +86,7 @@ def _deny():\",\n    \"patch\": \"-    raise AuthError(\\\"unathorized\\\")\\n+    raise AuthError(\\\"unauthorized\\\")\"\n  }\n]",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 2,
+      "name": "get_hunk",
+      "input": {
+        "hunk_id": "hunk:0"
+      },
+      "result": "Error: no hunk hunk:0",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 3,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_KR05HSwQqTCv0MmRQ0cTk7JL",
+          "name": "get_hunk",
+          "input": {
+            "hunk_id": "h1"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_0fJrqXKHuktadbiPqIUwOzQm",
+          "name": "get_hunk",
+          "input": {
+            "hunk_id": "h2"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 3,
+      "name": "get_hunk",
+      "input": {
+        "hunk_id": "h1"
+      },
+      "result": "{\n  \"id\": \"h1\",\n  \"path\": \"src/auth.py\",\n  \"header\": \"@@ -38,7 +38,7 @@ def authenticate(request):\",\n  \"patch\": \"-    u = request.user\\n-    return u.role in ALLOWED_ROLES\\n+    user = request.user\\n+    return user.role in ALLOWED_ROLES\"\n}",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 3,
+      "name": "get_hunk",
+      "input": {
+        "hunk_id": "h2"
+      },
+      "result": "{\n  \"id\": \"h2\",\n  \"path\": \"src/auth.py\",\n  \"header\": \"@@ -86,7 +86,7 @@ def _deny():\",\n  \"patch\": \"-    raise AuthError(\\\"unathorized\\\")\\n+    raise AuthError(\\\"unauthorized\\\")\"\n}",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 4,
+      "stop_reason": "end_turn",
+      "content": [
+        {
+          "type": "text",
+          "text": "[\n  {\n    \"verdict\": \"ignored\",\n    \"subject\": \"comment:c1\",\n    \"evidence\": [ {\"kind\": \"review_comment\", \"ref\": \"comment:c1\", \"quote\": \"authenticate() will crash if `user` is None. Please add a guard before accessing user.role.\"} ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The diff does not include any guard for None user before accessing user.role.\"\n  },\n  {\n    \"verdict\": \"addressed\",\n    \"subject\": \"comment:c2\",\n    \"evidence\": [ {\"kind\": \"diff_hunk\", \"ref\": \"hunk:h2\", \"quote\": \"-    raise AuthError(\\\"unathorized\\\")\\n+    raise AuthError(\\\"unauthorized\\\")\"} ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The typo in the error message was corrected as requested.\"\n  }\n]"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "agent": "baseline",
+  "item_id": "case03_changelog_misclassified_breaking",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
+  "input_tokens": 453,
+  "output_tokens": 424,
+  "steps": [
+    {
+      "kind": "model",
+      "step": 0,
+      "stop_reason": "end_turn",
+      "content": [
+        {
+          "type": "text",
+          "text": "[\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"Breaking Change\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 0.9,\n    \"rationale\": \"The changelog does not mention the breaking change regarding the removal of the --timeout flag, which is clearly stated in the commit.\"\n  },\n  {\n    \"verdict\": \"misclassified\",\n    \"subject\": \"Changed Section\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog\",\n        \"ref\": \"line 1\",\n        \"quote\": \"Renamed the --timeout flag to --timeout-ms\"\n      },\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 0.8,\n    \"rationale\": \"The changelog classifies the renaming of the --timeout flag as 'Changed' rather than as a breaking change, which is how it is defined in the commit.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"New --json output mode\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog\",\n        \"ref\": \"line 2\",\n        \"quote\": \"New --json output mode for all commands\"\n      },\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a02\",\n        \"quote\": \"add --json output mode\"\n      }\n    ],\n    \"confidence\": 0.95,\n    \"rationale\": \"The changelog correctly reflects the addition of the --json output mode, aligning with the corresponding commit.\"\n  }\n]"
+        }
+      ]
+    }
+  ]
+}

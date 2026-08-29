@@ -1,0 +1,22 @@
+{
+  "agent": "baseline",
+  "item_id": "case06_changelog_internal_noise",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
+  "input_tokens": 539,
+  "output_tokens": 545,
+  "steps": [
+    {
+      "kind": "model",
+      "step": 0,
+      "stop_reason": "end_turn",
+      "content": [
+        {
+          "type": "text",
+          "text": "[\n    {\n        \"verdict\": \"partial\",\n        \"subject\": \"migrate CI from Travis to GitHub Actions\",\n        \"evidence\": [\n            {\n                \"kind\": \"chore\",\n                \"ref\": \"g50a02\",\n                \"quote\": \"migrate CI from Travis to GitHub Actions\"\n            }\n        ],\n        \"confidence\": 0.8,\n        \"rationale\": \"This commit is classified as a 'chore' but does not appear in the changelog which may imply a lack of coverage for CI changes in the listed change entries.\"\n    },\n    {\n        \"verdict\": \"ignored\",\n        \"subject\": \"split the god-object Manager class\",\n        \"evidence\": [\n            {\n                \"kind\": \"refactor\",\n                \"ref\": \"g50a03\",\n                \"quote\": \"split the god-object Manager class\"\n            }\n        ],\n        \"confidence\": 0.9,\n        \"rationale\": \"This commit is a refactor and is omitted from the changelog, as expected due to its internal nature, but it still should be acknowledged as an internal change.\"\n    },\n    {\n        \"verdict\": \"ignored\",\n        \"subject\": \"add regression test for the cache leak\",\n        \"evidence\": [\n            {\n                \"kind\": \"test\",\n                \"ref\": \"g50a04\",\n                \"quote\": \"add regression test for the cache leak\"\n            }\n        ],\n        \"confidence\": 0.9,\n        \"rationale\": \"This commit is test-related and is appropriately excluded from the changelog as it does not affect functionality.\"\n    },\n    {\n        \"verdict\": \"ignored\",\n        \"subject\": \"expose cache stats via getCacheStats()\",\n        \"evidence\": [\n            {\n                \"kind\": \"feat\",\n                \"ref\": \"g50a05\",\n                \"quote\": \"expose cache stats via getCacheStats()\"\n            }\n        ],\n        \"confidence\": 0.9,\n        \"rationale\": \"This feature is expected to be included in the changelog but is not directly referenced, suggesting a potential oversight.\"\n    },\n    {\n        \"verdict\": \"ignored\",\n        \"subject\": \"update copyright year in headers\",\n        \"evidence\": [\n            {\n                \"kind\": \"chore\",\n                \"ref\": \"g50a06\",\n                \"quote\": \"update copyright year in headers\"\n            }\n        ],\n        \"confidence\": 0.9,\n        \"rationale\": \"This cosmetic change is appropriately ignored in the changelog due to its non-impact on application functionality.\"\n    }\n]"
+        }
+      ]
+    }
+  ]
+}

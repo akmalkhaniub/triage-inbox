@@ -1,0 +1,18 @@
+{
+  "item_id": "case09_review_partial",
+  "item_type": "review_resolution",
+  "title": "Did PR #331 address its review? (one comment only partially handled)",
+  "artifact": {
+    "repo": "acme/reports",
+    "pr_title": "Clean up report builder",
+    "review_comments": [
+      {"id": "c1", "path": "src/report.py", "line": 30, "body": "Rename `d` to something descriptive, and add a unit test for the empty-input case."},
+      {"id": "c2", "path": "src/report.py", "line": 5, "body": "This import is unused, please remove it."}
+    ],
+    "diff_hunks": [
+      {"id": "h1", "path": "src/report.py", "header": "@@ -28,8 +28,8 @@ def build(rows):", "patch": "-    d = summarize(rows)\n-    return render(d)\n+    records = summarize(rows)\n+    return render(records)"},
+      {"id": "h2", "path": "src/report.py", "header": "@@ -3,7 +3,6 @@", "patch": "-import itertools\n import json"}
+    ]
+  },
+  "ground_truth": {"c1": "partial", "c2": "addressed"}
+}

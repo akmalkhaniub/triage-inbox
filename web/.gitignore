@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.tsbuildinfo
+# NOTE: public/data/ IS committed on purpose — it's the pre-generated eval
+# bundle Vercel serves. Regenerate it locally with `npm run data`.

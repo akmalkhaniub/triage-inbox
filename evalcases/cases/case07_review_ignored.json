@@ -1,0 +1,18 @@
+{
+  "item_id": "case07_review_ignored",
+  "item_type": "review_resolution",
+  "title": "Did PR #418 address its review? (HARD: author said 'done' but only made a cosmetic change)",
+  "artifact": {
+    "repo": "acme/auth",
+    "pr_title": "Harden authenticate()",
+    "review_comments": [
+      {"id": "c1", "path": "src/auth.py", "line": 42, "body": "authenticate() will crash if `user` is None. Please add a guard before accessing user.role."},
+      {"id": "c2", "path": "src/auth.py", "line": 88, "body": "Typo in the error message: 'unathorized' should be 'unauthorized'."}
+    ],
+    "diff_hunks": [
+      {"id": "h1", "path": "src/auth.py", "header": "@@ -38,7 +38,7 @@ def authenticate(request):", "patch": "-    u = request.user\n-    return u.role in ALLOWED_ROLES\n+    user = request.user\n+    return user.role in ALLOWED_ROLES"},
+      {"id": "h2", "path": "src/auth.py", "header": "@@ -86,7 +86,7 @@ def _deny():", "patch": "-    raise AuthError(\"unathorized\")\n+    raise AuthError(\"unauthorized\")"}
+    ]
+  },
+  "ground_truth": {"c1": "ignored", "c2": "addressed"}
+}

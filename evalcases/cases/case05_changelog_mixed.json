@@ -1,0 +1,23 @@
+{
+  "item_id": "case05_changelog_mixed",
+  "item_type": "changelog_audit",
+  "title": "Audit CHANGELOG for acme/mobile v4.3.0 (phantom + missing)",
+  "artifact": {
+    "repo": "acme/mobile",
+    "version": "4.3.0",
+    "commits": [
+      {"sha": "f43a01", "type": "feat", "subject": "add biometric unlock", "body": "Face ID / fingerprint unlock on supported devices."},
+      {"sha": "f43a02", "type": "fix", "subject": "fix crash when opening a deleted chat", "body": "Null-checked the chat before render."},
+      {"sha": "f43a03", "type": "feat", "subject": "add offline message queue", "body": "Messages composed offline send automatically on reconnect."}
+    ],
+    "changelog": [
+      {"line": 1, "section": "Added", "text": "Biometric unlock (Face ID / fingerprint)"},
+      {"line": 2, "section": "Fixed", "text": "Crash when opening a deleted chat"},
+      {"line": 3, "section": "Added", "text": "In-app video calling"}
+    ]
+  },
+  "ground_truth": [
+    {"type": "phantom", "ref": "changelog:3"},
+    {"type": "missing", "ref": "commit:f43a03"}
+  ]
+}

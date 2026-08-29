@@ -1,0 +1,22 @@
+{
+  "agent": "baseline",
+  "item_id": "case04_changelog_clean",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
+  "input_tokens": 479,
+  "output_tokens": 426,
+  "steps": [
+    {
+      "kind": "model",
+      "step": 0,
+      "stop_reason": "end_turn",
+      "content": [
+        {
+          "type": "text",
+          "text": "[\n    {\n        \"verdict\": \"phantom\",\n        \"subject\": \"Added section\",\n        \"evidence\": [\n            {\n                \"kind\": \"changelog\",\n                \"ref\": \"line 1\",\n                \"quote\": \"Keyboard shortcuts in the editor (Cmd+K command palette)\"\n            },\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"e12a01\",\n                \"quote\": \"add keyboard shortcuts to the editor\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The changelog mentions keyboard shortcuts in the editor but does not include the full context from the associated commit about the command palette.\"\n    },\n    {\n        \"verdict\": \"phantom\",\n        \"subject\": \"Fixed section\",\n        \"evidence\": [\n            {\n                \"kind\": \"changelog\",\n                \"ref\": \"line 2\",\n                \"quote\": \"Drafts are no longer lost when switching tabs\"\n            },\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"e12a02\",\n                \"quote\": \"stop losing draft on tab switch\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The changelog summarizes the fix accurately, but does not fully capture the context or details as provided in the commit message.\"\n    },\n    {\n        \"verdict\": \"ignored\",\n        \"subject\": \"Test section\",\n        \"evidence\": [],\n        \"confidence\": 0.9,\n        \"rationale\": \"There are no mentions of the test commit in the changelog which may be typical, but it represents missing context that is relevant for users.\"\n    },\n    {\n        \"verdict\": \"ignored\",\n        \"subject\": \"Refactor section\",\n        \"evidence\": [],\n        \"confidence\": 0.9,\n        \"rationale\": \"The refactor commit is not included in the changelog, which may be acceptable due to a lack of user-facing changes, yet it is still a significant contribution that is omitted.\"\n    }\n]"
+        }
+      ]
+    }
+  ]
+}

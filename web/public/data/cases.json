@@ -1,0 +1,473 @@
+{
+  "case01_changelog_phantom": {
+    "item_type": "changelog_audit",
+    "title": "Audit CHANGELOG for acme/widgets v1.4.0",
+    "ground_truth": [
+      {
+        "type": "phantom",
+        "ref": "changelog:3"
+      }
+    ],
+    "artifact": {
+      "repo": "acme/widgets",
+      "version": "1.4.0",
+      "commits": [
+        {
+          "sha": "a1b2c3",
+          "type": "feat",
+          "subject": "add CSV export to reports view",
+          "body": "Users can download any report as CSV."
+        },
+        {
+          "sha": "d4e5f6",
+          "type": "fix",
+          "subject": "correct timezone offset in daily digest",
+          "body": "Digest was sent one hour late for UTC+1 users."
+        },
+        {
+          "sha": "77aa88",
+          "type": "chore",
+          "subject": "bump eslint to 9.2",
+          "body": "Dev-only tooling update."
+        }
+      ],
+      "changelog": [
+        {
+          "line": 1,
+          "section": "Added",
+          "text": "CSV export for the reports view"
+        },
+        {
+          "line": 2,
+          "section": "Fixed",
+          "text": "Daily digest timezone offset for UTC+1 users"
+        },
+        {
+          "line": 3,
+          "section": "Added",
+          "text": "Dark mode for the settings page"
+        }
+      ]
+    }
+  },
+  "case02_changelog_missing": {
+    "item_type": "changelog_audit",
+    "title": "Audit CHANGELOG for acme/api v2.1.0",
+    "ground_truth": [
+      {
+        "type": "missing",
+        "ref": "commit:b10002"
+      }
+    ],
+    "artifact": {
+      "repo": "acme/api",
+      "version": "2.1.0",
+      "commits": [
+        {
+          "sha": "b10001",
+          "type": "feat",
+          "subject": "add pagination to /v2/orders",
+          "body": "New page and per_page query params."
+        },
+        {
+          "sha": "b10002",
+          "type": "feat",
+          "subject": "add rate-limit headers to all responses",
+          "body": "Returns X-RateLimit-Remaining on every response."
+        },
+        {
+          "sha": "b10003",
+          "type": "fix",
+          "subject": "reject negative quantity in order create",
+          "body": "Previously accepted negative quantities."
+        }
+      ],
+      "changelog": [
+        {
+          "line": 1,
+          "section": "Added",
+          "text": "Pagination on the /v2/orders endpoint"
+        },
+        {
+          "line": 2,
+          "section": "Fixed",
+          "text": "Order creation now rejects negative quantities"
+        }
+      ]
+    }
+  },
+  "case03_changelog_misclassified_breaking": {
+    "item_type": "changelog_audit",
+    "title": "Audit CHANGELOG for acme/cli v3.0.0 (HARD: breaking change hidden in commit body)",
+    "ground_truth": [
+      {
+        "type": "misclassified",
+        "ref": "changelog:1"
+      }
+    ],
+    "artifact": {
+      "repo": "acme/cli",
+      "version": "3.0.0",
+      "commits": [
+        {
+          "sha": "c30a01",
+          "type": "feat",
+          "subject": "rename --timeout flag to --timeout-ms",
+          "body": "BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds."
+        },
+        {
+          "sha": "c30a02",
+          "type": "feat",
+          "subject": "add --json output mode",
+          "body": "Machine-readable output for all commands."
+        },
+        {
+          "sha": "c30a03",
+          "type": "docs",
+          "subject": "expand the quickstart guide",
+          "body": "Doc-only change."
+        }
+      ],
+      "changelog": [
+        {
+          "line": 1,
+          "section": "Changed",
+          "text": "Renamed the --timeout flag to --timeout-ms"
+        },
+        {
+          "line": 2,
+          "section": "Added",
+          "text": "New --json output mode for all commands"
+        }
+      ]
+    }
+  },
+  "case04_changelog_clean": {
+    "item_type": "changelog_audit",
+    "title": "Audit CHANGELOG for acme/web v1.2.0 (no discrepancies -- precision check)",
+    "ground_truth": [],
+    "artifact": {
+      "repo": "acme/web",
+      "version": "1.2.0",
+      "commits": [
+        {
+          "sha": "e12a01",
+          "type": "feat",
+          "subject": "add keyboard shortcuts to the editor",
+          "body": "Cmd+K opens the command palette."
+        },
+        {
+          "sha": "e12a02",
+          "type": "fix",
+          "subject": "stop losing draft on tab switch",
+          "body": "Drafts are now autosaved before navigation."
+        },
+        {
+          "sha": "e12a03",
+          "type": "test",
+          "subject": "add coverage for the draft autosave path",
+          "body": "Test-only."
+        },
+        {
+          "sha": "e12a04",
+          "type": "refactor",
+          "subject": "extract editor toolbar into its own module",
+          "body": "No user-facing change."
+        }
+      ],
+      "changelog": [
+        {
+          "line": 1,
+          "section": "Added",
+          "text": "Keyboard shortcuts in the editor (Cmd+K command palette)"
+        },
+        {
+          "line": 2,
+          "section": "Fixed",
+          "text": "Drafts are no longer lost when switching tabs"
+        }
+      ]
+    }
+  },
+  "case05_changelog_mixed": {
+    "item_type": "changelog_audit",
+    "title": "Audit CHANGELOG for acme/mobile v4.3.0 (phantom + missing)",
+    "ground_truth": [
+      {
+        "type": "phantom",
+        "ref": "changelog:3"
+      },
+      {
+        "type": "missing",
+        "ref": "commit:f43a03"
+      }
+    ],
+    "artifact": {
+      "repo": "acme/mobile",
+      "version": "4.3.0",
+      "commits": [
+        {
+          "sha": "f43a01",
+          "type": "feat",
+          "subject": "add biometric unlock",
+          "body": "Face ID / fingerprint unlock on supported devices."
+        },
+        {
+          "sha": "f43a02",
+          "type": "fix",
+          "subject": "fix crash when opening a deleted chat",
+          "body": "Null-checked the chat before render."
+        },
+        {
+          "sha": "f43a03",
+          "type": "feat",
+          "subject": "add offline message queue",
+          "body": "Messages composed offline send automatically on reconnect."
+        }
+      ],
+      "changelog": [
+        {
+          "line": 1,
+          "section": "Added",
+          "text": "Biometric unlock (Face ID / fingerprint)"
+        },
+        {
+          "line": 2,
+          "section": "Fixed",
+          "text": "Crash when opening a deleted chat"
+        },
+        {
+          "line": 3,
+          "section": "Added",
+          "text": "In-app video calling"
+        }
+      ]
+    }
+  },
+  "case06_changelog_internal_noise": {
+    "item_type": "changelog_audit",
+    "title": "Audit CHANGELOG for acme/core v5.0.1 (HARD: many internal commits must NOT be flagged)",
+    "ground_truth": [
+      {
+        "type": "missing",
+        "ref": "commit:g50a05"
+      }
+    ],
+    "artifact": {
+      "repo": "acme/core",
+      "version": "5.0.1",
+      "commits": [
+        {
+          "sha": "g50a01",
+          "type": "fix",
+          "subject": "fix memory leak in the cache eviction loop",
+          "body": "Long-running processes no longer grow unbounded."
+        },
+        {
+          "sha": "g50a02",
+          "type": "chore",
+          "subject": "migrate CI from Travis to GitHub Actions",
+          "body": "Internal infra only."
+        },
+        {
+          "sha": "g50a03",
+          "type": "refactor",
+          "subject": "split the god-object Manager class",
+          "body": "No behavior change."
+        },
+        {
+          "sha": "g50a04",
+          "type": "test",
+          "subject": "add regression test for the cache leak",
+          "body": "Test-only."
+        },
+        {
+          "sha": "g50a05",
+          "type": "feat",
+          "subject": "expose cache stats via getCacheStats()",
+          "body": "New public API returning hit/miss counts."
+        },
+        {
+          "sha": "g50a06",
+          "type": "chore",
+          "subject": "update copyright year in headers",
+          "body": "Cosmetic."
+        }
+      ],
+      "changelog": [
+        {
+          "line": 1,
+          "section": "Fixed",
+          "text": "Memory leak in cache eviction for long-running processes"
+        }
+      ]
+    }
+  },
+  "case07_review_ignored": {
+    "item_type": "review_resolution",
+    "title": "Did PR #418 address its review? (HARD: author said 'done' but only made a cosmetic change)",
+    "ground_truth": {
+      "c1": "ignored",
+      "c2": "addressed"
+    },
+    "artifact": {
+      "repo": "acme/auth",
+      "pr_title": "Harden authenticate()",
+      "review_comments": [
+        {
+          "id": "c1",
+          "path": "src/auth.py",
+          "line": 42,
+          "body": "authenticate() will crash if `user` is None. Please add a guard before accessing user.role."
+        },
+        {
+          "id": "c2",
+          "path": "src/auth.py",
+          "line": 88,
+          "body": "Typo in the error message: 'unathorized' should be 'unauthorized'."
+        }
+      ],
+      "diff_hunks": [
+        {
+          "id": "h1",
+          "path": "src/auth.py",
+          "header": "@@ -38,7 +38,7 @@ def authenticate(request):",
+          "patch": "-    u = request.user\n-    return u.role in ALLOWED_ROLES\n+    user = request.user\n+    return user.role in ALLOWED_ROLES"
+        },
+        {
+          "id": "h2",
+          "path": "src/auth.py",
+          "header": "@@ -86,7 +86,7 @@ def _deny():",
+          "patch": "-    raise AuthError(\"unathorized\")\n+    raise AuthError(\"unauthorized\")"
+        }
+      ]
+    }
+  },
+  "case08_review_addressed": {
+    "item_type": "review_resolution",
+    "title": "Did PR #205 address its review? (all addressed -- precision check)",
+    "ground_truth": {
+      "c1": "addressed",
+      "c2": "addressed"
+    },
+    "artifact": {
+      "repo": "acme/api",
+      "pr_title": "Add limit validation and page-size constant to orders endpoint",
+      "review_comments": [
+        {
+          "id": "c1",
+          "path": "src/api/orders.py",
+          "line": 15,
+          "body": "Please validate that `limit` is positive before using it."
+        },
+        {
+          "id": "c2",
+          "path": "src/api/orders.py",
+          "line": 60,
+          "body": "Use a named constant for the default page size instead of the magic number 20."
+        }
+      ],
+      "diff_hunks": [
+        {
+          "id": "h1",
+          "path": "src/api/orders.py",
+          "header": "@@ -12,6 +12,8 @@ def list_orders(limit, page):",
+          "patch": "     limit = int(limit)\n+    if limit <= 0:\n+        raise ValueError(\"limit must be positive\")"
+        },
+        {
+          "id": "h2",
+          "path": "src/api/orders.py",
+          "header": "@@ -1,4 +1,6 @@",
+          "patch": "+DEFAULT_PAGE_SIZE = 20\n@@ -58,7 +60,7 @@ def _page(page):\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"
+        }
+      ]
+    }
+  },
+  "case09_review_partial": {
+    "item_type": "review_resolution",
+    "title": "Did PR #331 address its review? (one comment only partially handled)",
+    "ground_truth": {
+      "c1": "partial",
+      "c2": "addressed"
+    },
+    "artifact": {
+      "repo": "acme/reports",
+      "pr_title": "Clean up report builder",
+      "review_comments": [
+        {
+          "id": "c1",
+          "path": "src/report.py",
+          "line": 30,
+          "body": "Rename `d` to something descriptive, and add a unit test for the empty-input case."
+        },
+        {
+          "id": "c2",
+          "path": "src/report.py",
+          "line": 5,
+          "body": "This import is unused, please remove it."
+        }
+      ],
+      "diff_hunks": [
+        {
+          "id": "h1",
+          "path": "src/report.py",
+          "header": "@@ -28,8 +28,8 @@ def build(rows):",
+          "patch": "-    d = summarize(rows)\n-    return render(d)\n+    records = summarize(rows)\n+    return render(records)"
+        },
+        {
+          "id": "h2",
+          "path": "src/report.py",
+          "header": "@@ -3,7 +3,6 @@",
+          "patch": "-import itertools\n import json"
+        }
+      ]
+    }
+  },
+  "case10_review_mixed": {
+    "item_type": "review_resolution",
+    "title": "Did PR #560 address its review? (addressed + ignored + partial)",
+    "ground_truth": {
+      "c1": "addressed",
+      "c2": "ignored",
+      "c3": "partial"
+    },
+    "artifact": {
+      "repo": "acme/core",
+      "pr_title": "Cache module cleanup",
+      "review_comments": [
+        {
+          "id": "c1",
+          "path": "src/cache.py",
+          "line": 12,
+          "body": "Add a docstring to `get()` explaining the return value."
+        },
+        {
+          "id": "c2",
+          "path": "src/cache.py",
+          "line": 40,
+          "body": "hit_rate() can divide by zero when total == 0 -- please guard it."
+        },
+        {
+          "id": "c3",
+          "path": "src/cache.py",
+          "line": 55,
+          "body": "Extract the eviction logic into a helper and cover it with a test."
+        }
+      ],
+      "diff_hunks": [
+        {
+          "id": "h1",
+          "path": "src/cache.py",
+          "header": "@@ -10,6 +10,9 @@ class Cache:",
+          "patch": "     def get(self, key):\n+        \"\"\"Return the cached value for key, or None if absent or expired.\"\"\"\n         return self._store.get(key)"
+        },
+        {
+          "id": "h2",
+          "path": "src/cache.py",
+          "header": "@@ -50,10 +53,14 @@ class Cache:",
+          "patch": "-        # inline eviction\n-        while len(self._store) > self.capacity:\n-            self._store.popitem(last=False)\n+        self._evict()\n+\n+    def _evict(self):\n+        while len(self._store) > self.capacity:\n+            self._store.popitem(last=False)"
+        }
+      ]
+    }
+  }
+}

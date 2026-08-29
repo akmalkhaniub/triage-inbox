@@ -1,0 +1,15 @@
+{
+  "item_id": "dep_bump_demo",
+  "item_type": "dep_bump",
+  "title": "Bump lodash from 4.17.20 to 4.17.21 (Dependabot)",
+  "artifact": {
+    "repo": "acme/web",
+    "package": "lodash",
+    "from_version": "4.17.20",
+    "to_version": "4.17.21",
+    "dependency_changelog": ["4.17.21: security fix for prototype pollution (CVE-2021-23337)"],
+    "call_sites": ["src/util/merge.js: _.merge(a, b)"],
+    "ci_status": "green"
+  },
+  "ground_truth": {}
+}

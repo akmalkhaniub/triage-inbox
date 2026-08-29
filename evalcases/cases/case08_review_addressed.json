@@ -1,0 +1,18 @@
+{
+  "item_id": "case08_review_addressed",
+  "item_type": "review_resolution",
+  "title": "Did PR #205 address its review? (all addressed -- precision check)",
+  "artifact": {
+    "repo": "acme/api",
+    "pr_title": "Add limit validation and page-size constant to orders endpoint",
+    "review_comments": [
+      {"id": "c1", "path": "src/api/orders.py", "line": 15, "body": "Please validate that `limit` is positive before using it."},
+      {"id": "c2", "path": "src/api/orders.py", "line": 60, "body": "Use a named constant for the default page size instead of the magic number 20."}
+    ],
+    "diff_hunks": [
+      {"id": "h1", "path": "src/api/orders.py", "header": "@@ -12,6 +12,8 @@ def list_orders(limit, page):", "patch": "     limit = int(limit)\n+    if limit <= 0:\n+        raise ValueError(\"limit must be positive\")"},
+      {"id": "h2", "path": "src/api/orders.py", "header": "@@ -1,4 +1,6 @@", "patch": "+DEFAULT_PAGE_SIZE = 20\n@@ -58,7 +60,7 @@ def _page(page):\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"}
+    ]
+  },
+  "ground_truth": {"c1": "addressed", "c2": "addressed"}
+}

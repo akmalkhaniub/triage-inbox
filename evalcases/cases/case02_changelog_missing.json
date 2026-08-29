@@ -1,0 +1,21 @@
+{
+  "item_id": "case02_changelog_missing",
+  "item_type": "changelog_audit",
+  "title": "Audit CHANGELOG for acme/api v2.1.0",
+  "artifact": {
+    "repo": "acme/api",
+    "version": "2.1.0",
+    "commits": [
+      {"sha": "b10001", "type": "feat", "subject": "add pagination to /v2/orders", "body": "New page and per_page query params."},
+      {"sha": "b10002", "type": "feat", "subject": "add rate-limit headers to all responses", "body": "Returns X-RateLimit-Remaining on every response."},
+      {"sha": "b10003", "type": "fix", "subject": "reject negative quantity in order create", "body": "Previously accepted negative quantities."}
+    ],
+    "changelog": [
+      {"line": 1, "section": "Added", "text": "Pagination on the /v2/orders endpoint"},
+      {"line": 2, "section": "Fixed", "text": "Order creation now rejects negative quantities"}
+    ]
+  },
+  "ground_truth": [
+    {"type": "missing", "ref": "commit:b10002"}
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "item_id": "case10_review_mixed",
+  "item_type": "review_resolution",
+  "title": "Did PR #560 address its review? (addressed + ignored + partial)",
+  "artifact": {
+    "repo": "acme/core",
+    "pr_title": "Cache module cleanup",
+    "review_comments": [
+      {"id": "c1", "path": "src/cache.py", "line": 12, "body": "Add a docstring to `get()` explaining the return value."},
+      {"id": "c2", "path": "src/cache.py", "line": 40, "body": "hit_rate() can divide by zero when total == 0 -- please guard it."},
+      {"id": "c3", "path": "src/cache.py", "line": 55, "body": "Extract the eviction logic into a helper and cover it with a test."}
+    ],
+    "diff_hunks": [
+      {"id": "h1", "path": "src/cache.py", "header": "@@ -10,6 +10,9 @@ class Cache:", "patch": "     def get(self, key):\n+        \"\"\"Return the cached value for key, or None if absent or expired.\"\"\"\n         return self._store.get(key)"},
+      {"id": "h2", "path": "src/cache.py", "header": "@@ -50,10 +53,14 @@ class Cache:", "patch": "-        # inline eviction\n-        while len(self._store) > self.capacity:\n-            self._store.popitem(last=False)\n+        self._evict()\n+\n+    def _evict(self):\n+        while len(self._store) > self.capacity:\n+            self._store.popitem(last=False)"}
+    ]
+  },
+  "ground_truth": {"c1": "addressed", "c2": "ignored", "c3": "partial"}
+}

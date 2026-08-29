@@ -1,0 +1,42 @@
+Provider: openai  Model: gpt-4o-mini (effort=high, applies to anthropic only)  cases=10  arms=['baseline', 'agent']
+
+  [baseline] case01_changelog_phantom: F1=0.00 (tp=0 fp=3 fn=1)  $0.0002
+  [agent   ] case01_changelog_phantom: F1=0.00 (tp=0 fp=2 fn=1)  $0.0012
+  [baseline] case02_changelog_missing: ERROR (No JSON found in model output:
+[
+    {
+        "verdict": "missing",
+        "subject": "add rate-limit headers to all responses",
+        "evidence": [],
+        "confidence": 1.0,
+        "rationale)
+  [agent   ] case02_changelog_missing: F1=1.00 (tp=1 fp=0 fn=0)  $0.0011
+  [baseline] case03_changelog_misclassified_breaking: F1=0.00 (tp=0 fp=3 fn=1)  $0.0003
+  [agent   ] case03_changelog_misclassified_breaking: F1=0.00 (tp=0 fp=1 fn=1)  $0.0007
+  [baseline] case04_changelog_clean: F1=0.00 (tp=0 fp=2 fn=0)  $0.0003
+  [agent   ] case04_changelog_clean: F1=1.00 (tp=0 fp=0 fn=0)  $0.0009
+  [baseline] case05_changelog_mixed: F1=0.00 (tp=0 fp=2 fn=2)  $0.0002
+  [agent   ] case05_changelog_mixed: F1=0.67 (tp=1 fp=0 fn=1)  $0.0008
+  [baseline] case06_changelog_internal_noise: F1=0.00 (tp=0 fp=0 fn=1)  $0.0004
+  [agent   ] case06_changelog_internal_noise: F1=1.00 (tp=1 fp=0 fn=0)  $0.0009
+  [baseline] case07_review_ignored: F1=0.00 (tp=0 fp=1 fn=1)  $0.0002
+  [agent   ] case07_review_ignored: F1=1.00 (tp=1 fp=0 fn=0)  $0.0011
+  [baseline] case08_review_addressed: F1=1.00 (tp=0 fp=0 fn=0)  $0.0002
+  [agent   ] case08_review_addressed: F1=1.00 (tp=0 fp=0 fn=0)  $0.0007
+  [baseline] case09_review_partial: F1=0.00 (tp=0 fp=1 fn=1)  $0.0002
+  [agent   ] case09_review_partial: F1=0.00 (tp=0 fp=0 fn=1)  $0.0008
+  [baseline] case10_review_mixed: F1=0.00 (tp=0 fp=2 fn=2)  $0.0003
+  [agent   ] case10_review_mixed: F1=0.50 (tp=1 fp=1 fn=1)  $0.0012
+
+=== Aggregate (micro over all cases) ===
+Traceback (most recent call last):
+  File "G:\ReplitProjects\hackathons\micro1_hackerearth_Aug28-2026\triage-inbox\eval.py", line 136, in <module>
+    main()
+    ~~~~^^
+  File "G:\ReplitProjects\hackathons\micro1_hackerearth_Aug28-2026\triage-inbox\eval.py", line 126, in main
+    print(f"  {label:24} baseline={bs:>10}  agent={as_:>10}  \u0394={change}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0394' in position 66: character maps to <undefined>

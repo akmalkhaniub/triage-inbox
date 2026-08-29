@@ -1,0 +1,21 @@
+{
+  "item_id": "case03_changelog_misclassified_breaking",
+  "item_type": "changelog_audit",
+  "title": "Audit CHANGELOG for acme/cli v3.0.0 (HARD: breaking change hidden in commit body)",
+  "artifact": {
+    "repo": "acme/cli",
+    "version": "3.0.0",
+    "commits": [
+      {"sha": "c30a01", "type": "feat", "subject": "rename --timeout flag to --timeout-ms", "body": "BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds."},
+      {"sha": "c30a02", "type": "feat", "subject": "add --json output mode", "body": "Machine-readable output for all commands."},
+      {"sha": "c30a03", "type": "docs", "subject": "expand the quickstart guide", "body": "Doc-only change."}
+    ],
+    "changelog": [
+      {"line": 1, "section": "Changed", "text": "Renamed the --timeout flag to --timeout-ms"},
+      {"line": 2, "section": "Added", "text": "New --json output mode for all commands"}
+    ]
+  },
+  "ground_truth": [
+    {"type": "misclassified", "ref": "changelog:1"}
+  ]
+}

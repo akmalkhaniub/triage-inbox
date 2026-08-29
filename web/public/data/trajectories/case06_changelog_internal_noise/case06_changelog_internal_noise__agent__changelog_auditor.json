@@ -1,0 +1,107 @@
+{
+  "agent": "changelog_auditor",
+  "item_id": "case06_changelog_internal_noise",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system": "You are a release-notes auditor for a software repository.\n\nYour job: compare the CHANGELOG **as written** against the **actual commits** in\nthe release, and report only the DISCREPANCIES. Do not list lines that are fine.\n\nDiscrepancy types:\n- \"phantom\": a CHANGELOG line claims a change that no commit supports.\n- \"missing\": a commit made a user-facing change (feat / fix / breaking) that no\n  CHANGELOG line mentions. Ignore purely internal commits (chore, docs, test,\n  refactor with no user impact) -- those are not expected in the changelog.\n- \"misclassified\": a CHANGELOG line exists but sits under the wrong section for\n  the commit's true impact. The most important case: a BREAKING change listed\n  under an ordinary \"Added\"/\"Fixed\"/\"Changed\" heading instead of \"Breaking\".\n\nMethod:\n1. Call list_commits, then read_changelog.\n2. You CANNOT judge breaking-ness from a subject alone. Call get_commit to read\n   the body for EVERY commit that is even possibly breaking -- specifically any\n   whose subject mentions rename / remove / drop / delete / replace / change /\n   migrate, and (because major releases concentrate breaking changes) every\n   commit when the release version is a major bump (x.0.0). The BREAKING CHANGE\n   marker usually appears only in the body.\n3. Decide the discrepancies. Tie EACH to evidence: the commit sha and/or the\n   changelog line, and quote the exact text you relied on.\n\nOutput ONLY a JSON array (no prose) of objects:\n[\n  {\n    \"verdict\": \"phantom\" | \"missing\" | \"misclassified\",\n    \"subject\": \"changelog:<line>\"  (for phantom/misclassified)  or  \"commit:<sha>\" (for missing),\n    \"evidence\": [ {\"kind\": \"changelog_line\"|\"commit\", \"ref\": \"changelog:<line>\"|\"commit:<sha>\", \"quote\": \"<exact text>\"} ],\n    \"confidence\": 0.0-1.0,\n    \"rationale\": \"<one sentence>\"\n  }\n]\nIf there are no discrepancies, output [].",
+  "input_tokens": 3378,
+  "output_tokens": 283,
+  "steps": [
+    {
+      "kind": "model",
+      "step": 0,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_wQYwn9y6DwmYfFKE9fiqInmN",
+          "name": "list_commits",
+          "input": {}
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 0,
+      "name": "list_commits",
+      "input": {},
+      "result": "[\n  {\n    \"sha\": \"g50a01\",\n    \"type\": \"fix\",\n    \"subject\": \"fix memory leak in the cache eviction loop\"\n  },\n  {\n    \"sha\": \"g50a02\",\n    \"type\": \"chore\",\n    \"subject\": \"migrate CI from Travis to GitHub Actions\"\n  },\n  {\n    \"sha\": \"g50a03\",\n    \"type\": \"refactor\",\n    \"subject\": \"split the god-object Manager class\"\n  },\n  {\n    \"sha\": \"g50a04\",\n    \"type\": \"test\",\n    \"subject\": \"add regression test for the cache leak\"\n  },\n  {\n    \"sha\": \"g50a05\",\n    \"type\": \"feat\",\n    \"subject\": \"expose cache stats via getCacheStats()\"\n  },\n  {\n    \"sha\": \"g50a06\",\n    \"type\": \"chore\",\n    \"subject\": \"update copyright year in headers\"\n  }\n]",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 1,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_oMBLNkVXCvm5FC55OxLqA0Ts",
+          "name": "read_changelog",
+          "input": {}
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "read_changelog",
+      "input": {},
+      "result": "[\n  {\n    \"line\": 1,\n    \"section\": \"Fixed\",\n    \"text\": \"Memory leak in cache eviction for long-running processes\"\n  }\n]",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 2,
+      "stop_reason": "tool_use",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_5J7KmxHWlz7OLV3YZhTOYo1g",
+          "name": "get_commit",
+          "input": {
+            "sha": "g50a01"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_6aNMmTNYITvEzQQUf4SE2CVU",
+          "name": "get_commit",
+          "input": {
+            "sha": "g50a05"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "tool",
+      "step": 2,
+      "name": "get_commit",
+      "input": {
+        "sha": "g50a01"
+      },
+      "result": "{\n  \"sha\": \"g50a01\",\n  \"type\": \"fix\",\n  \"subject\": \"fix memory leak in the cache eviction loop\",\n  \"body\": \"Long-running processes no longer grow unbounded.\"\n}",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 2,
+      "name": "get_commit",
+      "input": {
+        "sha": "g50a05"
+      },
+      "result": "{\n  \"sha\": \"g50a05\",\n  \"type\": \"feat\",\n  \"subject\": \"expose cache stats via getCacheStats()\",\n  \"body\": \"New public API returning hit/miss counts.\"\n}",
+      "is_error": false
+    },
+    {
+      "kind": "model",
+      "step": 3,
+      "stop_reason": "end_turn",
+      "content": [
+        {
+          "type": "text",
+          "text": "[\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"changelog:Memory leak in cache eviction for long-running processes\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:1\",\n        \"quote\": \"Memory leak in cache eviction for long-running processes\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"There is no commit that corresponds to this alleged memory leak fix, as the only related commit is for fixing the memory leak in a different context.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"commit:g50a05\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:g50a05\",\n        \"quote\": \"expose cache stats via getCacheStats()\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The new feature of exposing cache stats is missing from the CHANGELOG.\"\n  }\n]"
+        }
+      ]
+    }
+  ]
+}

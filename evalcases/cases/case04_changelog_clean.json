@@ -1,0 +1,20 @@
+{
+  "item_id": "case04_changelog_clean",
+  "item_type": "changelog_audit",
+  "title": "Audit CHANGELOG for acme/web v1.2.0 (no discrepancies -- precision check)",
+  "artifact": {
+    "repo": "acme/web",
+    "version": "1.2.0",
+    "commits": [
+      {"sha": "e12a01", "type": "feat", "subject": "add keyboard shortcuts to the editor", "body": "Cmd+K opens the command palette."},
+      {"sha": "e12a02", "type": "fix", "subject": "stop losing draft on tab switch", "body": "Drafts are now autosaved before navigation."},
+      {"sha": "e12a03", "type": "test", "subject": "add coverage for the draft autosave path", "body": "Test-only."},
+      {"sha": "e12a04", "type": "refactor", "subject": "extract editor toolbar into its own module", "body": "No user-facing change."}
+    ],
+    "changelog": [
+      {"line": 1, "section": "Added", "text": "Keyboard shortcuts in the editor (Cmd+K command palette)"},
+      {"line": 2, "section": "Fixed", "text": "Drafts are no longer lost when switching tabs"}
+    ]
+  },
+  "ground_truth": []
+}

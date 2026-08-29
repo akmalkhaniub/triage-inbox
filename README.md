@@ -97,6 +97,23 @@ your own funded run — this repo ships no fabricated numbers.** See
 results table to fill in, and [`REPRODUCE.md`](REPRODUCE.md) for a clean-room
 runbook.
 
+## Testing on real open-source GitHub repositories
+
+In addition to offline benchmark fixtures, you can point Triage Inbox directly
+at any public GitHub repository to audit real pending releases or PRs in the wild:
+
+```bash
+# 1. Audit a real release CHANGELOG vs Commits (e.g. pallets/flask):
+python run_github.py changelog pallets/flask --base 3.0.0 --head 3.1.0
+
+# 2. Audit a real GitHub Pull Request for unaddressed review comments:
+python run_github.py pr tiangolo/fastapi 11500
+
+# 3. Export real GitHub cases to offline evaluation fixtures:
+python run_github.py pr tiangolo/fastapi 11500 --save evalcases/cases/case11_fastapi_real.json
+```
+
+
 ## Switching models & providers
 
 The agent is provider-agnostic: one env var swaps the backend, so the eval can

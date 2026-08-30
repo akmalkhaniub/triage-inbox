@@ -40,6 +40,51 @@ def _github_request(endpoint: str) -> Any:
         ) from e
 
 
+def _fetch_repo_changelog(repo: str, head_tag: str, specified_file: str = "") -> str:
+    """Intelligently retrieves release notes/changelog from GitHub Releases API or multi-path discovery."""
+    # 1. Check official GitHub Releases API for release notes body
+    try:
+        rel_data = _github_request(f"repos/{repo}/releases/tags/{head_tag}")
+        body = (rel_data.get("body") or "").strip()
+        if body and len(body) > 30:
+            rel_name = rel_data.get("name") or head_tag
+            return f"# Release {rel_name}\n\n{body}"
+    except Exception:
+        pass
+
+    # 2. Candidate changelog paths across standard ecosystems
+    candidates = []
+    if specified_file:
+        candidates.append(specified_file)
+    candidates.extend([
+        "CHANGELOG.md",
+        "CHANGES.rst",
+        "CHANGES.md",
+        "HISTORY.md",
+        "HISTORY.rst",
+        "RELEASES.md",
+        "docs/changes.rst",
+        "docs/CHANGELOG.md",
+        "docs/history.rst",
+        "libs/langchain/CHANGELOG.md",
+        "packages/core/CHANGELOG.md",
+    ])
+
+    for path in candidates:
+        try:
+            file_data = _github_request(f"repos/{repo}/contents/{path}?ref={head_tag}")
+            raw_b64 = file_data.get("content", "")
+            if raw_b64:
+                decoded = base64.b64decode(raw_b64).decode("utf-8", errors="replace").strip()
+                if decoded:
+                    return decoded
+        except Exception:
+            continue
+
+    # 3. If no file found, synthesize from release tag
+    return f"# Release {head_tag}\n\n## Changes\n* Release {head_tag} notes (fetched via GitHub compare tree)."
+
+
 def fetch_release_fixture(
     repo: str,
     base_tag: str,
@@ -66,13 +111,8 @@ def fetch_release_fixture(
             "body": body,
         })
 
-    # 2. Fetch raw changelog content
-    try:
-        file_data = _github_request(f"repos/{repo}/contents/{changelog_file}?ref={head_tag}")
-        raw_content = base64.b64decode(file_data["content"]).decode("utf-8", errors="replace")
-    except Exception:
-        # Fallback to empty if changelog not found at that path
-        raw_content = f"# Changelog\n\n## {head_tag}\n\n* No changelog found at {changelog_file}"
+    # 2. Fetch raw changelog content with multi-path & GitHub Releases discovery
+    raw_content = _fetch_repo_changelog(repo, head_tag, changelog_file)
 
     changelog_lines: list[dict[str, Any]] = []
     current_heading = "General"

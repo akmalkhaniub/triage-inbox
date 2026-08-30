@@ -104,8 +104,10 @@ def _anthropic_call(system, messages, tool_specs, force_tool) -> LLMResponse:
 
 
 # ------------------------------------------------------- OpenAI-compatible
-def _to_openai_messages(system, messages) -> list[dict[str, Any]]:
-    out = [{"role": "system", "content": system}]
+def _to_openai_messages(system, messages, is_reasoning: bool = False) -> list[dict[str, Any]]:
+    # Reasoning models (o1/o3) recommend role='developer' for system prompts.
+    role = "developer" if is_reasoning else "system"
+    out = [{"role": role, "content": system}] if system else []
     for m in messages:
         content = m["content"]
         if m["role"] == "user":
@@ -135,11 +137,20 @@ def _to_openai_messages(system, messages) -> list[dict[str, Any]]:
 def _openai_call(system, messages, tool_specs, force_tool) -> LLMResponse:
     import os
     key = os.environ.get(config.KEY_ENV, "")
+    
+    # OpenAI reasoning models (o1, o1-mini, o3, o3-mini) require max_completion_tokens
+    # instead of max_tokens.
+    model_lower = config.MODEL.lower()
+    is_reasoning = any(model_lower.startswith(p) for p in ("o1", "o3", "openai/o1", "openai/o3")) or "o3-" in model_lower or "o1-" in model_lower
+
     body: dict[str, Any] = {
         "model": config.MODEL,
-        "max_tokens": config.MAX_TOKENS,
-        "messages": _to_openai_messages(system, messages),
+        "messages": _to_openai_messages(system, messages, is_reasoning=is_reasoning),
     }
+    if is_reasoning:
+        body["max_completion_tokens"] = config.MAX_TOKENS
+    else:
+        body["max_tokens"] = config.MAX_TOKENS
     if tool_specs:
         body["tools"] = [{"type": "function", "function": {
             "name": t["name"], "description": t["description"],

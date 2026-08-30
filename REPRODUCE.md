@@ -52,8 +52,10 @@ python run_one.py evalcases/cases/case03_changelog_misclassified_breaking.json
 ```
 
 Prints the triage result, the ground truth, and the paths of the trajectories
-written under `trajectories/case03.../`. Try `--arm baseline` to see the flat
-agent on the same case.
+written under `trajectories/case03.../`. After the report, the agent pauses at a
+**human approval checkpoint** (Ground Rule #04) where you can accept or override
+the verdict. Pass `--no-approve` to skip in automated or CI runs. Try
+`--arm baseline` to see the flat agent on the same case.
 
 To see routing extend to a designed-but-unbuilt lane (one cheap model call — the
 router — then an honest stub), run:

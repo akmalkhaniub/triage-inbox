@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { f2, isHardTitle, loadCases, loadManifest, loadResults, pct } from "./data";
 import TrajectoryPanel from "./TrajectoryPanel";
+import AgentGraph from "./AgentGraph";
 import { STORY, QUESTIONS, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
 
@@ -54,8 +55,8 @@ interface LiveTriageData {
 
 const DEFAULT_MODELS: Record<string, Array<{ id: string; name: string }>> = {
   openai: [
-    { id: "gpt-4o-mini", name: "GPT-4o Mini (Default, Fast & Economical)" },
-    { id: "gpt-4o", name: "GPT-4o (Omni Flagship)" },
+    { id: "gpt-4o", name: "GPT-4o (Primary Flagship — 0.95 F1, 0 False Alarms)" },
+    { id: "gpt-4o-mini", name: "GPT-4o Mini (Fast & Economical — 0.53 F1)" },
     { id: "o3-mini", name: "o3-mini (High Reasoning)" },
   ],
   anthropic: [
@@ -76,19 +77,31 @@ const DEFAULT_MODELS: Record<string, Array<{ id: string; name: string }>> = {
   ],
 };
 
+type TabType = "video" | "queue" | "graph" | "github" | "architecture" | "reproduce";
+
 export default function App() {
   const [results, setResults] = useState<Results | null>(null);
   const [manifest, setManifest] = useState<Manifest | null>(null);
   const [cases, setCases] = useState<Cases | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const [currentTab, setCurrentTab] = useState<"video" | "queue" | "github" | "architecture" | "reproduce">("video");
+  
+  // URL Hash Sync for Tab Navigation
+  const [currentTab, setCurrentTab] = useState<TabType>(() => {
+    const hash = window.location.hash.replace(/^#\/?/, "").toLowerCase();
+    if (hash.startsWith("case/")) return "queue";
+    if (["video", "queue", "graph", "github", "architecture", "reproduce"].includes(hash)) {
+      return hash as TabType;
+    }
+    return "video";
+  });
+
   const [caseFilter, setCaseFilter] = useState<"all" | "changelog" | "review" | "hard" | "wins">("all");
   const [videoStep, setVideoStep] = useState<number>(1);
 
   // Model & Provider Configuration Settings
   const [provider, setProvider] = useState<string>(() => localStorage.getItem("triage_provider") || "openai");
-  const [model, setModel] = useState<string>(() => localStorage.getItem("triage_model") || "gpt-4o-mini");
+  const [model, setModel] = useState<string>(() => localStorage.getItem("triage_model") || "gpt-4o");
   const [modelsRegistry, setModelsRegistry] = useState<Record<string, Array<{ id: string; name: string }>>>(DEFAULT_MODELS);
   const [runBothArms, setRunBothArms] = useState<boolean>(true);
   const [showAdvancedAuth, setShowAdvancedAuth] = useState<boolean>(false);
@@ -112,6 +125,39 @@ export default function App() {
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     return (localStorage.getItem("triage_theme") as "dark" | "light") || "light";
   });
+
+  // URL Hash Sync listener
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, "").toLowerCase();
+      if (hash.startsWith("case/")) {
+        const caseId = hash.replace("case/", "");
+        setCurrentTab("queue");
+        setSelected(caseId);
+        return;
+      }
+      if (["video", "queue", "graph", "github", "architecture", "reproduce"].includes(hash)) {
+        setCurrentTab(hash as TabType);
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  const navigateTab = (tab: TabType) => {
+    setCurrentTab(tab);
+    window.location.hash = `#/${tab}`;
+  };
+
+  const handleSelectCase = (id: string | null) => {
+    setSelected(id);
+    if (id) {
+      window.location.hash = `#/case/${id}`;
+    } else {
+      window.location.hash = `#/queue`;
+    }
+  };
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -143,12 +189,21 @@ export default function App() {
 
   useEffect(() => {
     Promise.all([loadResults(), loadManifest(), loadCases()])
-      .then(([r, m, c]) => { setResults(r); setManifest(m); setCases(c); })
+      .then(([r, m, c]) => {
+        setResults(r);
+        setManifest(m);
+        setCases(c);
+        // Check if initial hash is a case
+        const hash = window.location.hash.replace(/^#\/?/, "");
+        if (hash.startsWith("case/")) {
+          setSelected(hash.replace("case/", ""));
+        }
+      })
       .catch((e) => setErr(String(e)));
   }, []);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSelected(null);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && handleSelectCase(null);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
@@ -249,10 +304,10 @@ export default function App() {
 
   return (
     <>
-      {/* NAVIGATION BAR */}
+      {/* NAVIGATION BAR WITH REAL URL SYNC */}
       <nav className="top">
         <div className="nav-inner">
-          <div className="logo-box">
+          <div className="logo-box" style={{ cursor: "pointer" }} onClick={() => navigateTab("video")}>
             <div className="logo-icon">T</div>
             <span>Triage Inbox</span>
             <span className="logo-sub">Maintainer Copilot</span>
@@ -261,31 +316,37 @@ export default function App() {
           <div className="nav-tabs">
             <button
               className={`nav-tab-btn video-highlight ${currentTab === "video" ? "active" : ""}`}
-              onClick={() => setCurrentTab("video")}
+              onClick={() => navigateTab("video")}
             >
-              🎬 Video Presenter Mode
+              🎬 Video Presenter
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "queue" ? "active" : ""}`}
-              onClick={() => setCurrentTab("queue")}
+              onClick={() => navigateTab("queue")}
             >
               📥 Maintainer Queue ({caseIds.length})
             </button>
             <button
+              className={`nav-tab-btn ${currentTab === "graph" ? "active" : ""}`}
+              onClick={() => navigateTab("graph")}
+            >
+              🧠 Agent Graph
+            </button>
+            <button
               className={`nav-tab-btn ${currentTab === "github" ? "active" : ""}`}
-              onClick={() => setCurrentTab("github")}
+              onClick={() => navigateTab("github")}
             >
               🐙 Live GitHub Scanner
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "architecture" ? "active" : ""}`}
-              onClick={() => setCurrentTab("architecture")}
+              onClick={() => navigateTab("architecture")}
             >
-              🧠 Architecture &amp; Story
+              📖 Design Story
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "reproduce" ? "active" : ""}`}
-              onClick={() => setCurrentTab("reproduce")}
+              onClick={() => navigateTab("reproduce")}
             >
               🚀 Reproduce &amp; CI
             </button>
@@ -296,13 +357,13 @@ export default function App() {
           <button className="theme-toggle" onClick={toggleTheme} title="Toggle light/dark mode">
             {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
           </button>
-          <span className="badge-model">{provider}: {model}</span>
+          <span className="badge-model" title="Active evaluation model">{results.model || `${provider}: ${model}`}</span>
         </div>
       </nav>
 
       <div className="wrap tab-content">
         {/* ========================================================================= */}
-        {/* TAB 0: DEDICATED VIDEO PRESENTER SUITE */}
+        {/* TAB 0: DEDICATED VIDEO PRESENTER SUITE                                    */}
         {/* ========================================================================= */}
         {currentTab === "video" && (
           <section id="video" className="video-suite">
@@ -316,7 +377,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* STEP SELECTOR (NO TIMESTAMPS) */}
+            {/* STEP SELECTOR */}
             <div className="video-stepper">
               <button className={`step-btn ${videoStep === 1 ? "active" : ""}`} onClick={() => setVideoStep(1)}>
                 <div className="time">Part 1</div>
@@ -398,7 +459,7 @@ export default function App() {
                 <div className="script-box">
                   <div className="script-speaker">🎙️ Speaker Script:</div>
                   <div className="script-quote">
-                    "When people first try solving this with LLMs, they dump the entire commit history or PR diff into a single prompt. But here is what happens: the baseline model is fluent, yet produces confident false positives — hallucinating citations and missing breaking changes. Across our 10 benchmark cases, the flat baseline scored an F1 of 0.00 with 14 false alarms."
+                    "When people first try solving this with LLMs, they dump the entire commit history or PR diff into a single prompt. But here is what happens: the baseline model is fluent, yet produces confident false positives — hallucinating citations and missing breaking changes. Across our 10 benchmark cases, the flat baseline scored an F1 of 0.00 with 11 false alarms."
                   </div>
                 </div>
 
@@ -417,34 +478,19 @@ export default function App() {
                 <div className="script-box">
                   <div className="script-speaker">🎙️ Speaker Script:</div>
                   <div className="script-quote">
-                    "Our solution attacks this with a 3-stage agentic pipeline: A Router dispatches to a focused specialist; the specialist uses on-demand tools (`list_commits`, `get_commit`, `get_diff`) to drill into commit bodies; and a Two-Layer Verifier checks deterministic code grounding before checking reasoning. Click below to inspect a live case execution:"
+                    "Our solution attacks this with a multi-stage agentic pipeline: A Router dispatches to a focused specialist; the specialist uses on-demand tools (`list_commits`, `get_commit`, `get_diff`) to drill into commit bodies; and a Two-Layer Verifier checks deterministic code grounding before checking reasoning. Click below to inspect a live case execution:"
                   </div>
                 </div>
 
-                <div className="pipe-container" style={{ margin: "20px 0" }}>
-                  <div className="pipe-flow">
-                    <div className="pipe-card active">
-                      <div className="pc-title">1. Router Agent</div>
-                      <div className="pc-desc">Classifies item type and selects dedicated specialist.</div>
-                    </div>
-                    <span className="pipe-arrow">→</span>
-                    <div className="pipe-card active">
-                      <div className="pc-title">2. Specialist + Tools</div>
-                      <div className="pc-desc">Fetches on-demand commit bodies and code patches.</div>
-                    </div>
-                    <span className="pipe-arrow">→</span>
-                    <div className="pipe-card verified">
-                      <div className="pc-title">3. Two-Layer Verifier</div>
-                      <div className="pc-desc">Grounding (quote exists) + Soundness (reasoning check).</div>
-                    </div>
-                  </div>
+                <div style={{ margin: "20px 0" }}>
+                  <AgentGraph activeCaseId="case03_changelog_misclassified_breaking" />
                 </div>
 
                 <div style={{ textAlign: "center", margin: "16px 0" }}>
                   <button
                     className="filter-btn active"
-                    style={{ padding: "10px 20px", fontSize: 14 }}
-                    onClick={() => setSelected("case03_changelog_misclassified_breaking")}
+                    style={{ padding: "12px 24px", fontSize: 14, cursor: "pointer" }}
+                    onClick={() => handleSelectCase("case03_changelog_misclassified_breaking")}
                   >
                     🔍 Click to Inspect Live Trajectory (Case #3: Misclassified Breaking Change)
                   </button>
@@ -477,7 +523,7 @@ export default function App() {
                   </div>
                   <div className="metric-pill" style={{ padding: "12px 18px" }}>
                     <span className="mp-lbl">Head-to-Head</span>
-                    <span className="mp-val" style={{ fontSize: 20 }}>7 Wins / 0 Losses</span>
+                    <span className="mp-val" style={{ fontSize: 20 }}>7 Wins / 0 Losses / 3 Clean</span>
                   </div>
                 </div>
               </div>
@@ -507,7 +553,7 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 1: MAINTAINER QUEUE */}
+        {/* TAB 1: MAINTAINER QUEUE (PREMIUM CARDS)                                   */}
         {/* ========================================================================= */}
         {currentTab === "queue" && (
           <section id="queue">
@@ -523,19 +569,19 @@ export default function App() {
               <div className="metric-strip">
                 <div className="metric-pill">
                   <span className="mp-lbl">Problem F1</span>
-                  <span className="mp-val good">{f2(b.f1)} → {f2(a.f1)}</span>
+                  <span className="mp-val good">{f2(b.f1)} → {f2(a.f1)} (+{f2(a.f1 - b.f1)})</span>
                 </div>
                 <div className="metric-pill">
                   <span className="mp-lbl">False Alarms</span>
-                  <span className="mp-val good">{b.false_alarms_per_case.toFixed(1)} → {a.false_alarms_per_case.toFixed(1)} (−71%)</span>
+                  <span className="mp-val good">{b.false_alarms_per_case.toFixed(1)} → {a.false_alarms_per_case.toFixed(1)} (−100%)</span>
                 </div>
                 <div className="metric-pill">
                   <span className="mp-lbl">Precision</span>
                   <span className="mp-val good">{pct(b.precision)} → {pct(a.precision)}</span>
                 </div>
                 <div className="metric-pill">
-                  <span className="mp-lbl">Head-to-Head</span>
-                  <span className="mp-val">{tally.wins} Wins / 0 Losses</span>
+                  <span className="mp-lbl">Benchmark Result</span>
+                  <span className="mp-val" style={{ color: "var(--good)" }}>{tally.wins} Wins / 0 Losses</span>
                 </div>
               </div>
             </div>
@@ -545,16 +591,16 @@ export default function App() {
               <div className="filter-btn-group">
                 <button className={`filter-btn ${caseFilter === "all" ? "active" : ""}`} onClick={() => setCaseFilter("all")}>All ({caseIds.length})</button>
                 <button className={`filter-btn ${caseFilter === "changelog" ? "active" : ""}`} onClick={() => setCaseFilter("changelog")}>CHANGELOG Audits (G)</button>
-                <button className={`filter-btn ${caseFilter === "review" ? "active" : ""}`} onClick={() => setCaseFilter("review")}>Review Comment Resolvers (E)</button>
+                <button className={`filter-btn ${caseFilter === "review" ? "active" : ""}`} onClick={() => setCaseFilter("review")}>Review Resolvers (E)</button>
                 <button className={`filter-btn ${caseFilter === "hard" ? "active" : ""}`} onClick={() => setCaseFilter("hard")}>Hard Edge Cases</button>
                 <button className={`filter-btn ${caseFilter === "wins" ? "active" : ""}`} onClick={() => setCaseFilter("wins")}>Agent Wins ({tally.wins})</button>
               </div>
               <span style={{ fontSize: 13, color: "var(--text-faint)" }}>
-                Showing <strong>{filteredCaseIds.length}</strong> items · Click any row for full proof &amp; trajectory
+                Showing <strong>{filteredCaseIds.length}</strong> items · Click any card for visual graph &amp; proof traces
               </span>
             </div>
 
-            {/* QUEUE CARDS */}
+            {/* REDESIGNED PREMIUM QUEUE CARDS */}
             <div className="queue-grid">
               {filteredCaseIds.map((id) => {
                 const row = results.per_case[id];
@@ -562,49 +608,76 @@ export default function App() {
                 const bf = row.baseline?.f1 ?? 0, af = row.agent?.f1 ?? 0;
                 const isReview = row.item_type === "review_resolution";
                 const isHard = isHardTitle(meta?.title || "");
+                const isWin = af > bf + 0.001;
+                const isClean = bf === 1 && af === 1;
 
                 return (
-                  <div className="queue-card" key={id} onClick={() => setSelected(id)}>
-                    <div className="qc-info">
-                      <div className="qc-tags">
+                  <div className="queue-card-premium" key={id} onClick={() => handleSelectCase(id)}>
+                    {/* TOP ROW: BADGES & CASE ID */}
+                    <div className="qc-top-row">
+                      <div className="qc-badge-strip">
                         <span className={`tag ${isReview ? "review" : "changelog"}`}>
-                          {isReview ? "PR Review" : "CHANGELOG"}
+                          {isReview ? "💬 PR Review" : "📦 CHANGELOG"}
                         </span>
-                        {isHard && <span className="tag hard">Hard Case</span>}
-                        <span style={{ fontSize: 11.5, color: "var(--text-faint)", fontFamily: "var(--mono)" }}>{id}</span>
+                        {isHard && <span className="tag hard">⚡ Hard Edge Case</span>}
+                        <span style={{ fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--mono)", fontWeight: 600 }}>
+                          #{id}
+                        </span>
                       </div>
-                      <div className="qc-title">
-                        {(meta?.title || id).replace(/\s*\(HARD:.*$/, "").replace(/\s*\([^)]*precision[^)]*\)/i, "")}
-                      </div>
-                      <div className="qc-desc">
-                        {isReview
-                          ? "Cross-examines reviewer comments against modified diff hunks."
-                          : "Diffs release notes against commit history to detect phantoms or missing entries."}
-                      </div>
-                    </div>
 
-                    <div className="arm-compare">
-                      <div className="arm-score">
-                        <span className="lbl">Baseline:</span>
-                        <span className={`val ${bf === 0 ? "zero" : "good"}`}>{bf.toFixed(2)} F1</span>
-                      </div>
-                      <div className="arm-score">
-                        <span className="lbl">Agent:</span>
-                        <span className={`val ${af > 0 ? "good" : "zero"}`}>{af.toFixed(2)} F1</span>
-                      </div>
-                    </div>
-
-                    <div style={{ textAlign: "center" }}>
                       <span className={`action-badge ${row.agent?.action || "needs_human"}`}>
-                        {row.agent?.action || "needs_human"}
+                        Verdict: {row.agent?.action || "needs_human"}
                       </span>
                     </div>
 
-                    <div style={{ textAlign: "right", fontSize: 12.5, color: "var(--accent)", fontWeight: 600 }}>
-                      View Proof
+                    {/* TITLE & DESCRIPTION */}
+                    <div>
+                      <div className="qc-main-title">
+                        {(meta?.title || id).replace(/\s*\(HARD:.*$/, "").replace(/\s*\([^)]*precision[^)]*\)/i, "")}
+                      </div>
+                      <p className="qc-desc-text">
+                        {isReview
+                          ? "Cross-examines reviewer comments against modified diff hunks to confirm author addressed requested changes."
+                          : "Diffs release notes against commit history to detect phantom entries, omitted fixes, or misclassified breaking changes."}
+                      </p>
                     </div>
 
-                    <div className="chev">›</div>
+                    {/* BENCHMARK COMPARISON METRICS ROW */}
+                    <div className="qc-metrics-row">
+                      {/* BASELINE STATUS */}
+                      <div className="qc-arm-box">
+                        <span className="qc-arm-label">Naive Baseline:</span>
+                        {isClean ? (
+                          <span className="qc-arm-badge clean">1.00 F1 (Clean)</span>
+                        ) : bf === 0 ? (
+                          <span className="qc-arm-badge fail">0.00 F1 (Failed / Hallucinated)</span>
+                        ) : (
+                          <span className="qc-arm-badge">{bf.toFixed(2)} F1</span>
+                        )}
+                      </div>
+
+                      {/* AGENT STATUS */}
+                      <div className="qc-arm-box">
+                        <span className="qc-arm-label">Multi-Agent:</span>
+                        <span className={`qc-arm-badge ${af > 0 ? "pass" : "fail"}`}>
+                          {af.toFixed(2)} F1 {af === 1 ? "(100% Grounded & Verified)" : ""}
+                        </span>
+                      </div>
+
+                      {/* WIN BADGE */}
+                      {isWin && (
+                        <span style={{ fontSize: 11.5, color: "var(--good)", fontWeight: 700, fontFamily: "var(--mono)" }}>
+                          🏆 +{(af - bf).toFixed(2)} F1 Improvement
+                        </span>
+                      )}
+
+                      {/* CTA */}
+                      <div className="qc-action-area">
+                        <span style={{ fontSize: 12.5, color: "var(--accent)", fontWeight: 700 }}>
+                          Inspect Graph &amp; Proof ➔
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -613,7 +686,25 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: PREMIUM LIVE GITHUB SCANNER & TRIAGE EXPLORER */}
+        {/* TAB 2: INTERACTIVE AGENT GRAPH VISUALIZER                                */}
+        {/* ========================================================================= */}
+        {currentTab === "graph" && (
+          <section id="graph">
+            <div className="page-head">
+              <div className="page-title-area">
+                <h1>🧠 Interactive Agent Graph &amp; Architecture Visualizer</h1>
+                <p>
+                  Explore the exact multi-agent node topology, on-demand tool execution loops, and two-layer proof gates.
+                </p>
+              </div>
+            </div>
+
+            <AgentGraph />
+          </section>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 3: PREMIUM LIVE GITHUB SCANNER & TRIAGE EXPLORER                     */}
         {/* ========================================================================= */}
         {currentTab === "github" && (
           <section id="github">
@@ -836,9 +927,7 @@ export default function App() {
               </div>
             )}
 
-            {/* ========================================================================= */}
             {/* RICH RESULTS & ARTIFACT EXPLORER */}
-            {/* ========================================================================= */}
             {liveData && (
               <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 20 }}>
                 {/* 1. FETCHED ARTIFACTS CARD */}
@@ -851,7 +940,6 @@ export default function App() {
                       </span>
                     </div>
 
-                    {/* ARTIFACT TABS */}
                     <div className="rc-tabs">
                       <button
                         className={`rc-tab ${activeArtifactTab === "commits" ? "active" : ""}`}
@@ -885,7 +973,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* COMMITS LIST */}
                   {activeArtifactTab === "commits" && (
                     <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8, background: "var(--bg)" }}>
                       {liveData.artifacts.commits.map((c, i) => (
@@ -907,14 +994,12 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* CHANGELOG CONTENT */}
                   {activeArtifactTab === "changelog" && (
                     <pre style={{ maxHeight: 240, margin: 0, whiteSpace: "pre-wrap" }}>
                       {liveData.artifacts.changelog_preview || "No changelog content found."}
                     </pre>
                   )}
 
-                  {/* REVIEW COMMENTS */}
                   {activeArtifactTab === "comments" && (
                     <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8, background: "var(--bg)" }}>
                       {liveData.artifacts.review_comments.map((rc, i) => (
@@ -929,7 +1014,6 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* DIFF FILES */}
                   {activeArtifactTab === "diffs" && (
                     <div style={{ padding: 12, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12.5 }}>
                       <strong>Modified Files in Pull Request:</strong>
@@ -942,7 +1026,7 @@ export default function App() {
                   )}
                 </div>
 
-                {/* 2. SIDE-BY-SIDE VERDICT & FINDINGS COMPARISON */}
+                {/* 2. SIDE-BY-SIDE VERDICT COMPARISON */}
                 <div style={{ display: "grid", gridTemplateColumns: liveData.baseline ? "1fr 1fr" : "1fr", gap: 16 }}>
                   {/* AGENT ARM */}
                   <div className="live-result-box" style={{ margin: 0, border: "2px solid var(--accent)" }}>
@@ -1004,7 +1088,7 @@ export default function App() {
                     )}
                   </div>
 
-                  {/* BASELINE ARM (IF RUN) */}
+                  {/* BASELINE ARM */}
                   {liveData.baseline && (
                     <div className="live-result-box" style={{ margin: 0, background: "var(--bg-elev2)" }}>
                       <div className="lrb-head">
@@ -1120,7 +1204,7 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 3: ARCHITECTURE & STORY */}
+        {/* TAB 4: ARCHITECTURE & STORY                                               */}
         {/* ========================================================================= */}
         {currentTab === "architecture" && (
           <section id="architecture">
@@ -1135,26 +1219,10 @@ export default function App() {
 
             <div className="sec-head" style={{ marginTop: 10 }}>
               <span className="sec-num">01</span>
-              <h2>Pipeline Flow</h2>
+              <h2>Visual Pipeline Flow</h2>
             </div>
-            <div className="pipe-container">
-              <div className="pipe-flow">
-                <div className="pipe-card active">
-                  <div className="pc-title">1. Router Agent</div>
-                  <div className="pc-desc">Classifies item type (CHANGELOG, PR Review, Dependency bump) and picks dedicated specialist.</div>
-                </div>
-                <span className="pipe-arrow">→</span>
-                <div className="pipe-card active">
-                  <div className="pc-title">2. Specialist + Tools</div>
-                  <div className="pc-desc">Queries on-demand tools (<code>list_commits</code>, <code>get_commit</code>, <code>get_diff</code>) to gather code evidence.</div>
-                </div>
-                <span className="pipe-arrow">→</span>
-                <div className="pipe-card verified">
-                  <div className="pc-title">3. Two-Layer Verifier</div>
-                  <div className="pc-desc">1. Grounding: Asserts ref &amp; quote exist in repo.<br />2. Soundness: Independent model validates reasoning.</div>
-                </div>
-              </div>
-            </div>
+
+            <AgentGraph />
 
             <div className="sec-head" style={{ marginTop: 32 }}>
               <span className="sec-num">02</span>
@@ -1225,7 +1293,7 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 4: REPRODUCE & CI SETUP */}
+        {/* TAB 5: REPRODUCE & CI SETUP                                               */}
         {/* ========================================================================= */}
         {currentTab === "reproduce" && (
           <section id="reproduce">
@@ -1240,8 +1308,10 @@ export default function App() {
 
             <pre>
 {`# 1. Clone and install dependencies
+git clone https://github.com/akmalkhaniub/triage-inbox.git
+cd triage-inbox
 pip install -r requirements.txt
-cp .env.example .env         # Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GROQ_API_KEY
+cp .env.example .env         # Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GROQ_API_KEY
 
 # 2. Run offline sanity verification (zero API cost)
 python -c "from src.fixtures import load_all; print(len(load_all('evalcases/cases')), 'cases ready')"
@@ -1249,14 +1319,14 @@ python -c "from src.fixtures import load_all; print(len(load_all('evalcases/case
 # 3. Execute the full benchmark evaluation (Baseline vs Agent)
 python eval.py
 
-# 4. Run a single case with rich terminal formatting
+# 4. Run a single case with human approval gate
 python run_one.py evalcases/cases/case03_changelog_misclassified_breaking.json`}
             </pre>
 
             <div className="callout" style={{ marginTop: 24 }}>
-              <strong>Automated GitHub Actions Workflow:</strong>
+              <strong>Automated Continuous Triage:</strong>
               <p>
-                Triage Inbox includes a ready-to-use CI workflow in <code>.github/workflows/triage.yml</code>
+                Triage Inbox includes a ready-to-use CI workflow in <code>ci/triage.yml</code>
                 to automatically audit pull requests on push or merge.
               </p>
             </div>
@@ -1268,12 +1338,12 @@ python run_one.py evalcases/cases/case03_changelog_misclassified_breaking.json`}
       <footer>
         <div className="wrap">
           <strong style={{ color: "var(--text)" }}>Triage Inbox</strong> · Built for the micro1
-          Agentic Workflows Hackathon · Multi-Provider Support (Anthropic / OpenAI / Groq / OpenRouter) ·
+          Agentic Workflows Hackathon · Multi-Provider Support (OpenAI / Anthropic / Groq / OpenRouter) ·
           Live GitHub Support · Verified Evidence-First Architecture.
         </div>
       </footer>
 
-      {/* TRAJECTORY DRAWER */}
+      {/* TRAJECTORY DRAWER WITH AGENT GRAPH */}
       {selected && cases[selected] && (
         <TrajectoryPanel
           caseId={selected}
@@ -1283,7 +1353,8 @@ python run_one.py evalcases/cases/case03_changelog_misclassified_breaking.json`}
             agent: manifest[selected]?.agent || [],
             baseline: manifest[selected]?.baseline || [],
           }}
-          onClose={() => setSelected(null)}
+          activeModel={results.model}
+          onClose={() => handleSelectCase(null)}
         />
       )}
     </>

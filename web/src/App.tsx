@@ -263,12 +263,12 @@ export default function App() {
   const [repoPrs, setRepoPrs] = useState<Array<{ number: number; title: string; user: string }>>([]);
   const [isLoadingTags, setIsLoadingTags] = useState<boolean>(false);
 
-  const [runnerType, setRunnerType] = useState<"changelog" | "pr">("changelog");
+  const [runnerType] = useState<"changelog" | "pr">("changelog");
   const [repoInput, setRepoInput] = useState<string>("pallets/flask");
   const [baseTag, setBaseTag] = useState<string>("3.0.0");
   const [headTag, setHeadTag] = useState<string>("3.1.0");
-  const [changelogFile, setChangelogFile] = useState<string>("CHANGELOG.md");
   const [prNumber, setPrNumber] = useState<string>("11500");
+  const changelogFile = "CHANGELOG.md";
   const [isRunningLive, setIsRunningLive] = useState<boolean>(false);
   const [liveData, setLiveData] = useState<LiveTriageData | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
@@ -491,17 +491,6 @@ export default function App() {
       setLiveError(e.message || String(e));
     } finally {
       setIsRunningLive(false);
-    }
-  };
-
-  const applyPreset = (type: "changelog" | "pr", repo: string, p1: string, p2?: string) => {
-    setRunnerType(type);
-    setRepoInput(repo);
-    if (type === "changelog") {
-      setBaseTag(p1);
-      setHeadTag(p2 || "");
-    } else {
-      setPrNumber(p1);
     }
   };
 
@@ -1126,100 +1115,68 @@ export default function App() {
             {/* LIVE RUNNER FORM */}
             <div className="runner-card">
               <div className="rc-header">
-                <h3 className="rc-title">Target Open-Source Repository &amp; Lane</h3>
-                <div className="rc-tabs">
-                  <button
-                    className={`rc-tab ${runnerType === "changelog" ? "active" : ""}`}
-                    onClick={() => setRunnerType("changelog")}
-                  >
-                    📦 Release CHANGELOG Audit
-                  </button>
-                  <button
-                    className={`rc-tab ${runnerType === "pr" ? "active" : ""}`}
-                    onClick={() => setRunnerType("pr")}
-                  >
-                    💬 PR Review Resolver
-                  </button>
+                <div>
+                  <h3 className="rc-title" style={{ margin: "0 0 3px" }}>Target Open-Source Repository &amp; Execution Scope</h3>
+                  <p style={{ margin: 0, fontSize: 13, color: "var(--text-dim)" }}>
+                    The Router Orchestrator Agent coordinates both the <strong>Release CHANGELOG Auditor</strong> and <strong>PR Review Resolution</strong> agents on the selected repository.
+                  </p>
                 </div>
               </div>
 
-              {/* QUICK SAMPLE CHIPS */}
-              <div className="presets-row">
-                <span style={{ fontSize: 12, color: "var(--text-faint)", fontWeight: 600 }}>Quick Samples:</span>
-                <button className="preset-btn" onClick={() => applyPreset("changelog", "pallets/flask", "3.0.0", "3.1.0")}>
-                  ⚡ Flask (Release 3.0.0 → 3.1.0)
-                </button>
-                <button className="preset-btn" onClick={() => applyPreset("changelog", "psf/requests", "v2.31.0", "v2.32.0")}>
-                  ⚡ Requests (Release v2.31 → v2.32)
-                </button>
-                <button className="preset-btn" onClick={() => applyPreset("pr", "tiangolo/fastapi", "11500")}>
-                  ⚡ FastAPI (Pull Request #11500)
-                </button>
-                <button className="preset-btn" onClick={() => applyPreset("pr", "pydantic/pydantic", "9000")}>
-                  ⚡ Pydantic (Pull Request #9000)
-                </button>
-              </div>
-
-              {/* INPUT FIELDS */}
-              <div className="sb-row" style={{ marginTop: 12 }}>
+              {/* TARGET REPOSITORY INPUT */}
+              <div className="sb-row" style={{ marginTop: 14 }}>
                 <div className="sb-group" style={{ flex: 1.5 }}>
-                  <label>Selected Repository (owner/repo)</label>
+                  <label>Selected Target Repository (owner/repo)</label>
                   <input
                     className="sb-input"
                     value={repoInput}
-                    onChange={(e) => setRepoInput(e.target.value)}
+                    onChange={(e) => handleSelectRepo(e.target.value)}
                     placeholder="e.g. pallets/flask or tiangolo/fastapi"
                   />
                 </div>
 
-                {runnerType === "changelog" ? (
-                  <>
-                    <div className="sb-group">
-                      <label>Base Tag {isLoadingTags ? "(loading tags...)" : ""}</label>
-                      {repoTags.length > 0 ? (
-                        <select className="sb-select" value={baseTag} onChange={(e) => setBaseTag(e.target.value)}>
-                          {repoTags.map((t) => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                      ) : (
-                        <input className="sb-input" value={baseTag} onChange={(e) => setBaseTag(e.target.value)} placeholder="e.g. 3.0.0" />
-                      )}
-                    </div>
-                    <div className="sb-group">
-                      <label>Head Tag</label>
-                      {repoTags.length > 0 ? (
-                        <select className="sb-select" value={headTag} onChange={(e) => setHeadTag(e.target.value)}>
-                          {repoTags.map((t) => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                      ) : (
-                        <input className="sb-input" value={headTag} onChange={(e) => setHeadTag(e.target.value)} placeholder="e.g. 3.1.0" />
-                      )}
-                    </div>
-                    <div className="sb-group">
-                      <label>CHANGELOG File</label>
-                      <input className="sb-input" value={changelogFile} onChange={(e) => setChangelogFile(e.target.value)} placeholder="CHANGELOG.md" />
-                    </div>
-                  </>
-                ) : (
-                  <div className="sb-group" style={{ flex: 1 }}>
-                    <label>Pull Request Number (#)</label>
-                    {repoPrs.length > 0 ? (
-                      <select className="sb-select" value={prNumber} onChange={(e) => setPrNumber(e.target.value)}>
-                        {repoPrs.map((p) => <option key={p.number} value={p.number}>#{p.number}: {p.title.slice(0, 45)} (@{p.user})</option>)}
-                      </select>
-                    ) : (
-                      <input className="sb-input" type="number" value={prNumber} onChange={(e) => setPrNumber(e.target.value)} placeholder="e.g. 11500" />
-                    )}
-                  </div>
-                )}
+                <div className="sb-group">
+                  <label>Release Base Tag {isLoadingTags ? "(loading...)" : ""}</label>
+                  {repoTags.length > 0 ? (
+                    <select className="sb-select" value={baseTag} onChange={(e) => setBaseTag(e.target.value)}>
+                      {repoTags.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  ) : (
+                    <input className="sb-input" value={baseTag} onChange={(e) => setBaseTag(e.target.value)} placeholder="e.g. 3.0.0" />
+                  )}
+                </div>
+
+                <div className="sb-group">
+                  <label>Release Head Tag</label>
+                  {repoTags.length > 0 ? (
+                    <select className="sb-select" value={headTag} onChange={(e) => setHeadTag(e.target.value)}>
+                      {repoTags.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  ) : (
+                    <input className="sb-input" value={headTag} onChange={(e) => setHeadTag(e.target.value)} placeholder="e.g. 3.1.0" />
+                  )}
+                </div>
+
+                <div className="sb-group" style={{ flex: 1 }}>
+                  <label>Active Pull Request (#)</label>
+                  {repoPrs.length > 0 ? (
+                    <select className="sb-select" value={prNumber} onChange={(e) => setPrNumber(e.target.value)}>
+                      {repoPrs.map((p) => <option key={p.number} value={p.number}>#{p.number}: {p.title.slice(0, 40)}</option>)}
+                    </select>
+                  ) : (
+                    <input className="sb-input" type="number" value={prNumber} onChange={(e) => setPrNumber(e.target.value)} placeholder="e.g. 11500" />
+                  )}
+                </div>
               </div>
 
+              {/* ACTION BUTTON */}
               <div style={{ marginTop: 20, display: "flex", gap: 14, alignItems: "center" }}>
                 <button
                   className="run-btn"
                   onClick={handleRunLiveTriage}
                   disabled={isRunningLive || !repoInput.trim()}
                 >
-                  {isRunningLive ? "⏳ Querying GitHub REST API & Running Triage Agents…" : "🚀 Run Live Real-Time Triage"}
+                  {isRunningLive ? "⏳ Querying GitHub REST API & Running Triage Agents…" : "🚀 Execute Multi-Agent Repository Triage"}
                 </button>
                 {isRunningLive && (
                   <span style={{ fontSize: 13, color: "var(--text-dim)" }}>

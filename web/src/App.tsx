@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { isHardTitle, loadCases, loadManifest, loadResults, pct } from "./data";
 import TrajectoryPanel from "./TrajectoryPanel";
 import AgentGraph from "./AgentGraph";
-import { STORY, QUESTIONS, CHOICES } from "./content";
+import { STORY, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
 
 interface SearchRepoItem {
@@ -1503,90 +1503,113 @@ export default function App() {
         {/* ========================================================================= */}
         {currentTab === "architecture" && (
           <section id="architecture">
-            <div className="page-head">
+            <div className="page-head" style={{ marginBottom: 16 }}>
               <div className="page-title-area">
-                <h1>🧠 Multi-Agent Architecture &amp; Design Story</h1>
+                <h1>🧠 Multi-Agent Architecture &amp; System Design</h1>
                 <p>
-                  A parallel, modular multi-agent graph with on-demand tools and two-layer proof verification.
+                  A parallel, modular multi-agent graph with on-demand Git tools and two-layer proof verification.
                 </p>
               </div>
             </div>
 
-            <div className="sec-head" style={{ marginTop: 10 }}>
-              <span className="sec-num">01</span>
-              <h2>Interactive Multi-Agent Topology</h2>
-            </div>
-
-            <AgentGraph />
-
-            <div className="sec-head" style={{ marginTop: 32 }}>
-              <span className="sec-num">02</span>
-              <h2>Key Architectural Design Choices</h2>
-            </div>
-            <div className="value-props">
-              {CHOICES.map((c) => (
-                <div className="vprop-card" key={c.h}>
-                  <h3>{c.h}</h3>
-                  <p>{c.p}</p>
+            {/* TWO-COLUMN LAYOUT: STICKY NAV SIDEBAR + CONTENT PANELS */}
+            <div className="arch-docs-layout">
+              {/* STICKY SIDEBAR */}
+              <aside className="arch-sidebar">
+                <div className="arch-sidebar-inner">
+                  <span className="arch-sb-title">Architecture Specs</span>
+                  <nav className="arch-sb-nav">
+                    <a href="#arch-graph" className="arch-sb-link">
+                      <span className="arch-sb-num">1</span>
+                      <span>System Topology</span>
+                    </a>
+                    <a href="#arch-choices" className="arch-sb-link">
+                      <span className="arch-sb-num">2</span>
+                      <span>Design Choices</span>
+                    </a>
+                    <a href="#arch-changelog" className="arch-sb-link">
+                      <span className="arch-sb-num">3</span>
+                      <span>Evolution Changelog</span>
+                    </a>
+                    <a href="#arch-lessons" className="arch-sb-link">
+                      <span className="arch-sb-num">4</span>
+                      <span>Reliability Lessons</span>
+                    </a>
+                  </nav>
                 </div>
-              ))}
-            </div>
+              </aside>
 
-            <div className="sec-head" style={{ marginTop: 32 }}>
-              <span className="sec-num">03</span>
-              <h2>The 4 Core Questions</h2>
-            </div>
-            <div className="value-props">
-              {QUESTIONS.map((q) => (
-                <div className="vprop-card" key={q.n}>
-                  <span className="tag changelog" style={{ marginBottom: 6, display: "inline-block" }}>{q.n}</span>
-                  <h3>{q.q}</h3>
-                  <p>{q.a}</p>
+              {/* MAIN CONTENT AREA */}
+              <div className="arch-main-content">
+                {/* SECTION 1: INTERACTIVE TOPOLOGY */}
+                <div id="arch-graph" className="arch-section-block">
+                  <AgentGraph />
                 </div>
-              ))}
-            </div>
 
-            <div className="sec-head" style={{ marginTop: 32 }}>
-              <span className="sec-num">04</span>
-              <h2>Evolution Timeline &amp; Changelog</h2>
-            </div>
-            <div className="timeline">
-              {STORY.map((s, i) => (
-                <div className={`tl-item ${s.kind || ""}`} key={i}>
-                  <div className="tl-head">
-                    <span className="tl-stage">{s.stage}</span>
-                    {s.badge && <span className={`tl-badge ${s.badgeKind}`}>{s.badge}</span>}
-                    {s.evidence && <span className="tl-badge evidence">{s.evidence}</span>}
+                {/* SECTION 2: KEY ARCHITECTURAL DESIGN CHOICES */}
+                <div id="arch-choices" className="arch-section-block">
+                  <div className="sec-head" style={{ marginTop: 10 }}>
+                    <span className="sec-num">02</span>
+                    <h2>Key Architectural Design Choices</h2>
                   </div>
-                  <p>{s.body}</p>
+                  <div className="value-props">
+                    {CHOICES.map((c) => (
+                      <div className="vprop-card" key={c.h}>
+                        <h3>{c.h}</h3>
+                        <p>{c.p}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="sec-head" style={{ marginTop: 32 }}>
-              <span className="sec-num">05</span>
-              <h2>Hot Take &amp; Practical Lessons</h2>
-            </div>
-            <div className="callout hot">
-              <strong>Reliability isn't a smarter prompt — it's making the agent unable to assert what it can't point at.</strong>
-              <p>
-                Cheap deterministic grounding (does the cited commit exist? is the quote actually in it?)
-                removes a whole class of hallucinated findings that no amount of tuning the generator
-                reliably fixes. Verify at the seam where claims meet artifacts, and let the generator be bold.
-              </p>
-            </div>
-            <div className="callout hot">
-              <strong>A verifier is only as good as the evidence it's handed.</strong>
-              <p>
-                Ours first rejected <em>correct</em> findings because it judged absence claims ("no commit
-                supports this line") from a single quote — you can't prove an absence from one artifact.
-                Match the verifier's context to the shape of the claim, or verification quietly becomes a
-                false-negative machine.
-              </p>
+                {/* SECTION 3: EVOLUTION CHANGELOG */}
+                <div id="arch-changelog" className="arch-section-block">
+                  <div className="sec-head" style={{ marginTop: 10 }}>
+                    <span className="sec-num">03</span>
+                    <h2>Development Changelog &amp; Iterations</h2>
+                  </div>
+                  <div className="timeline">
+                    {STORY.map((s, i) => (
+                      <div className={`tl-item ${s.kind || ""}`} key={i}>
+                        <div className="tl-head">
+                          <span className="tl-stage">{s.stage}</span>
+                          {s.badge && <span className={`tl-badge ${s.badgeKind}`}>{s.badge}</span>}
+                          {s.evidence && <span className="tl-badge evidence">{s.evidence}</span>}
+                        </div>
+                        <p>{s.body}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* SECTION 4: HOT TAKE & LESSONS */}
+                <div id="arch-lessons" className="arch-section-block">
+                  <div className="sec-head" style={{ marginTop: 10 }}>
+                    <span className="sec-num">04</span>
+                    <h2>Reliability Lessons &amp; Failure Modes Neutralized</h2>
+                  </div>
+                  <div className="callout hot">
+                    <strong>Reliability isn't a smarter prompt — it's making the agent unable to assert what it can't point at.</strong>
+                    <p>
+                      Cheap deterministic grounding (does the cited commit exist? is the quote actually in it?)
+                      removes a whole class of hallucinated findings that no amount of tuning the generator
+                      reliably fixes. Verify at the seam where claims meet artifacts, and let the generator be bold.
+                    </p>
+                  </div>
+                  <div className="callout hot">
+                    <strong>A verifier is only as good as the evidence it's handed.</strong>
+                    <p>
+                      Ours first rejected <em>correct</em> findings because it judged absence claims ("no commit
+                      supports this line") from a single quote — you can't prove an absence from one artifact.
+                      Match the verifier's context to the shape of the claim, or verification quietly becomes a
+                      false-negative machine.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         )}
-
         {/* ========================================================================= */}
         {/* TAB 4: REPRODUCE & CI SETUP                                               */}
         {/* ========================================================================= */}

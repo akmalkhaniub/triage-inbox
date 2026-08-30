@@ -776,3 +776,50 @@ footer { border-top: 1px solid var(--border); padding: 24px 0; font-size: 12.5px
 
 .node-name { font-size: 13px; font-weight: 700; color: var(--text); }
 .node-desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+
+/* ========================================================================= */
+/* ARCHITECTURE DOCUMENTATION SIDEBAR LAYOUT                                 */
+/* ========================================================================= */
+.arch-docs-layout {
+  display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: start;
+}
+@media (max-width: 900px) {
+  .arch-docs-layout { grid-template-columns: 1fr; }
+  .arch-sidebar { display: none; }
+}
+
+.arch-sidebar {
+  position: sticky; top: 74px;
+}
+.arch-sidebar-inner {
+  background: var(--bg-elev); border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 14px; box-shadow: var(--shadow);
+}
+.arch-sb-title {
+  font-size: 11px; font-weight: 800; font-family: var(--mono); text-transform: uppercase;
+  color: var(--text-faint); letter-spacing: 0.05em; display: block; margin-bottom: 10px;
+}
+.arch-sb-nav {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.arch-sb-link {
+  display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-dim); transition: all 0.15s ease;
+  text-decoration: none; border-left: 2px solid transparent;
+}
+.arch-sb-link:hover {
+  background: var(--bg-elev2); color: var(--accent); border-left-color: var(--accent);
+  text-decoration: none;
+}
+.arch-sb-num {
+  font-size: 10px; font-family: var(--mono); color: var(--accent); font-weight: 700;
+  background: var(--bg-elev2); padding: 1px 5px; border-radius: 3px;
+}
+
+.arch-main-content {
+  display: flex; flex-direction: column; gap: 32px; min-width: 0;
+}
+.arch-section-block {
+  scroll-margin-top: 80px;
+}

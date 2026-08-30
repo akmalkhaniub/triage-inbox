@@ -252,19 +252,18 @@ export default function AgentGraph({
       {/* HEADER WITH CONTROLS */}
       <div className="ag-header" style={{ marginBottom: 16 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-            <span className="tag review" style={{ fontSize: 11 }}>Multi-Agent System Architecture</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>
+              Interactive Graph &amp; Agent Inspector
+            </h3>
             {activeCaseId && (
-              <span className="badge-model" style={{ color: "var(--accent)" }}>
-                Active Case: {activeCaseId}
+              <span className="badge-model" style={{ color: "var(--accent)", fontSize: 11 }}>
+                Case: {activeCaseId}
               </span>
             )}
           </div>
-          <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, letterSpacing: "-0.02em" }}>
-            Parallel Multi-Agent Architecture Studio
-          </h3>
-          <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--text-dim)" }}>
-            Click any numbered step (1–7) on the left to inspect that specific Agent's role, tools, operational logic, and anti-hallucination guardrail.
+          <p style={{ margin: "2px 0 0", fontSize: 13, color: "var(--text-dim)" }}>
+            Click any numbered step to inspect that Agent's operational contract, tools, and anti-hallucination guardrails.
           </p>
         </div>
 
@@ -272,7 +271,7 @@ export default function AgentGraph({
           className="filter-btn active"
           onClick={handleStartSim}
           disabled={isSimulating}
-          style={{ padding: "8px 16px", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}
+          style={{ padding: "7px 14px", fontSize: 12.5, display: "flex", alignItems: "center", gap: 6 }}
         >
           {isSimulating ? "⚡ Simulating Flow..." : "▶ Simulate Flow"}
         </button>

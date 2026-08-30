@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import { f2, isHardTitle, loadCases, loadManifest, loadResults, pct, usd } from "./data";
+import { f2, isHardTitle, loadCases, loadManifest, loadResults, pct } from "./data";
 import TrajectoryPanel from "./TrajectoryPanel";
 import { STORY, QUESTIONS, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
@@ -71,9 +71,9 @@ export default function App() {
     });
   }, [results, cases, caseIds, caseFilter]);
 
-  if (err) return <div className="wrap errbox">Failed to load data: {err}<br />Run <code>python web/build_data.py</code> then reload.</div>;
+  if (err) return <div className="wrap errbox" style={{ padding: "40px 20px" }}>Failed to load data: {err}<br />Run <code>python web/build_data.py</code> then reload.</div>;
   if (!results || !results.aggregate.baseline || !results.aggregate.agent || !manifest || !cases)
-    return <div className="wrap loading" style={{ padding: "80px 20px", textAlign: "center" }}>Loading Triage Inbox Workspace…</div>;
+    return <div className="wrap loading" style={{ padding: "60px 20px", textAlign: "center" }}>Loading Triage Inbox Workspace…</div>;
 
   const b = results.aggregate.baseline, a = results.aggregate.agent;
 
@@ -125,111 +125,56 @@ export default function App() {
       </nav>
 
       <div className="wrap tab-content">
-        {/* HERO / PURPOSE SECTION */}
-        <header className="hero">
-          <div className="hero-badge-row">
-            <span className="eyebrow">micro1 · Agentic Workflows Hackathon</span>
-            <span className="eyebrow" style={{ color: "var(--good)", borderColor: "var(--good-border)", background: "var(--good-bg)" }}>
-              ✓ 100% Grounded in Git Artifacts
-            </span>
-          </div>
-
-          <h1>
-            Automated PR &amp; Release Triage —<br />
-            <span className="grad">with verified proof on every verdict.</span>
-          </h1>
-
-          <p className="sub">
-            Maintainers waste hours cross-referencing commit histories against release notes and verifying
-            if PR authors actually handled review comments. <strong>Triage Inbox</strong> independently
-            gathers repository evidence, rejects ungrounded claims, and delivers actionable verdicts.
-          </p>
-
-          {/* 3 VALUE CARDS (Clear purpose breakdown) */}
-          <div className="value-props">
-            <div className="vprop-card">
-              <div className="vprop-icon">🔍</div>
-              <h3>1. On-Demand Artifact Tools</h3>
-              <p>
-                Specialists call <code>list_commits</code> and <code>get_diff</code> on-demand to inspect commit bodies and code patches, rather than skimming vague subject lines.
-              </p>
-            </div>
-            <div className="vprop-card">
-              <div className="vprop-icon">🛡️</div>
-              <h3>2. Two-Layer Proof Verifier</h3>
-              <p>
-                Every finding undergoes deterministic grounding (ref &amp; quote verification) followed by an independent soundness audit before reaching human review.
-              </p>
-            </div>
-            <div className="vprop-card">
-              <div className="vprop-icon">⚡</div>
-              <h3>3. Actionable Verdicts</h3>
-              <p>
-                Outputs clear, trusted actions (<code>AUTO_OK</code>, <code>NEEDS_HUMAN</code>, <code>ESCALATE</code>) backed by cited line numbers and SHAs.
-              </p>
-            </div>
-          </div>
-
-          {/* HEADLINE METRICS BANNER */}
-          <div className="metrics-banner">
-            <div className="mb-item">
-              <span className="mb-label">Primary Metric (F1)</span>
-              <span className="mb-val good">
-                <span className="was">{f2(b.f1)} →</span> {f2(a.f1)}
-              </span>
-              <span className="mb-sub">+{f2(a.f1 - b.f1)} F1 over baseline</span>
-            </div>
-
-            <div className="mb-item">
-              <span className="mb-label">False Alarms / Task</span>
-              <span className="mb-val good">
-                <span className="was">{b.false_alarms_per_case.toFixed(1)} →</span> {a.false_alarms_per_case.toFixed(1)}
-              </span>
-              <span className="mb-sub">−71% wasted maintainer reviews</span>
-            </div>
-
-            <div className="mb-item">
-              <span className="mb-label">Precision</span>
-              <span className="mb-val good">
-                <span className="was">{pct(b.precision)} →</span> {pct(a.precision)}
-              </span>
-              <span className="mb-sub">Grounding eliminates hallucination</span>
-            </div>
-
-            <div className="mb-item">
-              <span className="mb-label">Cost / Task</span>
-              <span className="mb-val">
-                {usd(a.cost_per_task_usd)} <span className="was">/ task</span>
-              </span>
-              <span className="mb-sub">{tally.wins} Wins / 0 Losses ({results.n_cases} cases)</span>
-            </div>
-          </div>
-        </header>
-
-        {/* TAB 1: MAINTAINER QUEUE (MAIN WORKSTATION VIEW) */}
+        {/* ========================================================================= */}
+        {/* TAB 1: MAINTAINER QUEUE (IMMEDIATELY VISIBLE WORKSPACE) */}
+        {/* ========================================================================= */}
         {currentTab === "queue" && (
           <section id="queue">
-            <div className="sec-head">
-              <span className="sec-num">01</span>
-              <h2>Maintainer Triage Queue</h2>
-            </div>
-            <p className="sec-lead">
-              Select any queue item to inspect the live triage verdict, cited code evidence, and step-by-step agent trajectories.
-            </p>
+            <div className="page-head">
+              <div className="page-title-area">
+                <h1>Maintainer Triage Queue</h1>
+                <p>
+                  Zero-hallucination PR &amp; release audit workstation. Every claim is independently
+                  verified against Git artifacts before reaching your decision.
+                </p>
+              </div>
 
+              {/* COMPACT INLINE METRICS STRIP */}
+              <div className="metric-strip">
+                <div className="metric-pill">
+                  <span className="mp-lbl">Problem F1</span>
+                  <span className="mp-val good">{f2(b.f1)} → {f2(a.f1)}</span>
+                </div>
+                <div className="metric-pill">
+                  <span className="mp-lbl">False Alarms</span>
+                  <span className="mp-val good">{b.false_alarms_per_case.toFixed(1)} → {a.false_alarms_per_case.toFixed(1)} (−71%)</span>
+                </div>
+                <div className="metric-pill">
+                  <span className="mp-lbl">Precision</span>
+                  <span className="mp-val good">{pct(b.precision)} → {pct(a.precision)}</span>
+                </div>
+                <div className="metric-pill">
+                  <span className="mp-lbl">Head-to-Head</span>
+                  <span className="mp-val">{tally.wins} Wins / 0 Losses</span>
+                </div>
+              </div>
+            </div>
+
+            {/* FILTER BAR */}
             <div className="queue-filter-bar">
               <div className="filter-btn-group">
-                <button className={`filter-btn ${caseFilter === "all" ? "active" : ""}`} onClick={() => setCaseFilter("all")}>All Items ({caseIds.length})</button>
+                <button className={`filter-btn ${caseFilter === "all" ? "active" : ""}`} onClick={() => setCaseFilter("all")}>All ({caseIds.length})</button>
                 <button className={`filter-btn ${caseFilter === "changelog" ? "active" : ""}`} onClick={() => setCaseFilter("changelog")}>CHANGELOG Audits (G)</button>
                 <button className={`filter-btn ${caseFilter === "review" ? "active" : ""}`} onClick={() => setCaseFilter("review")}>Review Comment Resolvers (E)</button>
                 <button className={`filter-btn ${caseFilter === "hard" ? "active" : ""}`} onClick={() => setCaseFilter("hard")}>Hard Edge Cases</button>
                 <button className={`filter-btn ${caseFilter === "wins" ? "active" : ""}`} onClick={() => setCaseFilter("wins")}>Agent Wins ({tally.wins})</button>
               </div>
               <span style={{ fontSize: 13, color: "var(--text-faint)" }}>
-                Showing <strong>{filteredCaseIds.length}</strong> items · Click row for full proof
+                Showing <strong>{filteredCaseIds.length}</strong> items · Click any row for full proof &amp; trajectory
               </span>
             </div>
 
+            {/* QUEUE CARDS LIST */}
             <div className="queue-grid">
               {filteredCaseIds.map((id) => {
                 const row = results.per_case[id];
@@ -246,15 +191,15 @@ export default function App() {
                           {isReview ? "PR Review" : "CHANGELOG"}
                         </span>
                         {isHard && <span className="tag hard">Hard Case</span>}
-                        <span style={{ fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--mono)" }}>{id}</span>
+                        <span style={{ fontSize: 11.5, color: "var(--text-faint)", fontFamily: "var(--mono)" }}>{id}</span>
                       </div>
                       <div className="qc-title">
                         {(meta?.title || id).replace(/\s*\(HARD:.*$/, "").replace(/\s*\([^)]*precision[^)]*\)/i, "")}
                       </div>
                       <div className="qc-desc">
                         {isReview
-                          ? "Verifies if PR code diff hunks genuinely satisfy reviewer comments."
-                          : "Cross-checks release notes against git commit range to detect phantoms or missing notes."}
+                          ? "Cross-examines reviewer comments against modified diff hunks."
+                          : "Diffs release notes against commit history to detect phantoms or missing entries."}
                       </div>
                     </div>
 
@@ -275,7 +220,7 @@ export default function App() {
                       </span>
                     </div>
 
-                    <div style={{ textAlign: "right", fontSize: 13, color: "var(--accent)", fontWeight: 600 }}>
+                    <div style={{ textAlign: "right", fontSize: 12.5, color: "var(--accent)", fontWeight: 600 }}>
                       View Proof
                     </div>
 
@@ -287,16 +232,19 @@ export default function App() {
           </section>
         )}
 
+        {/* ========================================================================= */}
         {/* TAB 2: LIVE GITHUB REPO SCANNER */}
+        {/* ========================================================================= */}
         {currentTab === "github" && (
           <section id="github">
-            <div className="sec-head">
-              <span className="sec-num">02</span>
-              <h2>Live GitHub Open-Source Triage</h2>
+            <div className="page-head">
+              <div className="page-title-area">
+                <h1>Live GitHub Open-Source Triage</h1>
+                <p>
+                  Audit real-world open-source repositories and pull requests directly from GitHub's REST API.
+                </p>
+              </div>
             </div>
-            <p className="sec-lead">
-              Test Triage Inbox on real-world open-source repositories in the wild without synthetic mockups.
-            </p>
 
             <div className="gh-box">
               <h3>1. Audit a Real Release CHANGELOG vs. Commits (e.g., Flask)</h3>
@@ -334,17 +282,49 @@ python run_github.py pr tiangolo/fastapi 11500`}
           </section>
         )}
 
+        {/* ========================================================================= */}
         {/* TAB 3: ARCHITECTURE & STORY */}
+        {/* ========================================================================= */}
         {currentTab === "architecture" && (
           <section id="architecture">
-            <div className="sec-head">
-              <span className="sec-num">03</span>
-              <h2>Agent Pipeline Architecture</h2>
+            <div className="page-head">
+              <div className="page-title-area">
+                <h1>Agent Architecture &amp; Design Story</h1>
+                <p>
+                  Why purposeful choices, on-demand tools, and two-layer verification outperform single mega-prompts.
+                </p>
+              </div>
             </div>
-            <p className="sec-lead">
-              How the multi-agent pipeline prevents hallucinations and enforces grounded verdicts.
-            </p>
 
+            {/* 3 VALUE CARDS */}
+            <div className="value-props">
+              <div className="vprop-card">
+                <div className="vprop-icon">🔍</div>
+                <h3>1. On-Demand Artifact Tools</h3>
+                <p>
+                  Specialists call <code>list_commits</code> and <code>get_diff</code> on-demand to inspect commit bodies and code patches, rather than skimming vague subject lines.
+                </p>
+              </div>
+              <div className="vprop-card">
+                <div className="vprop-icon">🛡️</div>
+                <h3>2. Two-Layer Proof Verifier</h3>
+                <p>
+                  Every finding undergoes deterministic grounding (ref &amp; quote verification) followed by an independent soundness audit before reaching human review.
+                </p>
+              </div>
+              <div className="vprop-card">
+                <div className="vprop-icon">⚡</div>
+                <h3>3. Actionable Verdicts</h3>
+                <p>
+                  Outputs clear, trusted actions (<code>AUTO_OK</code>, <code>NEEDS_HUMAN</code>, <code>ESCALATE</code>) backed by cited line numbers and SHAs.
+                </p>
+              </div>
+            </div>
+
+            <div className="sec-head" style={{ marginTop: 24 }}>
+              <span className="sec-num">01</span>
+              <h2>Pipeline Flow</h2>
+            </div>
             <div className="pipe-container">
               <div className="pipe-flow">
                 <div className="pipe-card active">
@@ -365,7 +345,7 @@ python run_github.py pr tiangolo/fastapi 11500`}
             </div>
 
             <div className="sec-head" style={{ marginTop: 32 }}>
-              <span className="sec-num">04</span>
+              <span className="sec-num">02</span>
               <h2>Key Architectural Design Choices</h2>
             </div>
             <div className="value-props">
@@ -378,7 +358,7 @@ python run_github.py pr tiangolo/fastapi 11500`}
             </div>
 
             <div className="sec-head" style={{ marginTop: 32 }}>
-              <span className="sec-num">05</span>
+              <span className="sec-num">03</span>
               <h2>The 4 Core Questions</h2>
             </div>
             <div className="value-props">
@@ -392,7 +372,7 @@ python run_github.py pr tiangolo/fastapi 11500`}
             </div>
 
             <div className="sec-head" style={{ marginTop: 32 }}>
-              <span className="sec-num">06</span>
+              <span className="sec-num">04</span>
               <h2>Evolution Timeline &amp; Changelog</h2>
             </div>
             <div className="timeline">
@@ -409,7 +389,7 @@ python run_github.py pr tiangolo/fastapi 11500`}
             </div>
 
             <div className="sec-head" style={{ marginTop: 32 }}>
-              <span className="sec-num">07</span>
+              <span className="sec-num">05</span>
               <h2>Hot Take &amp; Practical Lessons</h2>
             </div>
             <div className="callout hot">
@@ -432,16 +412,19 @@ python run_github.py pr tiangolo/fastapi 11500`}
           </section>
         )}
 
+        {/* ========================================================================= */}
         {/* TAB 4: REPRODUCE & CI SETUP */}
+        {/* ========================================================================= */}
         {currentTab === "reproduce" && (
           <section id="reproduce">
-            <div className="sec-head">
-              <span className="sec-num">08</span>
-              <h2>Reproduce &amp; CI Integration</h2>
+            <div className="page-head">
+              <div className="page-title-area">
+                <h1>Reproduce &amp; CI Integration</h1>
+                <p>
+                  Full clean-room runbook and automated continuous triage with GitHub Actions.
+                </p>
+              </div>
             </div>
-            <p className="sec-lead">
-              From a clean environment. All benchmark cases run offline with zero external network dependencies.
-            </p>
 
             <pre>
 {`# 1. Clone and install dependencies

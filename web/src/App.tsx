@@ -520,10 +520,10 @@ export default function App() {
               🎬 Solution Pitch
             </button>
             <button
-              className={`nav-tab-btn ${currentTab === "audits" ? "active" : ""}`}
-              onClick={() => navigateTab("audits")}
+              className={`nav-tab-btn ${currentTab === "architecture" ? "active" : ""}`}
+              onClick={() => navigateTab("architecture")}
             >
-              🔍 Audit Reports ({savedLiveAudits.length + caseIds.length})
+              🧠 Multi-Agent Architecture
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "github" ? "active" : ""}`}
@@ -532,10 +532,10 @@ export default function App() {
               🐙 Live GitHub Scanner
             </button>
             <button
-              className={`nav-tab-btn ${currentTab === "architecture" ? "active" : ""}`}
-              onClick={() => navigateTab("architecture")}
+              className={`nav-tab-btn ${currentTab === "audits" ? "active" : ""}`}
+              onClick={() => navigateTab("audits")}
             >
-              🧠 Multi-Agent Architecture
+              📋 Verification Reports ({savedLiveAudits.length + caseIds.length})
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "reproduce" ? "active" : ""}`}
@@ -744,15 +744,15 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 1: REPOSITORY AUDIT REPORTS & VERIFICATION FEED                       */}
+        {/* TAB 3: REPOSITORY VERIFICATION REPORTS & BENCHMARK                       */}
         {/* ========================================================================= */}
         {currentTab === "audits" && (
           <section id="audits">
             <div className="page-head">
               <div className="page-title-area">
-                <h1>🔍 Repository Audit Reports &amp; Verification Feed</h1>
+                <h1>📋 Repository Verification &amp; Benchmark Reports</h1>
                 <p>
-                  Zero-hallucination release notes and PR review audit feed. View real-world audits performed on public GitHub repositories, or inspect the 10-case ground truth benchmark suite.
+                  Zero-hallucination release notes and PR review verification feed. View live runs executed on public GitHub repositories, or inspect the 10-case ground truth benchmark suite.
                 </p>
               </div>
 

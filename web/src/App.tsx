@@ -5,6 +5,15 @@ import AgentGraph from "./AgentGraph";
 import { STORY, QUESTIONS, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
 
+interface SearchRepoItem {
+  full_name: string;
+  description: string;
+  stars: number;
+  language: string;
+  owner: string;
+  name: string;
+}
+
 interface LiveArtifacts {
   commits_count: number;
   commits: Array<{ sha: string; full_sha: string; message: string; body: string; author: string }>;
@@ -77,7 +86,7 @@ const DEFAULT_MODELS: Record<string, Array<{ id: string; name: string }>> = {
   ],
 };
 
-type TabType = "video" | "queue" | "graph" | "github" | "architecture" | "reproduce";
+type TabType = "video" | "queue" | "github" | "architecture" | "reproduce";
 
 export default function App() {
   const [results, setResults] = useState<Results | null>(null);
@@ -90,7 +99,7 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<TabType>(() => {
     const hash = window.location.hash.replace(/^#\/?/, "").toLowerCase();
     if (hash.startsWith("case/")) return "queue";
-    if (["video", "queue", "graph", "github", "architecture", "reproduce"].includes(hash)) {
+    if (["video", "queue", "github", "architecture", "reproduce"].includes(hash)) {
       return hash as TabType;
     }
     return "video";
@@ -109,6 +118,13 @@ export default function App() {
   const [githubToken, setGithubToken] = useState<string>(() => localStorage.getItem("triage_gh_token") || "");
 
   // Live GitHub Runner State
+  const [searchQuery, setSearchQuery] = useState<string>("flask");
+  const [isSearchingRepo, setIsSearchingRepo] = useState<boolean>(false);
+  const [searchResults, setSearchResults] = useState<SearchRepoItem[]>([]);
+  const [repoTags, setRepoTags] = useState<string[]>([]);
+  const [repoPrs, setRepoPrs] = useState<Array<{ number: number; title: string; user: string }>>([]);
+  const [isLoadingTags, setIsLoadingTags] = useState<boolean>(false);
+
   const [runnerType, setRunnerType] = useState<"changelog" | "pr">("changelog");
   const [repoInput, setRepoInput] = useState<string>("pallets/flask");
   const [baseTag, setBaseTag] = useState<string>("3.0.0");
@@ -136,7 +152,7 @@ export default function App() {
         setSelected(caseId);
         return;
       }
-      if (["video", "queue", "graph", "github", "architecture", "reproduce"].includes(hash)) {
+      if (["video", "queue", "github", "architecture", "reproduce"].includes(hash)) {
         setCurrentTab(hash as TabType);
       }
     };
@@ -193,7 +209,6 @@ export default function App() {
         setResults(r);
         setManifest(m);
         setCases(c);
-        // Check if initial hash is a case
         const hash = window.location.hash.replace(/^#\/?/, "");
         if (hash.startsWith("case/")) {
           setSelected(hash.replace("case/", ""));
@@ -239,6 +254,55 @@ export default function App() {
       return true;
     });
   }, [results, cases, caseIds, caseFilter]);
+
+  // Handle GitHub Repo Search
+  const handleSearchRepos = async () => {
+    if (!searchQuery.trim()) return;
+    setIsSearchingRepo(true);
+    try {
+      const res = await fetch(`/api/github/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      const data = await res.json();
+      if (data && data.items) {
+        setSearchResults(data.items);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSearchingRepo(false);
+    }
+  };
+
+  // When a repo is picked, fetch its tags and PRs
+  const handleSelectRepo = async (full_name: string) => {
+    setRepoInput(full_name);
+    setIsLoadingTags(true);
+    try {
+      const [tagsRes, prsRes] = await Promise.all([
+        fetch(`/api/github/tags?repo=${encodeURIComponent(full_name)}`),
+        fetch(`/api/github/prs?repo=${encodeURIComponent(full_name)}`),
+      ]);
+      const tagsData = await tagsRes.json();
+      const prsData = await prsRes.json();
+
+      if (tagsData && tagsData.tags && tagsData.tags.length >= 2) {
+        setRepoTags(tagsData.tags);
+        setHeadTag(tagsData.tags[0]);
+        setBaseTag(tagsData.tags[1]);
+      } else if (tagsData && tagsData.tags && tagsData.tags.length === 1) {
+        setRepoTags(tagsData.tags);
+        setHeadTag(tagsData.tags[0]);
+      }
+
+      if (prsData && prsData.prs && prsData.prs.length > 0) {
+        setRepoPrs(prsData.prs);
+        setPrNumber(String(prsData.prs[0].number));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingTags(false);
+    }
+  };
 
   const handleRunLiveTriage = async () => {
     setIsRunningLive(true);
@@ -318,19 +382,13 @@ export default function App() {
               className={`nav-tab-btn video-highlight ${currentTab === "video" ? "active" : ""}`}
               onClick={() => navigateTab("video")}
             >
-              🎬 Video Presenter
+              🎬 Video &amp; Pitch
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "queue" ? "active" : ""}`}
               onClick={() => navigateTab("queue")}
             >
               📥 Maintainer Queue ({caseIds.length})
-            </button>
-            <button
-              className={`nav-tab-btn ${currentTab === "graph" ? "active" : ""}`}
-              onClick={() => navigateTab("graph")}
-            >
-              🧠 Agent Graph
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "github" ? "active" : ""}`}
@@ -342,7 +400,7 @@ export default function App() {
               className={`nav-tab-btn ${currentTab === "architecture" ? "active" : ""}`}
               onClick={() => navigateTab("architecture")}
             >
-              📖 Design Story
+              🧠 Architecture &amp; Graph
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "reproduce" ? "active" : ""}`}
@@ -686,36 +744,68 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: INTERACTIVE AGENT GRAPH VISUALIZER                                */}
-        {/* ========================================================================= */}
-        {currentTab === "graph" && (
-          <section id="graph">
-            <div className="page-head">
-              <div className="page-title-area">
-                <h1>🧠 Interactive Agent Graph &amp; Architecture Visualizer</h1>
-                <p>
-                  Explore the exact multi-agent node topology, on-demand tool execution loops, and two-layer proof gates.
-                </p>
-              </div>
-            </div>
-
-            <AgentGraph />
-          </section>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 3: PREMIUM LIVE GITHUB SCANNER & TRIAGE EXPLORER                     */}
+        {/* TAB 2: LIVE GITHUB REPO SEARCH & REAL-TIME AUDIT SUITE                   */}
         {/* ========================================================================= */}
         {currentTab === "github" && (
           <section id="github">
             <div className="page-head">
               <div className="page-title-area">
-                <h1>Live GitHub Repository Scanner &amp; Triage Suite</h1>
+                <h1>Live Open-Source GitHub Scanner &amp; Real-Time Auditor</h1>
                 <p>
-                  Perform live, zero-hallucination audits on any public GitHub repository in real time.
-                  Inspects raw git commits and diffs, runs agents, and verifies proof.
+                  Search ANY open-source repository on GitHub or enter custom repo coordinates.
+                  Triage Inbox fetches live Git artifacts, executes multi-agent reasoning, and delivers verified verdicts in real time.
                 </p>
               </div>
+            </div>
+
+            {/* REPOSITORY SEARCH BAR */}
+            <div className="agent-graph-container" style={{ margin: "0 0 20px", padding: 20 }}>
+              <h3 style={{ margin: "0 0 10px", fontSize: 16, fontWeight: 700 }}>
+                🔍 Search Open-Source Repositories (GitHub REST API)
+              </h3>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <input
+                  className="sb-input"
+                  style={{ flex: 1, minWidth: 260, fontSize: 14 }}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearchRepos()}
+                  placeholder="Search open-source repo (e.g. flask, fastapi, requests, django, react, transformers)..."
+                />
+                <button
+                  className="filter-btn active"
+                  style={{ padding: "8px 20px", fontSize: 13, cursor: "pointer" }}
+                  onClick={handleSearchRepos}
+                  disabled={isSearchingRepo}
+                >
+                  {isSearchingRepo ? "Searching..." : "Search GitHub Repos"}
+                </button>
+              </div>
+
+              {/* SEARCH RESULTS DROPDOWN / CARDS */}
+              {searchResults.length > 0 && (
+                <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 10 }}>
+                  {searchResults.map((item) => (
+                    <div
+                      key={item.full_name}
+                      onClick={() => handleSelectRepo(item.full_name)}
+                      style={{
+                        background: repoInput === item.full_name ? "var(--accent-light)" : "var(--bg-elev2)",
+                        border: repoInput === item.full_name ? "2px solid var(--accent)" : "1px solid var(--border)",
+                        borderRadius: 8, padding: 10, cursor: "pointer", transition: "all 0.15s ease",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                        <strong style={{ fontSize: 13, color: "var(--text)" }}>{item.full_name}</strong>
+                        <span style={{ fontSize: 11, color: "var(--accent)", fontFamily: "var(--mono)" }}>⭐ {item.stars.toLocaleString()}</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 11.5, color: "var(--text-dim)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {item.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* MODEL & ENVIRONMENT CONFIGURATION */}
@@ -813,7 +903,7 @@ export default function App() {
             {/* LIVE RUNNER FORM */}
             <div className="runner-card">
               <div className="rc-header">
-                <h3 className="rc-title">1. Target Public GitHub Repository</h3>
+                <h3 className="rc-title">Target Open-Source Repository &amp; Lane</h3>
                 <div className="rc-tabs">
                   <button
                     className={`rc-tab ${runnerType === "changelog" ? "active" : ""}`}
@@ -850,55 +940,52 @@ export default function App() {
               {/* INPUT FIELDS */}
               <div className="sb-row" style={{ marginTop: 12 }}>
                 <div className="sb-group" style={{ flex: 1.5 }}>
-                  <label>Repository (owner/repo)</label>
+                  <label>Selected Repository (owner/repo)</label>
                   <input
                     className="sb-input"
                     value={repoInput}
                     onChange={(e) => setRepoInput(e.target.value)}
-                    placeholder="e.g. pallets/flask"
+                    placeholder="e.g. pallets/flask or tiangolo/fastapi"
                   />
                 </div>
 
                 {runnerType === "changelog" ? (
                   <>
                     <div className="sb-group">
-                      <label>Base Tag</label>
-                      <input
-                        className="sb-input"
-                        value={baseTag}
-                        onChange={(e) => setBaseTag(e.target.value)}
-                        placeholder="e.g. 3.0.0"
-                      />
+                      <label>Base Tag {isLoadingTags ? "(loading tags...)" : ""}</label>
+                      {repoTags.length > 0 ? (
+                        <select className="sb-select" value={baseTag} onChange={(e) => setBaseTag(e.target.value)}>
+                          {repoTags.map((t) => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      ) : (
+                        <input className="sb-input" value={baseTag} onChange={(e) => setBaseTag(e.target.value)} placeholder="e.g. 3.0.0" />
+                      )}
                     </div>
                     <div className="sb-group">
                       <label>Head Tag</label>
-                      <input
-                        className="sb-input"
-                        value={headTag}
-                        onChange={(e) => setHeadTag(e.target.value)}
-                        placeholder="e.g. 3.1.0"
-                      />
+                      {repoTags.length > 0 ? (
+                        <select className="sb-select" value={headTag} onChange={(e) => setHeadTag(e.target.value)}>
+                          {repoTags.map((t) => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      ) : (
+                        <input className="sb-input" value={headTag} onChange={(e) => setHeadTag(e.target.value)} placeholder="e.g. 3.1.0" />
+                      )}
                     </div>
                     <div className="sb-group">
                       <label>CHANGELOG File</label>
-                      <input
-                        className="sb-input"
-                        value={changelogFile}
-                        onChange={(e) => setChangelogFile(e.target.value)}
-                        placeholder="CHANGELOG.md"
-                      />
+                      <input className="sb-input" value={changelogFile} onChange={(e) => setChangelogFile(e.target.value)} placeholder="CHANGELOG.md" />
                     </div>
                   </>
                 ) : (
-                  <div className="sb-group">
+                  <div className="sb-group" style={{ flex: 1 }}>
                     <label>Pull Request Number (#)</label>
-                    <input
-                      className="sb-input"
-                      type="number"
-                      value={prNumber}
-                      onChange={(e) => setPrNumber(e.target.value)}
-                      placeholder="e.g. 11500"
-                    />
+                    {repoPrs.length > 0 ? (
+                      <select className="sb-select" value={prNumber} onChange={(e) => setPrNumber(e.target.value)}>
+                        {repoPrs.map((p) => <option key={p.number} value={p.number}>#{p.number}: {p.title.slice(0, 45)} (@{p.user})</option>)}
+                      </select>
+                    ) : (
+                      <input className="sb-input" type="number" value={prNumber} onChange={(e) => setPrNumber(e.target.value)} placeholder="e.g. 11500" />
+                    )}
                   </div>
                 )}
               </div>
@@ -909,11 +996,11 @@ export default function App() {
                   onClick={handleRunLiveTriage}
                   disabled={isRunningLive || !repoInput.trim()}
                 >
-                  {isRunningLive ? "⏳ Querying GitHub REST API & Running Triage Agents…" : "🚀 Run Live Triage Audit"}
+                  {isRunningLive ? "⏳ Querying GitHub REST API & Running Triage Agents…" : "🚀 Run Live Real-Time Triage"}
                 </button>
                 {isRunningLive && (
                   <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
-                    Downloading Git commits, diffs, and executing verification agents…
+                    Downloading Git commits/diffs, executing multi-agent reasoning, and verifying proofs…
                   </span>
                 )}
               </div>
@@ -1204,13 +1291,13 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 4: ARCHITECTURE & STORY                                               */}
+        {/* TAB 3: ARCHITECTURE & EVOLUTION STORY                                    */}
         {/* ========================================================================= */}
         {currentTab === "architecture" && (
           <section id="architecture">
             <div className="page-head">
               <div className="page-title-area">
-                <h1>Agent Architecture &amp; Design Story</h1>
+                <h1>🧠 Architecture &amp; Evolution Story</h1>
                 <p>
                   Why purposeful choices, on-demand tools, and two-layer verification outperform single mega-prompts.
                 </p>
@@ -1219,7 +1306,7 @@ export default function App() {
 
             <div className="sec-head" style={{ marginTop: 10 }}>
               <span className="sec-num">01</span>
-              <h2>Visual Pipeline Flow</h2>
+              <h2>Interactive Multi-Agent Graph</h2>
             </div>
 
             <AgentGraph />
@@ -1293,7 +1380,7 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 5: REPRODUCE & CI SETUP                                               */}
+        {/* TAB 4: REPRODUCE & CI SETUP                                               */}
         {/* ========================================================================= */}
         {currentTab === "reproduce" && (
           <section id="reproduce">

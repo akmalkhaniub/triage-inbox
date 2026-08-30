@@ -44,6 +44,26 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"status": "ok", "provider": config.PROVIDER, "model": config.MODEL})
             return
 
+        if parsed.path == "/api/github/search":
+            q = qs.get("q", [""])[0].strip()
+            if not q:
+                self._send_json(400, {"error": "Missing search query 'q'"})
+                return
+            try:
+                search_data = _github_request(f"search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=6")
+                items = [{
+                    "full_name": item.get("full_name", ""),
+                    "description": item.get("description", "") or "No description provided",
+                    "stars": item.get("stargazers_count", 0),
+                    "language": item.get("language", ""),
+                    "owner": item.get("owner", {}).get("login", ""),
+                    "name": item.get("name", ""),
+                } for item in search_data.get("items", [])]
+                self._send_json(200, {"query": q, "total": search_data.get("total_count", 0), "items": items})
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+            return
+
         if parsed.path == "/api/github/tags":
             repo = qs.get("repo", [""])[0]
             if not repo:

@@ -70,12 +70,47 @@ def print_rich_report(fx: Fixture, result, trajs, arm: str, traj_dir: str) -> No
     print(f"{BOLD}{'=' * 72}{RESET}\n")
 
 
+def human_approval_gate(result) -> str:
+    """Ground Rule #04: human approval before consequential actions.
+
+    Presents the agent's recommendation and lets the maintainer accept, override,
+    or reject before the verdict is finalized.
+    """
+    act = result.recommended_action
+    act_badge = ACTION_COLORS.get(act, f"[{act.upper()}]")
+
+    print(f"\n{BOLD}━━━ HUMAN APPROVAL CHECKPOINT ━━━{RESET}")
+    print(f"  Agent recommends: {act_badge}")
+    print(f"  Options:")
+    print(f"    {GREEN}[y]{RESET}  Accept agent recommendation ({act})")
+    print(f"    {YELLOW}[h]{RESET}  Override → NEEDS_HUMAN (flag for manual review)")
+    print(f"    {RED}[e]{RESET}  Override → ESCALATE (urgent attention)")
+    print(f"    {CYAN}[a]{RESET}  Override → AUTO_OK (approve and clear)")
+    print(f"    {DIM}[s]{RESET}  Skip approval (non-interactive mode)")
+
+    try:
+        choice = input(f"\n  Your decision [{GREEN}y{RESET}/h/e/a/s]: ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        print(f"\n  {DIM}(Non-interactive — accepting agent recommendation){RESET}")
+        return act
+
+    overrides = {"h": "needs_human", "e": "escalate", "a": "auto_ok"}
+    if choice in overrides:
+        final = overrides[choice]
+        print(f"  {YELLOW}→ Human override: {final.upper()}{RESET}")
+        return final
+    else:
+        print(f"  {GREEN}→ Accepted: {act.upper()}{RESET}")
+        return act
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Run one case through Triage Inbox agent or baseline.")
     ap.add_argument("case", help="Path to case JSON fixture")
     ap.add_argument("--arm", choices=["agent", "baseline"], default="agent", help="Arm to run: agent (default) or baseline")
     ap.add_argument("--traj", default="trajectories", help="Directory where trajectories are dumped")
     ap.add_argument("--json", action="store_true", help="Output raw JSON instead of formatted report")
+    ap.add_argument("--no-approve", action="store_true", help="Skip human approval checkpoint")
     args = ap.parse_args()
 
     fx = Fixture.load(args.case)
@@ -91,6 +126,13 @@ def main() -> None:
             print(f"  {t.agent:18} -> {md}")
     else:
         print_rich_report(fx, result, trajs, args.arm, args.traj)
+
+        # Ground Rule #04: human approval before consequential actions
+        if not args.no_approve:
+            final_action = human_approval_gate(result)
+            if final_action != result.recommended_action:
+                result.recommended_action = final_action
+                print(f"\n  {BOLD}Final action recorded:{RESET} {final_action.upper()}")
 
 
 if __name__ == "__main__":

@@ -158,25 +158,33 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                     return
 
                 # 3. Format fetched artifacts for rich UI inspection
-                commits = fx.artifacts.get("commits", [])
-                changelog_text = fx.artifacts.get("changelog", "")
-                review_comments = fx.artifacts.get("review_comments", [])
-                diff_hunks = fx.artifacts.get("diff_hunks", [])
+                # Use the Fixture's typed accessors (fx.artifact is the raw dict,
+                # fx.commits() / fx.changelog() / fx.review_comments() / fx.diff_hunks()
+                # are the typed helpers).
+                commits = fx.commits()           # list[dict] with sha/subject/body/author
+                changelog_lines = fx.changelog() # list[dict] with line/text/heading
+                review_comments = fx.review_comments()  # list[dict]
+                diff_hunks = fx.diff_hunks()     # list[dict] with id/path/patch
+
+                # Build a readable changelog preview string from structured lines
+                changelog_text = "\n".join(
+                    cl.get("text", "") for cl in changelog_lines
+                ) if changelog_lines else ""
 
                 artifacts_summary = {
                     "commits_count": len(commits),
                     "commits": [{
                         "sha": c.get("sha", "")[:8],
-                        "full_sha": c.get("sha", ""),
-                        "message": c.get("message", "").split("\n")[0],
-                        "body": c.get("message", ""),
+                        "full_sha": c.get("full_sha", c.get("sha", "")),
+                        "message": c.get("subject", c.get("message", "")).split("\n")[0],
+                        "body": c.get("body", c.get("message", "")),
                         "author": c.get("author", "unknown"),
                     } for c in commits[:25]],
-                    "changelog_length": len(changelog_text) if isinstance(changelog_text, str) else 0,
-                    "changelog_preview": changelog_text[:2000] if isinstance(changelog_text, str) else "",
+                    "changelog_length": len(changelog_text),
+                    "changelog_preview": changelog_text[:2000],
                     "review_comments": review_comments,
-                    "diff_hunks_count": len(diff_hunks) if isinstance(diff_hunks, list) else len(diff_hunks.keys()) if isinstance(diff_hunks, dict) else 0,
-                    "diff_files": list(diff_hunks.keys()) if isinstance(diff_hunks, dict) else [],
+                    "diff_hunks_count": len(diff_hunks),
+                    "diff_files": [h.get("path", "") for h in diff_hunks] if diff_hunks else [],
                 }
 
                 # 4. Execute triage runs

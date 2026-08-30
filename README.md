@@ -40,6 +40,18 @@ in code, not just described. See it live:
 > project. The only pre-existing components are the Anthropic Python SDK and the
 > Claude models. Everything in `src/` is new.
 
+### Human-in-the-loop approval gate
+
+Ground Rule #04 requires human approval before consequential actions. When you
+run `run_one.py`, the agent presents its verdict (`AUTO_OK`, `NEEDS_HUMAN`, or
+`ESCALATE`) and pauses for the maintainer to accept or override before the
+action is finalized. Pass `--no-approve` for batch/CI mode:
+
+```bash
+python run_one.py evalcases/cases/case03_changelog_misclassified_breaking.json           # interactive approval
+python run_one.py evalcases/cases/case03_changelog_misclassified_breaking.json --no-approve  # skip for CI
+```
+
 ## How it works
 
 ```

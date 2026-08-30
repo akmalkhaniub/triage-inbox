@@ -4,10 +4,17 @@ import TrajectoryPanel from "./TrajectoryPanel";
 import { STORY, QUESTIONS, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
 
-interface LiveResult {
-  success: boolean;
-  item_id: string;
-  title: string;
+interface LiveArtifacts {
+  commits_count: number;
+  commits: Array<{ sha: string; full_sha: string; message: string; body: string; author: string }>;
+  changelog_length: number;
+  changelog_preview: string;
+  review_comments: Array<any>;
+  diff_hunks_count: number;
+  diff_files: Array<string>;
+}
+
+interface ArmOutput {
   result: {
     item_id: string;
     item_type: string;
@@ -34,6 +41,41 @@ interface LiveResult {
   }>;
 }
 
+interface LiveTriageData {
+  success: boolean;
+  item_id: string;
+  title: string;
+  item_type: string;
+  repo: string;
+  artifacts: LiveArtifacts;
+  agent: ArmOutput;
+  baseline: ArmOutput | null;
+}
+
+const DEFAULT_MODELS: Record<string, Array<{ id: string; name: string }>> = {
+  openai: [
+    { id: "gpt-4o-mini", name: "GPT-4o Mini (Default, Fast & Economical)" },
+    { id: "gpt-4o", name: "GPT-4o (Omni Flagship)" },
+    { id: "o3-mini", name: "o3-mini (High Reasoning)" },
+  ],
+  anthropic: [
+    { id: "claude-3-7-sonnet-20250219", name: "Claude 3.7 Sonnet (Hybrid Reasoning)" },
+    { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet (Coding Specialist)" },
+    { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku (Ultra-fast)" },
+    { id: "claude-opus-5", name: "Claude Opus 5 (Evaluator Model)" },
+  ],
+  groq: [
+    { id: "llama-3.3-70b-versatile", name: "Llama 3.3 70B Versatile (Free / Blazing Fast)" },
+    { id: "llama-3.1-8b-instant", name: "Llama 3.1 8B Instant (Ultra-low Latency)" },
+    { id: "deepseek-r1-distill-llama-70b", name: "DeepSeek R1 Distill Llama 70B" },
+  ],
+  openrouter: [
+    { id: "anthropic/claude-3.7-sonnet", name: "Claude 3.7 Sonnet (via OpenRouter)" },
+    { id: "openai/gpt-4o", name: "GPT-4o (via OpenRouter)" },
+    { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash (via OpenRouter)" },
+  ],
+};
+
 export default function App() {
   const [results, setResults] = useState<Results | null>(null);
   const [manifest, setManifest] = useState<Manifest | null>(null);
@@ -47,9 +89,11 @@ export default function App() {
   // Model & Provider Configuration Settings
   const [provider, setProvider] = useState<string>(() => localStorage.getItem("triage_provider") || "openai");
   const [model, setModel] = useState<string>(() => localStorage.getItem("triage_model") || "gpt-4o-mini");
+  const [modelsRegistry, setModelsRegistry] = useState<Record<string, Array<{ id: string; name: string }>>>(DEFAULT_MODELS);
+  const [runBothArms, setRunBothArms] = useState<boolean>(true);
+  const [showAdvancedAuth, setShowAdvancedAuth] = useState<boolean>(false);
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem("triage_api_key") || "");
   const [githubToken, setGithubToken] = useState<string>(() => localStorage.getItem("triage_gh_token") || "");
-  const [arm, setArm] = useState<"agent" | "baseline">("agent");
 
   // Live GitHub Runner State
   const [runnerType, setRunnerType] = useState<"changelog" | "pr">("changelog");
@@ -59,8 +103,10 @@ export default function App() {
   const [changelogFile, setChangelogFile] = useState<string>("CHANGELOG.md");
   const [prNumber, setPrNumber] = useState<string>("11500");
   const [isRunningLive, setIsRunningLive] = useState<boolean>(false);
-  const [liveResult, setLiveResult] = useState<LiveResult | null>(null);
+  const [liveData, setLiveData] = useState<LiveTriageData | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
+  const [activeArtifactTab, setActiveArtifactTab] = useState<"commits" | "changelog" | "diffs" | "comments">("commits");
+  const [expandedTrajStep, setExpandedTrajStep] = useState<number | null>(null);
 
   // Default to LIGHT mode
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -78,6 +124,18 @@ export default function App() {
     localStorage.setItem("triage_api_key", apiKey);
     localStorage.setItem("triage_gh_token", githubToken);
   }, [provider, model, apiKey, githubToken]);
+
+  // Fetch available models from local backend server
+  useEffect(() => {
+    fetch("/api/models")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && typeof data === "object") {
+          setModelsRegistry(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -130,22 +188,22 @@ export default function App() {
   const handleRunLiveTriage = async () => {
     setIsRunningLive(true);
     setLiveError(null);
-    setLiveResult(null);
+    setLiveData(null);
 
     const payload: Record<string, any> = {
       type: runnerType,
-      repo: repoInput,
+      repo: repoInput.trim(),
       provider,
-      model: model || undefined,
-      api_key: apiKey || undefined,
-      github_token: githubToken || undefined,
-      arm,
+      model: model.trim() || undefined,
+      api_key: apiKey.trim() || undefined,
+      github_token: githubToken.trim() || undefined,
+      run_both: runBothArms,
     };
 
     if (runnerType === "changelog") {
-      payload.base_tag = baseTag;
-      payload.head_tag = headTag;
-      payload.changelog_file = changelogFile || "CHANGELOG.md";
+      payload.base_tag = baseTag.trim();
+      payload.head_tag = headTag.trim();
+      payload.changelog_file = changelogFile.trim() || "CHANGELOG.md";
     } else {
       payload.pr_number = parseInt(prNumber, 10);
     }
@@ -158,9 +216,9 @@ export default function App() {
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || `Server error ${res.status}`);
+        throw new Error(data.error || `Server returned error ${res.status}`);
       }
-      setLiveResult(data);
+      setLiveData(data);
     } catch (e: any) {
       setLiveError(e.message || String(e));
     } finally {
@@ -178,6 +236,10 @@ export default function App() {
       setPrNumber(p1);
     }
   };
+
+  const availableModelsForProvider = useMemo(() => {
+    return modelsRegistry[provider] || DEFAULT_MODELS[provider] || [];
+  }, [modelsRegistry, provider]);
 
   if (err) return <div className="wrap errbox" style={{ padding: "40px 20px" }}>Failed to load data: {err}<br />Run <code>python web/build_data.py</code> then reload.</div>;
   if (!results || !results.aggregate.baseline || !results.aggregate.agent || !manifest || !cases)
@@ -551,24 +613,35 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: LIVE GITHUB SCANNER WITH CONFIGURABLE MODEL SETTINGS & RUNNER */}
+        {/* TAB 2: PREMIUM LIVE GITHUB SCANNER & TRIAGE EXPLORER */}
         {/* ========================================================================= */}
         {currentTab === "github" && (
           <section id="github">
             <div className="page-head">
               <div className="page-title-area">
-                <h1>Live GitHub Repository Scanner</h1>
+                <h1>Live GitHub Repository Scanner &amp; Triage Suite</h1>
                 <p>
-                  Audit any real public GitHub repository in real time. Configure your provider and API keys below.
+                  Perform live, zero-hallucination audits on any public GitHub repository in real time.
+                  Inspects raw git commits and diffs, runs agents, and verifies proof.
                 </p>
               </div>
             </div>
 
-            {/* CONFIGURABLE SETTINGS BAR */}
+            {/* MODEL & ENVIRONMENT CONFIGURATION */}
             <div className="settings-bar">
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>⚙️ Model &amp; Provider Settings</span>
-                <span style={{ fontSize: 11.5, color: "var(--text-faint)" }}>Saved locally in browser session</span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--text)" }}>⚙️ Model &amp; Provider Settings</span>
+                  <span style={{ fontSize: 11, background: "var(--good-bg)", color: "var(--good)", border: "1px solid var(--good-border)", padding: "2px 7px", borderRadius: 4, fontWeight: 600 }}>
+                    ✓ Using local .env credentials
+                  </span>
+                </div>
+                <button
+                  style={{ background: "none", border: "none", color: "var(--accent)", fontSize: 12, cursor: "pointer", fontWeight: 600 }}
+                  onClick={() => setShowAdvancedAuth((prev) => !prev)}
+                >
+                  {showAdvancedAuth ? "▲ Hide Custom Key Overrides" : "▼ Override API Keys (Optional)"}
+                </button>
               </div>
 
               <div className="sb-row">
@@ -580,10 +653,8 @@ export default function App() {
                     onChange={(e) => {
                       const p = e.target.value;
                       setProvider(p);
-                      if (p === "openai") setModel("gpt-4o-mini");
-                      else if (p === "anthropic") setModel("claude-opus-5");
-                      else if (p === "groq") setModel("openai/gpt-oss-120b");
-                      else if (p === "openrouter") setModel("anthropic/claude-sonnet-4.5");
+                      const list = modelsRegistry[p] || DEFAULT_MODELS[p] || [];
+                      if (list.length > 0) setModel(list[0].id);
                     }}
                   >
                     <option value="openai">OpenAI</option>
@@ -593,56 +664,65 @@ export default function App() {
                   </select>
                 </div>
 
-                <div className="sb-group">
-                  <label>Model</label>
-                  <input
-                    className="sb-input"
-                    value={model}
-                    onChange={(e) => setModel(e.target.value)}
-                    placeholder="e.g. gpt-4o-mini, claude-3-7-sonnet"
-                  />
-                </div>
-
-                <div className="sb-group" style={{ flex: 1.5 }}>
-                  <label>Provider API Key</label>
-                  <input
-                    className="sb-input"
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="sk-... (Leave empty to use .env key)"
-                  />
-                </div>
-
-                <div className="sb-group">
-                  <label>GitHub Token (Optional)</label>
-                  <input
-                    className="sb-input"
-                    type="password"
-                    value={githubToken}
-                    onChange={(e) => setGithubToken(e.target.value)}
-                    placeholder="ghp_... (For high rate-limits)"
-                  />
-                </div>
-
-                <div className="sb-group">
-                  <label>Evaluation Arm</label>
+                <div className="sb-group" style={{ flex: 1.6 }}>
+                  <label>Select Model (Auto-fetched)</label>
                   <select
                     className="sb-select"
-                    value={arm}
-                    onChange={(e) => setArm(e.target.value as "agent" | "baseline")}
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
                   >
-                    <option value="agent">Agent (Router + Specialist + Verifier)</option>
-                    <option value="baseline">Baseline (Flat prompt)</option>
+                    {availableModelsForProvider.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="sb-group">
+                  <label>Evaluation Mode</label>
+                  <select
+                    className="sb-select"
+                    value={runBothArms ? "both" : "agent"}
+                    onChange={(e) => setRunBothArms(e.target.value === "both")}
+                  >
+                    <option value="both">Side-by-Side (Agent vs Flat Baseline)</option>
+                    <option value="agent">Agent Only (Fastest)</option>
                   </select>
                 </div>
               </div>
+
+              {/* ADVANCED OVERRIDES (COLLAPSIBLE) */}
+              {showAdvancedAuth && (
+                <div className="sb-row" style={{ paddingTop: 8, borderTop: "1px dashed var(--border)" }}>
+                  <div className="sb-group" style={{ flex: 1.5 }}>
+                    <label>Custom API Key (Optional override)</label>
+                    <input
+                      className="sb-input"
+                      type="password"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                      placeholder="Leave empty to use .env key"
+                    />
+                  </div>
+                  <div className="sb-group" style={{ flex: 1.5 }}>
+                    <label>Custom GitHub Token (Optional for 5000 req/hr)</label>
+                    <input
+                      className="sb-input"
+                      type="password"
+                      value={githubToken}
+                      onChange={(e) => setGithubToken(e.target.value)}
+                      placeholder="Leave empty to use .env GITHUB_TOKEN"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* LIVE RUNNER FORM */}
             <div className="runner-card">
               <div className="rc-header">
-                <h3 className="rc-title">Select or Enter a Public GitHub Repository</h3>
+                <h3 className="rc-title">1. Target Public GitHub Repository</h3>
                 <div className="rc-tabs">
                   <button
                     className={`rc-tab ${runnerType === "changelog" ? "active" : ""}`}
@@ -661,7 +741,7 @@ export default function App() {
 
               {/* QUICK PRESETS */}
               <div className="presets-row">
-                <span style={{ fontSize: 12, color: "var(--text-faint)", fontWeight: 600 }}>Quick Presets:</span>
+                <span style={{ fontSize: 12, color: "var(--text-faint)", fontWeight: 600 }}>1-Click Presets:</span>
                 <button className="preset-btn" onClick={() => applyPreset("changelog", "pallets/flask", "3.0.0", "3.1.0")}>
                   🧪 Flask 3.0.0 → 3.1.0
                 </button>
@@ -732,17 +812,17 @@ export default function App() {
                 )}
               </div>
 
-              <div style={{ marginTop: 18, display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ marginTop: 20, display: "flex", gap: 14, alignItems: "center" }}>
                 <button
                   className="run-btn"
                   onClick={handleRunLiveTriage}
                   disabled={isRunningLive || !repoInput.trim()}
                 >
-                  {isRunningLive ? "⏳ Querying GitHub & Running Agents…" : "🚀 Run Live Triage Audit"}
+                  {isRunningLive ? "⏳ Querying GitHub REST API & Running Triage Agents…" : "🚀 Run Live Triage Audit"}
                 </button>
                 {isRunningLive && (
                   <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
-                    Fetching commits, diffs, and verifying evidence…
+                    Downloading Git commits, diffs, and executing verification agents…
                   </span>
                 )}
               </div>
@@ -756,65 +836,284 @@ export default function App() {
               </div>
             )}
 
-            {/* LIVE RESULT DISPLAY */}
-            {liveResult && liveResult.result && (
-              <div className="live-result-box">
-                <div className="lrb-head">
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: 18 }}>{liveResult.title}</h3>
-                    <div style={{ fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--mono)", marginTop: 2 }}>
-                      Item ID: {liveResult.item_id} · Arm: {arm}
+            {/* ========================================================================= */}
+            {/* RICH RESULTS & ARTIFACT EXPLORER */}
+            {/* ========================================================================= */}
+            {liveData && (
+              <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 20 }}>
+                {/* 1. FETCHED ARTIFACTS CARD */}
+                <div className="gh-box" style={{ margin: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: 17 }}>📦 Fetched Git Repository Artifacts</h3>
+                      <span style={{ fontSize: 12, color: "var(--text-faint)" }}>
+                        Source: GitHub REST API · {liveData.repo}
+                      </span>
+                    </div>
+
+                    {/* ARTIFACT TABS */}
+                    <div className="rc-tabs">
+                      <button
+                        className={`rc-tab ${activeArtifactTab === "commits" ? "active" : ""}`}
+                        onClick={() => setActiveArtifactTab("commits")}
+                      >
+                        Git Commits ({liveData.artifacts.commits_count})
+                      </button>
+                      {liveData.item_type === "changelog_audit" ? (
+                        <button
+                          className={`rc-tab ${activeArtifactTab === "changelog" ? "active" : ""}`}
+                          onClick={() => setActiveArtifactTab("changelog")}
+                        >
+                          CHANGELOG Content
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            className={`rc-tab ${activeArtifactTab === "comments" ? "active" : ""}`}
+                            onClick={() => setActiveArtifactTab("comments")}
+                          >
+                            Review Comments ({liveData.artifacts.review_comments?.length || 0})
+                          </button>
+                          <button
+                            className={`rc-tab ${activeArtifactTab === "diffs" ? "active" : ""}`}
+                            onClick={() => setActiveArtifactTab("diffs")}
+                          >
+                            Diff Files ({liveData.artifacts.diff_files?.length || 0})
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <span className={`action-badge ${liveResult.result.recommended_action || "needs_human"}`}>
-                    {liveResult.result.recommended_action || "needs_human"}
-                  </span>
-                </div>
 
-                <p style={{ fontSize: 14, color: "var(--text)", margin: "0 0 16px" }}>
-                  <strong>Verdict Summary:</strong> {liveResult.result.summary}
-                </p>
-
-                <h4 style={{ margin: "16px 0 8px", fontSize: 14 }}>
-                  Discovered Findings ({liveResult.result.findings?.length || 0}):
-                </h4>
-
-                {(!liveResult.result.findings || liveResult.result.findings.length === 0) ? (
-                  <div className="finding-card">
-                    <span style={{ color: "var(--good)", fontWeight: 600 }}>✓ Clean queue item</span> — No discrepancies detected.
-                  </div>
-                ) : (
-                  liveResult.result.findings.map((f, idx) => (
-                    <div className="finding-card" key={idx}>
-                      <div className="fc-head">
-                        <span className={`vlabel ${f.verdict}`}>{f.verdict}</span>
-                        <strong style={{ fontSize: 13 }}>{f.subject}</strong>
-                        <span style={{ marginLeft: "auto", fontSize: 11 }}>
-                          {f.verified ? (
-                            <span style={{ color: "var(--good)", fontWeight: 700 }}>[VERIFIED ✓]</span>
-                          ) : (
-                            <span style={{ color: "var(--bad)", fontWeight: 700 }}>[UNVERIFIED ✗]</span>
-                          )}
-                        </span>
-                      </div>
-                      {f.rationale && (
-                        <p style={{ margin: "4px 0", fontSize: 12.5, color: "var(--text-dim)" }}>
-                          {f.rationale}
-                        </p>
-                      )}
-                      {f.evidence && f.evidence.map((ev, i) => (
-                        <div className="fc-quote" key={i}>
-                          <strong>Ref: {ev.kind}:{ev.ref}</strong> — "{ev.quote}"
+                  {/* COMMITS LIST */}
+                  {activeArtifactTab === "commits" && (
+                    <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8, background: "var(--bg)" }}>
+                      {liveData.artifacts.commits.map((c, i) => (
+                        <div key={i} style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10, fontSize: 12.5 }}>
+                          <a
+                            href={`https://github.com/${liveData.repo}/commit/${c.full_sha}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ fontFamily: "var(--mono)", fontWeight: 700, fontSize: 11.5 }}
+                          >
+                            {c.sha}
+                          </a>
+                          <span style={{ fontWeight: 600, color: "var(--text)", flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {c.message}
+                          </span>
+                          <span style={{ fontSize: 11, color: "var(--text-faint)" }}>@{c.author}</span>
                         </div>
                       ))}
-                      {f.verifier_note && (
-                        <div style={{ fontSize: 11.5, color: "var(--text-faint)", marginTop: 4 }}>
-                          <em>Verifier Note:</em> {f.verifier_note}
+                    </div>
+                  )}
+
+                  {/* CHANGELOG CONTENT */}
+                  {activeArtifactTab === "changelog" && (
+                    <pre style={{ maxHeight: 240, margin: 0, whiteSpace: "pre-wrap" }}>
+                      {liveData.artifacts.changelog_preview || "No changelog content found."}
+                    </pre>
+                  )}
+
+                  {/* REVIEW COMMENTS */}
+                  {activeArtifactTab === "comments" && (
+                    <div style={{ maxHeight: 240, overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8, background: "var(--bg)" }}>
+                      {liveData.artifacts.review_comments.map((rc, i) => (
+                        <div key={i} style={{ padding: "10px 12px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3, fontWeight: 700, color: "var(--accent)" }}>
+                            <span>Comment #{rc.id || i + 1} on <code>{rc.path || rc.file}</code></span>
+                            <span style={{ color: "var(--text-faint)" }}>Line {rc.line || "?"}</span>
+                          </div>
+                          <p style={{ margin: 0, color: "var(--text)" }}>{rc.body || rc.comment}</p>
                         </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* DIFF FILES */}
+                  {activeArtifactTab === "diffs" && (
+                    <div style={{ padding: 12, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12.5 }}>
+                      <strong>Modified Files in Pull Request:</strong>
+                      <ul style={{ margin: "6px 0 0", paddingLeft: 20 }}>
+                        {liveData.artifacts.diff_files.map((df, i) => (
+                          <li key={i} style={{ fontFamily: "var(--mono)", color: "var(--accent)" }}>{df}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. SIDE-BY-SIDE VERDICT & FINDINGS COMPARISON */}
+                <div style={{ display: "grid", gridTemplateColumns: liveData.baseline ? "1fr 1fr" : "1fr", gap: 16 }}>
+                  {/* AGENT ARM */}
+                  <div className="live-result-box" style={{ margin: 0, border: "2px solid var(--accent)" }}>
+                    <div className="lrb-head">
+                      <div>
+                        <span className="tag review" style={{ marginBottom: 4, display: "inline-block" }}>
+                          🧠 Multi-Agent Pipeline
+                        </span>
+                        <h3 style={{ margin: 0, fontSize: 16 }}>Evidence-First Triage Result</h3>
+                      </div>
+                      <span className={`action-badge ${liveData.agent.result.recommended_action || "needs_human"}`}>
+                        {liveData.agent.result.recommended_action || "needs_human"}
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: 13.5, margin: "0 0 14px", color: "var(--text)" }}>
+                      <strong>Summary:</strong> {liveData.agent.result.summary}
+                    </p>
+
+                    <h4 style={{ margin: "14px 0 8px", fontSize: 13, textTransform: "uppercase", color: "var(--text-faint)" }}>
+                      Verified Findings ({liveData.agent.result.findings?.length || 0}):
+                    </h4>
+
+                    {(!liveData.agent.result.findings || liveData.agent.result.findings.length === 0) ? (
+                      <div className="finding-card">
+                        <span style={{ color: "var(--good)", fontWeight: 600 }}>✓ Clean Queue Item</span> — No discrepancies detected. Safe to proceed.
+                      </div>
+                    ) : (
+                      liveData.agent.result.findings.map((f, idx) => (
+                        <div className="finding-card" key={idx}>
+                          <div className="fc-head">
+                            <span className={`vlabel ${f.verdict}`}>{f.verdict}</span>
+                            <strong style={{ fontSize: 13 }}>{f.subject}</strong>
+                            <span style={{ marginLeft: "auto", fontSize: 11 }}>
+                              {f.verified ? (
+                                <span style={{ color: "var(--good)", fontWeight: 700 }}>[VERIFIED ✓]</span>
+                              ) : (
+                                <span style={{ color: "var(--bad)", fontWeight: 700 }}>[UNVERIFIED ✗]</span>
+                              )}
+                            </span>
+                          </div>
+                          {f.rationale && (
+                            <p style={{ margin: "4px 0", fontSize: 12, color: "var(--text-dim)" }}>
+                              {f.rationale}
+                            </p>
+                          )}
+                          {f.evidence && f.evidence.map((ev, i) => (
+                            <div className="fc-quote" key={i}>
+                              <strong>Ref: {ev.kind}:{ev.ref}</strong> — "{ev.quote}"
+                            </div>
+                          ))}
+                          {f.verifier_note && (
+                            <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 4 }}>
+                              <em>Verifier Note:</em> {f.verifier_note}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* BASELINE ARM (IF RUN) */}
+                  {liveData.baseline && (
+                    <div className="live-result-box" style={{ margin: 0, background: "var(--bg-elev2)" }}>
+                      <div className="lrb-head">
+                        <div>
+                          <span className="tag" style={{ marginBottom: 4, display: "inline-block", background: "var(--border)", color: "var(--text-dim)" }}>
+                            📄 Naive Flat Baseline
+                          </span>
+                          <h3 style={{ margin: 0, fontSize: 16 }}>Single-Prompt Result</h3>
+                        </div>
+                        <span className={`action-badge ${liveData.baseline.result.recommended_action || "needs_human"}`}>
+                          {liveData.baseline.result.recommended_action || "needs_human"}
+                        </span>
+                      </div>
+
+                      <p style={{ fontSize: 13.5, margin: "0 0 14px", color: "var(--text)" }}>
+                        <strong>Summary:</strong> {liveData.baseline.result.summary}
+                      </p>
+
+                      <h4 style={{ margin: "14px 0 8px", fontSize: 13, textTransform: "uppercase", color: "var(--text-faint)" }}>
+                        Ungrounded Claims ({liveData.baseline.result.findings?.length || 0}):
+                      </h4>
+
+                      {(!liveData.baseline.result.findings || liveData.baseline.result.findings.length === 0) ? (
+                        <div className="finding-card">
+                          <span style={{ color: "var(--text-faint)" }}>No claims generated.</span>
+                        </div>
+                      ) : (
+                        liveData.baseline.result.findings.map((f, idx) => (
+                          <div className="finding-card" key={idx}>
+                            <div className="fc-head">
+                              <span className={`vlabel ${f.verdict}`}>{f.verdict}</span>
+                              <strong style={{ fontSize: 13 }}>{f.subject}</strong>
+                              <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--warn)", fontWeight: 600 }}>
+                                [NO GROUNDING PROOF]
+                              </span>
+                            </div>
+                            {f.rationale && (
+                              <p style={{ margin: "4px 0", fontSize: 12, color: "var(--text-dim)" }}>
+                                {f.rationale}
+                              </p>
+                            )}
+                          </div>
+                        ))
                       )}
                     </div>
-                  ))
-                )}
+                  )}
+                </div>
+
+                {/* 3. STEP-BY-STEP AGENT TRAJECTORY INSPECTOR */}
+                <div className="gh-box" style={{ margin: 0 }}>
+                  <h3 style={{ margin: "0 0 4px", fontSize: 16 }}>
+                    🔍 Live Agent Trajectory &amp; Tool Inspection
+                  </h3>
+                  <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--text-dim)" }}>
+                    Inspect the exact sequence of subagents, on-demand tool calls (<code>list_commits</code>, <code>get_commit</code>, <code>get_diff</code>), and verification steps executed during this live triage audit.
+                  </p>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {liveData.agent.trajectories.map((traj, tIdx) => (
+                      <div className="traj-agent" key={tIdx} style={{ margin: 0 }}>
+                        <div className="ta-head">
+                          <span className="ta-name">{traj.agent}</span>
+                          <span className="ta-role">
+                            {traj.agent === "router" ? "Classification Agent" : traj.agent.includes("verifier") ? "Grounding & Soundness Verifier" : "Specialist Agent"}
+                          </span>
+                          <span className="ta-meta">
+                            {traj.input_tokens + traj.output_tokens} tokens
+                          </span>
+                        </div>
+
+                        {traj.steps.map((step, sIdx) => {
+                          const stepKey = tIdx * 100 + sIdx;
+                          const isExpanded = expandedTrajStep === stepKey;
+
+                          return (
+                            <div className="step" key={sIdx}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }} onClick={() => setExpandedTrajStep(isExpanded ? null : stepKey)}>
+                                <div className="s-kind">Step #{sIdx + 1} · {step.tool_calls ? "🔧 Tool Call Execution" : "💭 Model Thought"}</div>
+                                <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>
+                                  {isExpanded ? "Collapse ▲" : "Expand ▼"}
+                                </span>
+                              </div>
+
+                              {step.thought && (
+                                <div className="s-text" style={{ fontSize: 12.5, margin: "4px 0" }}>
+                                  {step.thought}
+                                </div>
+                              )}
+
+                              {step.tool_calls && step.tool_calls.map((tc: any, tcIdx: number) => (
+                                <div key={tcIdx}>
+                                  <div className="toolcall">
+                                    <strong>{tc.name}</strong>({JSON.stringify(tc.args || {})})
+                                  </div>
+                                </div>
+                              ))}
+
+                              {step.tool_results && step.tool_results.map((tr: any, trIdx: number) => (
+                                <div key={trIdx} className="toolresult" style={{ maxHeight: isExpanded ? 400 : 90 }}>
+                                  {typeof tr.result === "string" ? tr.result : JSON.stringify(tr.result, null, 2)}
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </section>

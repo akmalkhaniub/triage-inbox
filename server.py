@@ -75,6 +75,36 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                 self._send_json(500, {"error": str(e)})
             return
 
+        if parsed.path == "/api/models":
+            models_registry = {
+                "openai": [
+                    {"id": "gpt-4o-mini", "name": "GPT-4o Mini (Default, Fast & Economical)"},
+                    {"id": "gpt-4o", "name": "GPT-4o (Omni Flagship)"},
+                    {"id": "o3-mini", "name": "o3-mini (High Reasoning)"},
+                    {"id": "gpt-4-turbo", "name": "GPT-4 Turbo"},
+                ],
+                "anthropic": [
+                    {"id": "claude-3-7-sonnet-20250219", "name": "Claude 3.7 Sonnet (Hybrid Reasoning)"},
+                    {"id": "claude-3-5-sonnet-20241022", "name": "Claude 3.5 Sonnet (Coding Specialist)"},
+                    {"id": "claude-3-5-haiku-20241022", "name": "Claude 3.5 Haiku (Ultra-fast)"},
+                    {"id": "claude-opus-5", "name": "Claude Opus 5 (Evaluator Model)"},
+                ],
+                "groq": [
+                    {"id": "llama-3.3-70b-versatile", "name": "Llama 3.3 70B Versatile (Free / Blazing Fast)"},
+                    {"id": "llama-3.1-8b-instant", "name": "Llama 3.1 8B Instant (Ultra-low Latency)"},
+                    {"id": "deepseek-r1-distill-llama-70b", "name": "DeepSeek R1 Distill Llama 70B"},
+                    {"id": "mixtral-8x7b-32768", "name": "Mixtral 8x7B 32k Context"},
+                ],
+                "openrouter": [
+                    {"id": "anthropic/claude-3.7-sonnet", "name": "Claude 3.7 Sonnet (via OpenRouter)"},
+                    {"id": "openai/gpt-4o", "name": "GPT-4o (via OpenRouter)"},
+                    {"id": "google/gemini-2.0-flash-001", "name": "Gemini 2.0 Flash (via OpenRouter)"},
+                    {"id": "meta-llama/llama-3.3-70b-instruct", "name": "Llama 3.3 70B (via OpenRouter)"},
+                ],
+            }
+            self._send_json(200, models_registry)
+            return
+
         self._send_json(404, {"error": "Endpoint not found"})
 
     def do_POST(self):
@@ -89,12 +119,13 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
 
         if parsed.path == "/api/triage/live":
             try:
-                # 1. Apply runtime provider/model/key settings
+                # 1. Apply runtime provider/model/key settings (only if explicitly overridden)
                 provider = payload.get("provider") or config.PROVIDER
                 model = payload.get("model") or None
                 api_key = payload.get("api_key") or None
                 gh_token = payload.get("github_token") or None
-                arm = payload.get("arm", "agent")
+                run_both = payload.get("run_both", True)
+                selected_arm = payload.get("arm", "agent")
 
                 if gh_token:
                     os.environ["GITHUB_TOKEN"] = gh_token
@@ -126,28 +157,67 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                     self._send_json(400, {"error": f"Unknown triage type: {triage_type}"})
                     return
 
-                # 3. Execute triage
-                triage_fn = agent_mod.triage if arm == "agent" else baseline_mod.triage
-                result, trajs = triage_fn(fx)
+                # 3. Format fetched artifacts for rich UI inspection
+                commits = fx.artifacts.get("commits", [])
+                changelog_text = fx.artifacts.get("changelog", "")
+                review_comments = fx.artifacts.get("review_comments", [])
+                diff_hunks = fx.artifacts.get("diff_hunks", [])
 
-                # 4. Serialize trajectories
-                traj_data = []
-                for t in trajs:
-                    traj_data.append({
-                        "agent": t.agent,
-                        "item_id": t.item_id,
-                        "system": t.system,
-                        "steps": [s.detail for s in t.steps],
-                        "input_tokens": t.input_tokens,
-                        "output_tokens": t.output_tokens,
-                    })
+                artifacts_summary = {
+                    "commits_count": len(commits),
+                    "commits": [{
+                        "sha": c.get("sha", "")[:8],
+                        "full_sha": c.get("sha", ""),
+                        "message": c.get("message", "").split("\n")[0],
+                        "body": c.get("message", ""),
+                        "author": c.get("author", "unknown"),
+                    } for c in commits[:25]],
+                    "changelog_length": len(changelog_text) if isinstance(changelog_text, str) else 0,
+                    "changelog_preview": changelog_text[:2000] if isinstance(changelog_text, str) else "",
+                    "review_comments": review_comments,
+                    "diff_hunks_count": len(diff_hunks) if isinstance(diff_hunks, list) else len(diff_hunks.keys()) if isinstance(diff_hunks, dict) else 0,
+                    "diff_files": list(diff_hunks.keys()) if isinstance(diff_hunks, dict) else [],
+                }
+
+                # 4. Execute triage runs
+                agent_res, agent_trajs = agent_mod.triage(fx)
+                
+                baseline_res, baseline_trajs = None, []
+                if run_both:
+                    try:
+                        baseline_res, baseline_trajs = baseline_mod.triage(fx)
+                    except Exception as be:
+                        print("Baseline run error:", be)
+
+                # 5. Serialize trajectories
+                def serialize_trajs(trajs_list):
+                    out = []
+                    for t in trajs_list:
+                        out.append({
+                            "agent": t.agent,
+                            "item_id": t.item_id,
+                            "system": t.system,
+                            "steps": [s.detail for s in t.steps],
+                            "input_tokens": t.input_tokens,
+                            "output_tokens": t.output_tokens,
+                        })
+                    return out
 
                 self._send_json(200, {
                     "success": True,
                     "item_id": fx.item_id,
                     "title": fx.title,
-                    "result": result.to_dict(),
-                    "trajectories": traj_data,
+                    "item_type": fx.item_type,
+                    "repo": repo,
+                    "artifacts": artifacts_summary,
+                    "agent": {
+                        "result": agent_res.to_dict(),
+                        "trajectories": serialize_trajs(agent_trajs),
+                    },
+                    "baseline": {
+                        "result": baseline_res.to_dict() if baseline_res else None,
+                        "trajectories": serialize_trajs(baseline_trajs),
+                    } if run_both and baseline_res else None,
                 })
             except Exception as e:
                 import traceback
@@ -156,6 +226,7 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
             return
 
         self._send_json(404, {"error": "Endpoint not found"})
+
 
 
 def run_server(port: int = 8000):

@@ -67,6 +67,24 @@ KEY_ENV = _P["key_env"]
 # effort applies only to the Anthropic backend; ignored elsewhere.
 EFFORT = os.environ.get("TRIAGE_EFFORT", "high")
 
+
+def set_runtime_config(provider: str, model: str | None = None, api_key: str | None = None, effort: str | None = None) -> None:
+    """Dynamically switch provider, model, and key for live UI requests."""
+    global PROVIDER, MODEL, PROVIDER_KIND, BASE_URL, KEY_ENV, EFFORT
+    if provider not in PROVIDERS:
+        raise ValueError(f"Unknown TRIAGE_PROVIDER '{provider}'. Choose: {list(PROVIDERS)}")
+    PROVIDER = provider
+    _p = PROVIDERS[provider]
+    PROVIDER_KIND = _p["kind"]
+    BASE_URL = _p["base_url"]
+    KEY_ENV = _p["key_env"]
+    MODEL = model if model else _p["default_model"]
+    if effort:
+        EFFORT = effort
+    if api_key:
+        os.environ[KEY_ENV] = api_key
+
+
 # Per-1M-token USD prices for cost reporting. Unknown models -> $0 (see eval.py).
 PRICING = {
     "claude-opus-5":   {"input": 5.00, "output": 25.00},

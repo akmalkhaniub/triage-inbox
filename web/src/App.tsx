@@ -1,8 +1,38 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { f2, isHardTitle, loadCases, loadManifest, loadResults, pct } from "./data";
 import TrajectoryPanel from "./TrajectoryPanel";
 import { STORY, QUESTIONS, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
+
+interface LiveResult {
+  success: boolean;
+  item_id: string;
+  title: string;
+  result: {
+    item_id: string;
+    item_type: string;
+    recommended_action: string;
+    summary: string;
+    findings: Array<{
+      claim_id: string;
+      verdict: string;
+      subject: string;
+      evidence: Array<{ kind: string; ref: string; quote: string }>;
+      confidence: number;
+      rationale: string;
+      verified: boolean | null;
+      verifier_note: string;
+    }>;
+  };
+  trajectories: Array<{
+    agent: string;
+    item_id: string;
+    system: string;
+    steps: any[];
+    input_tokens: number;
+    output_tokens: number;
+  }>;
+}
 
 export default function App() {
   const [results, setResults] = useState<Results | null>(null);
@@ -13,7 +43,25 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<"video" | "queue" | "github" | "architecture" | "reproduce">("video");
   const [caseFilter, setCaseFilter] = useState<"all" | "changelog" | "review" | "hard" | "wins">("all");
   const [videoStep, setVideoStep] = useState<number>(1);
-  
+
+  // Model & Provider Configuration Settings
+  const [provider, setProvider] = useState<string>(() => localStorage.getItem("triage_provider") || "openai");
+  const [model, setModel] = useState<string>(() => localStorage.getItem("triage_model") || "gpt-4o-mini");
+  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem("triage_api_key") || "");
+  const [githubToken, setGithubToken] = useState<string>(() => localStorage.getItem("triage_gh_token") || "");
+  const [arm, setArm] = useState<"agent" | "baseline">("agent");
+
+  // Live GitHub Runner State
+  const [runnerType, setRunnerType] = useState<"changelog" | "pr">("changelog");
+  const [repoInput, setRepoInput] = useState<string>("pallets/flask");
+  const [baseTag, setBaseTag] = useState<string>("3.0.0");
+  const [headTag, setHeadTag] = useState<string>("3.1.0");
+  const [changelogFile, setChangelogFile] = useState<string>("CHANGELOG.md");
+  const [prNumber, setPrNumber] = useState<string>("11500");
+  const [isRunningLive, setIsRunningLive] = useState<boolean>(false);
+  const [liveResult, setLiveResult] = useState<LiveResult | null>(null);
+  const [liveError, setLiveError] = useState<string | null>(null);
+
   // Default to LIGHT mode
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     return (localStorage.getItem("triage_theme") as "dark" | "light") || "light";
@@ -23,6 +71,13 @@ export default function App() {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("triage_theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("triage_provider", provider);
+    localStorage.setItem("triage_model", model);
+    localStorage.setItem("triage_api_key", apiKey);
+    localStorage.setItem("triage_gh_token", githubToken);
+  }, [provider, model, apiKey, githubToken]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -71,6 +126,58 @@ export default function App() {
       return true;
     });
   }, [results, cases, caseIds, caseFilter]);
+
+  const handleRunLiveTriage = async () => {
+    setIsRunningLive(true);
+    setLiveError(null);
+    setLiveResult(null);
+
+    const payload: Record<string, any> = {
+      type: runnerType,
+      repo: repoInput,
+      provider,
+      model: model || undefined,
+      api_key: apiKey || undefined,
+      github_token: githubToken || undefined,
+      arm,
+    };
+
+    if (runnerType === "changelog") {
+      payload.base_tag = baseTag;
+      payload.head_tag = headTag;
+      payload.changelog_file = changelogFile || "CHANGELOG.md";
+    } else {
+      payload.pr_number = parseInt(prNumber, 10);
+    }
+
+    try {
+      const res = await fetch("/api/triage/live", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || `Server error ${res.status}`);
+      }
+      setLiveResult(data);
+    } catch (e: any) {
+      setLiveError(e.message || String(e));
+    } finally {
+      setIsRunningLive(false);
+    }
+  };
+
+  const applyPreset = (type: "changelog" | "pr", repo: string, p1: string, p2?: string) => {
+    setRunnerType(type);
+    setRepoInput(repo);
+    if (type === "changelog") {
+      setBaseTag(p1);
+      setHeadTag(p2 || "");
+    } else {
+      setPrNumber(p1);
+    }
+  };
 
   if (err) return <div className="wrap errbox" style={{ padding: "40px 20px" }}>Failed to load data: {err}<br />Run <code>python web/build_data.py</code> then reload.</div>;
   if (!results || !results.aggregate.baseline || !results.aggregate.agent || !manifest || !cases)
@@ -127,77 +234,103 @@ export default function App() {
           <button className="theme-toggle" onClick={toggleTheme} title="Toggle light/dark mode">
             {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
           </button>
-          <span className="badge-model">{results.model}</span>
+          <span className="badge-model">{provider}: {model}</span>
         </div>
       </nav>
 
       <div className="wrap tab-content">
         {/* ========================================================================= */}
-        {/* TAB 0: DEDICATED 5-MINUTE VIDEO PRESENTER SUITE */}
+        {/* TAB 0: DEDICATED VIDEO PRESENTER SUITE */}
         {/* ========================================================================= */}
         {currentTab === "video" && (
           <section id="video" className="video-suite">
             <div className="page-head">
               <div className="page-title-area">
-                <h1>🎬 5-Minute Video Recording Suite</h1>
+                <h1>🎬 Hackathon Video Presentation Suite</h1>
                 <p>
-                  Use this interactive sequential walkthrough to record your hackathon submission video.
-                  Follow the step-by-step speaker script and live interactive demonstrations.
+                  A sequential walkthrough for your 5-minute video submission.
+                  Presents the core maintainer problem, concrete failure modes, live agent proof, and benchmark evidence.
                 </p>
               </div>
             </div>
 
-            {/* STEP SELECTOR */}
+            {/* STEP SELECTOR (NO TIMESTAMPS) */}
             <div className="video-stepper">
               <button className={`step-btn ${videoStep === 1 ? "active" : ""}`} onClick={() => setVideoStep(1)}>
-                <div className="time">0:00 – 1:00</div>
-                <div className="title">1. The Problem &amp; Pain</div>
+                <div className="time">Part 1</div>
+                <div className="title">Problem &amp; Real-World Use Cases</div>
               </button>
               <button className={`step-btn ${videoStep === 2 ? "active" : ""}`} onClick={() => setVideoStep(2)}>
-                <div className="time">1:00 – 1:45</div>
-                <div className="title">2. The Baseline Failure</div>
+                <div className="time">Part 2</div>
+                <div className="title">The Naive Baseline Failure</div>
               </button>
               <button className={`step-btn ${videoStep === 3 ? "active" : ""}`} onClick={() => setVideoStep(3)}>
-                <div className="time">1:45 – 3:00</div>
-                <div className="title">3. Live Agent Solution</div>
+                <div className="time">Part 3</div>
+                <div className="title">Live Multi-Agent Solution</div>
               </button>
               <button className={`step-btn ${videoStep === 4 ? "active" : ""}`} onClick={() => setVideoStep(4)}>
-                <div className="time">3:00 – 4:00</div>
-                <div className="title">4. Evidence &amp; Changelog</div>
+                <div className="time">Part 4</div>
+                <div className="title">Benchmark Evidence &amp; Changelog</div>
               </button>
               <button className={`step-btn ${videoStep === 5 ? "active" : ""}`} onClick={() => setVideoStep(5)}>
-                <div className="time">4:00 – 5:00</div>
-                <div className="title">5. Hot Take &amp; Lessons</div>
+                <div className="time">Part 5</div>
+                <div className="title">Key Takeaways &amp; Hot Take</div>
               </button>
             </div>
 
-            {/* STEP 1: THE PROBLEM */}
+            {/* STEP 1 */}
             {videoStep === 1 && (
               <div>
                 <div className="script-box">
-                  <div className="script-speaker">🎙️ Speaker Script (Read during recording):</div>
+                  <div className="script-speaker">🎙️ Speaker Script:</div>
                   <div className="script-quote">
-                    "Hi everyone! This is <strong>Triage Inbox</strong> — an evidence-first agentic workflow designed for repository maintainers.<br /><br />
-                    Every maintainer faces Monday morning triage overload: checking if release CHANGELOGs match what actually shipped, and verifying if PR authors genuinely addressed reviewer comments. Skimming leads to silent breaking changes and cosmetic PR merges."
+                    "Hi everyone! This is <strong>Triage Inbox</strong> — an evidence-first agentic workflow built for repository maintainers.<br /><br />
+                    Maintainers face a relentless triage overload on Monday mornings. They must make dozens of small, evidence-heavy judgments across release notes and PR reviews. When tired maintainers skim, critical bugs and breaking changes quietly slip into production."
                   </div>
                 </div>
 
-                <div className="value-props" style={{ marginTop: 20 }}>
-                  <div className="vprop-card">
-                    <div className="vprop-icon">📦</div>
-                    <h3>1. The CHANGELOG Audit Dilemma (Lane G)</h3>
-                    <p>Did someone hide a breaking API change under a minor heading, or list a feature that never actually merged?</p>
+                <div className="sec-head" style={{ marginTop: 24 }}>
+                  <span className="sec-num">01</span>
+                  <h2>4 Critical Maintainer Failure Modes We Solve</h2>
+                </div>
+
+                <div className="value-props">
+                  <div className="vprop-card" style={{ borderLeft: "4px solid var(--bad)" }}>
+                    <div className="vprop-icon">⚠️</div>
+                    <h3>1. The Sneaky Breaking Change</h3>
+                    <p>
+                      <strong>Scenario:</strong> A PR renames an API method or alters a return type, but the author claims "Minor fix". The maintainer adds it to notes under <em>Fixed</em>. Downstream production systems crash on update.
+                    </p>
                   </div>
-                  <div className="vprop-card">
+
+                  <div className="vprop-card" style={{ borderLeft: "4px solid var(--warn)" }}>
                     <div className="vprop-icon">💬</div>
-                    <h3>2. The PR Review Resolution Dilemma (Lane E)</h3>
-                    <p>The author wrote "Fixed your feedback 👍", but did their code diff actually resolve the review comments?</p>
+                    <h3>2. The Cosmetic "Fixed" Reply</h3>
+                    <p>
+                      <strong>Scenario:</strong> A reviewer requests missing error handling. The author replies "Addressed 👍", but their diff only reformatted whitespace. Reviewers skim, assume it is done, and merge.
+                    </p>
+                  </div>
+
+                  <div className="vprop-card" style={{ borderLeft: "4px solid var(--accent)" }}>
+                    <div className="vprop-icon">👻</div>
+                    <h3>3. The Phantom Release Note</h3>
+                    <p>
+                      <strong>Scenario:</strong> Release notes promise a major new performance feature that was reverted before tag creation. Developers upgrade expecting the feature, only to find missing symbols.
+                    </p>
+                  </div>
+
+                  <div className="vprop-card" style={{ borderLeft: "4px solid var(--good)" }}>
+                    <div className="vprop-icon">📦</div>
+                    <h3>4. Internal Commit Noise</h3>
+                    <p>
+                      <strong>Scenario:</strong> 5 internal chore/CI commits fill the release range. A naive reviewer flags them as "missing from changelog", generating false alarms that waste maintainer hours.
+                    </p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* STEP 2: THE BASELINE FAILURE */}
+            {/* STEP 2 */}
             {videoStep === 2 && (
               <div>
                 <div className="script-box">
@@ -216,7 +349,7 @@ export default function App() {
               </div>
             )}
 
-            {/* STEP 3: LIVE AGENT SOLUTION */}
+            {/* STEP 3 */}
             {videoStep === 3 && (
               <div>
                 <div className="script-box">
@@ -257,7 +390,7 @@ export default function App() {
               </div>
             )}
 
-            {/* STEP 4: MEASURED EVIDENCE & CHANGELOG */}
+            {/* STEP 4 */}
             {videoStep === 4 && (
               <div>
                 <div className="script-box">
@@ -288,7 +421,7 @@ export default function App() {
               </div>
             )}
 
-            {/* STEP 5: HOT TAKE & TAKEAWAYS */}
+            {/* STEP 5 */}
             {videoStep === 5 && (
               <div>
                 <div className="script-box">
@@ -312,7 +445,7 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 1: MAINTAINER QUEUE (IMMEDIATELY VISIBLE WORKSPACE) */}
+        {/* TAB 1: MAINTAINER QUEUE */}
         {/* ========================================================================= */}
         {currentTab === "queue" && (
           <section id="queue">
@@ -325,7 +458,6 @@ export default function App() {
                 </p>
               </div>
 
-              {/* COMPACT INLINE METRICS STRIP */}
               <div className="metric-strip">
                 <div className="metric-pill">
                   <span className="mp-lbl">Problem F1</span>
@@ -360,7 +492,7 @@ export default function App() {
               </span>
             </div>
 
-            {/* QUEUE CARDS LIST */}
+            {/* QUEUE CARDS */}
             <div className="queue-grid">
               {filteredCaseIds.map((id) => {
                 const row = results.per_case[id];
@@ -419,52 +551,272 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: LIVE GITHUB REPO SCANNER */}
+        {/* TAB 2: LIVE GITHUB SCANNER WITH CONFIGURABLE MODEL SETTINGS & RUNNER */}
         {/* ========================================================================= */}
         {currentTab === "github" && (
           <section id="github">
             <div className="page-head">
               <div className="page-title-area">
-                <h1>Live GitHub Open-Source Triage</h1>
+                <h1>Live GitHub Repository Scanner</h1>
                 <p>
-                  Audit real-world open-source repositories and pull requests directly from GitHub's REST API.
+                  Audit any real public GitHub repository in real time. Configure your provider and API keys below.
                 </p>
               </div>
             </div>
 
-            <div className="gh-box">
-              <h3>1. Audit a Real Release CHANGELOG vs. Commits (e.g., Flask)</h3>
-              <p>
-                Connects to GitHub's REST API, pulls every real commit between two tags, downloads the actual <code>CHANGELOG.md</code>,
-                and verifies that every claimed fix or feature exists in Git history.
-              </p>
-              <pre>
-{`# Audit Flask v3.0.0 -> v3.1.0 release notes against git commits
-python run_github.py changelog pallets/flask --base 3.0.0 --head 3.1.0`}
-              </pre>
+            {/* CONFIGURABLE SETTINGS BAR */}
+            <div className="settings-bar">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>⚙️ Model &amp; Provider Settings</span>
+                <span style={{ fontSize: 11.5, color: "var(--text-faint)" }}>Saved locally in browser session</span>
+              </div>
+
+              <div className="sb-row">
+                <div className="sb-group">
+                  <label>Provider</label>
+                  <select
+                    className="sb-select"
+                    value={provider}
+                    onChange={(e) => {
+                      const p = e.target.value;
+                      setProvider(p);
+                      if (p === "openai") setModel("gpt-4o-mini");
+                      else if (p === "anthropic") setModel("claude-opus-5");
+                      else if (p === "groq") setModel("openai/gpt-oss-120b");
+                      else if (p === "openrouter") setModel("anthropic/claude-sonnet-4.5");
+                    }}
+                  >
+                    <option value="openai">OpenAI</option>
+                    <option value="anthropic">Anthropic (Claude)</option>
+                    <option value="groq">Groq (Fast / Free tier)</option>
+                    <option value="openrouter">OpenRouter</option>
+                  </select>
+                </div>
+
+                <div className="sb-group">
+                  <label>Model</label>
+                  <input
+                    className="sb-input"
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    placeholder="e.g. gpt-4o-mini, claude-3-7-sonnet"
+                  />
+                </div>
+
+                <div className="sb-group" style={{ flex: 1.5 }}>
+                  <label>Provider API Key</label>
+                  <input
+                    className="sb-input"
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="sk-... (Leave empty to use .env key)"
+                  />
+                </div>
+
+                <div className="sb-group">
+                  <label>GitHub Token (Optional)</label>
+                  <input
+                    className="sb-input"
+                    type="password"
+                    value={githubToken}
+                    onChange={(e) => setGithubToken(e.target.value)}
+                    placeholder="ghp_... (For high rate-limits)"
+                  />
+                </div>
+
+                <div className="sb-group">
+                  <label>Evaluation Arm</label>
+                  <select
+                    className="sb-select"
+                    value={arm}
+                    onChange={(e) => setArm(e.target.value as "agent" | "baseline")}
+                  >
+                    <option value="agent">Agent (Router + Specialist + Verifier)</option>
+                    <option value="baseline">Baseline (Flat prompt)</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-            <div className="gh-box">
-              <h3>2. Audit a Real GitHub Pull Request (e.g., FastAPI)</h3>
-              <p>
-                Fetches review threads and modified file diffs for any active PR, checking whether review comments
-                were genuinely addressed or merely replied to with cosmetic changes.
-              </p>
-              <pre>
-{`# Audit FastAPI PR #11500 review comments against modified diff hunks
-python run_github.py pr tiangolo/fastapi 11500`}
-              </pre>
+            {/* LIVE RUNNER FORM */}
+            <div className="runner-card">
+              <div className="rc-header">
+                <h3 className="rc-title">Select or Enter a Public GitHub Repository</h3>
+                <div className="rc-tabs">
+                  <button
+                    className={`rc-tab ${runnerType === "changelog" ? "active" : ""}`}
+                    onClick={() => setRunnerType("changelog")}
+                  >
+                    📦 Release CHANGELOG Audit
+                  </button>
+                  <button
+                    className={`rc-tab ${runnerType === "pr" ? "active" : ""}`}
+                    onClick={() => setRunnerType("pr")}
+                  >
+                    💬 PR Review Resolver
+                  </button>
+                </div>
+              </div>
+
+              {/* QUICK PRESETS */}
+              <div className="presets-row">
+                <span style={{ fontSize: 12, color: "var(--text-faint)", fontWeight: 600 }}>Quick Presets:</span>
+                <button className="preset-btn" onClick={() => applyPreset("changelog", "pallets/flask", "3.0.0", "3.1.0")}>
+                  🧪 Flask 3.0.0 → 3.1.0
+                </button>
+                <button className="preset-btn" onClick={() => applyPreset("changelog", "psf/requests", "v2.31.0", "v2.32.0")}>
+                  🧪 Requests v2.31 → v2.32
+                </button>
+                <button className="preset-btn" onClick={() => applyPreset("pr", "tiangolo/fastapi", "11500")}>
+                  🧪 FastAPI PR #11500
+                </button>
+                <button className="preset-btn" onClick={() => applyPreset("pr", "pydantic/pydantic", "9000")}>
+                  🧪 Pydantic PR #9000
+                </button>
+              </div>
+
+              {/* INPUT FIELDS */}
+              <div className="sb-row" style={{ marginTop: 12 }}>
+                <div className="sb-group" style={{ flex: 1.5 }}>
+                  <label>Repository (owner/repo)</label>
+                  <input
+                    className="sb-input"
+                    value={repoInput}
+                    onChange={(e) => setRepoInput(e.target.value)}
+                    placeholder="e.g. pallets/flask"
+                  />
+                </div>
+
+                {runnerType === "changelog" ? (
+                  <>
+                    <div className="sb-group">
+                      <label>Base Tag</label>
+                      <input
+                        className="sb-input"
+                        value={baseTag}
+                        onChange={(e) => setBaseTag(e.target.value)}
+                        placeholder="e.g. 3.0.0"
+                      />
+                    </div>
+                    <div className="sb-group">
+                      <label>Head Tag</label>
+                      <input
+                        className="sb-input"
+                        value={headTag}
+                        onChange={(e) => setHeadTag(e.target.value)}
+                        placeholder="e.g. 3.1.0"
+                      />
+                    </div>
+                    <div className="sb-group">
+                      <label>CHANGELOG File</label>
+                      <input
+                        className="sb-input"
+                        value={changelogFile}
+                        onChange={(e) => setChangelogFile(e.target.value)}
+                        placeholder="CHANGELOG.md"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="sb-group">
+                    <label>Pull Request Number (#)</label>
+                    <input
+                      className="sb-input"
+                      type="number"
+                      value={prNumber}
+                      onChange={(e) => setPrNumber(e.target.value)}
+                      placeholder="e.g. 11500"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginTop: 18, display: "flex", gap: 12, alignItems: "center" }}>
+                <button
+                  className="run-btn"
+                  onClick={handleRunLiveTriage}
+                  disabled={isRunningLive || !repoInput.trim()}
+                >
+                  {isRunningLive ? "⏳ Querying GitHub & Running Agents…" : "🚀 Run Live Triage Audit"}
+                </button>
+                {isRunningLive && (
+                  <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
+                    Fetching commits, diffs, and verifying evidence…
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="callout hot">
-              <strong>Capture Real Repos into Offline Evaluation Benchmarks:</strong>
-              <p>
-                You can freeze any real GitHub PR or release into a reproducible offline fixture for continuous regression testing:
-              </p>
-              <pre style={{ margin: "10px 0 0" }}>
-{`python run_github.py pr tiangolo/fastapi 11500 --save evalcases/cases/case11_fastapi_real.json`}
-              </pre>
-            </div>
+            {/* ERROR DISPLAY */}
+            {liveError && (
+              <div className="callout" style={{ borderLeftColor: "var(--bad)", marginTop: 16 }}>
+                <strong style={{ color: "var(--bad)" }}>Execution Error</strong>
+                <p>{liveError}</p>
+              </div>
+            )}
+
+            {/* LIVE RESULT DISPLAY */}
+            {liveResult && liveResult.result && (
+              <div className="live-result-box">
+                <div className="lrb-head">
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 18 }}>{liveResult.title}</h3>
+                    <div style={{ fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--mono)", marginTop: 2 }}>
+                      Item ID: {liveResult.item_id} · Arm: {arm}
+                    </div>
+                  </div>
+                  <span className={`action-badge ${liveResult.result.recommended_action || "needs_human"}`}>
+                    {liveResult.result.recommended_action || "needs_human"}
+                  </span>
+                </div>
+
+                <p style={{ fontSize: 14, color: "var(--text)", margin: "0 0 16px" }}>
+                  <strong>Verdict Summary:</strong> {liveResult.result.summary}
+                </p>
+
+                <h4 style={{ margin: "16px 0 8px", fontSize: 14 }}>
+                  Discovered Findings ({liveResult.result.findings?.length || 0}):
+                </h4>
+
+                {(!liveResult.result.findings || liveResult.result.findings.length === 0) ? (
+                  <div className="finding-card">
+                    <span style={{ color: "var(--good)", fontWeight: 600 }}>✓ Clean queue item</span> — No discrepancies detected.
+                  </div>
+                ) : (
+                  liveResult.result.findings.map((f, idx) => (
+                    <div className="finding-card" key={idx}>
+                      <div className="fc-head">
+                        <span className={`vlabel ${f.verdict}`}>{f.verdict}</span>
+                        <strong style={{ fontSize: 13 }}>{f.subject}</strong>
+                        <span style={{ marginLeft: "auto", fontSize: 11 }}>
+                          {f.verified ? (
+                            <span style={{ color: "var(--good)", fontWeight: 700 }}>[VERIFIED ✓]</span>
+                          ) : (
+                            <span style={{ color: "var(--bad)", fontWeight: 700 }}>[UNVERIFIED ✗]</span>
+                          )}
+                        </span>
+                      </div>
+                      {f.rationale && (
+                        <p style={{ margin: "4px 0", fontSize: 12.5, color: "var(--text-dim)" }}>
+                          {f.rationale}
+                        </p>
+                      )}
+                      {f.evidence && f.evidence.map((ev, i) => (
+                        <div className="fc-quote" key={i}>
+                          <strong>Ref: {ev.kind}:{ev.ref}</strong> — "{ev.quote}"
+                        </div>
+                      ))}
+                      {f.verifier_note && (
+                        <div style={{ fontSize: 11.5, color: "var(--text-faint)", marginTop: 4 }}>
+                          <em>Verifier Note:</em> {f.verifier_note}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </section>
         )}
 

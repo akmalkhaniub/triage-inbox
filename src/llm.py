@@ -68,11 +68,11 @@ _ANTHROPIC_CLIENT = None
 
 
 def _anthropic_client():
-    global _ANTHROPIC_CLIENT
-    if _ANTHROPIC_CLIENT is None:
-        import anthropic
-        _ANTHROPIC_CLIENT = anthropic.Anthropic()
-    return _ANTHROPIC_CLIENT
+    import os
+    import anthropic
+    key = os.environ.get("ANTHROPIC_API_KEY")
+    return anthropic.Anthropic(api_key=key) if key else anthropic.Anthropic()
+
 
 
 def _anthropic_call(system, messages, tool_specs, force_tool) -> LLMResponse:

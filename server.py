@@ -50,7 +50,20 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                 self._send_json(400, {"error": "Missing search query 'q'"})
                 return
             try:
-                search_data = _github_request(f"search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=6")
+                # Prioritize exact repo name matches (e.g. pallets/flask for 'flask')
+                if "/" in q:
+                    search_url = f"search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=8"
+                else:
+                    search_url = f"search/repositories?q={urllib.parse.quote(q)}+in:name&sort=stars&order=desc&per_page=8"
+                
+                search_data = _github_request(search_url)
+                raw_items = search_data.get("items", [])
+                
+                # If in:name returned fewer than 3 items, fallback to full text search
+                if len(raw_items) < 3 and "/" not in q:
+                    fallback_data = _github_request(f"search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=8")
+                    raw_items = fallback_data.get("items", [])
+
                 items = [{
                     "full_name": item.get("full_name", ""),
                     "description": item.get("description", "") or "No description provided",
@@ -58,8 +71,52 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                     "language": item.get("language", ""),
                     "owner": item.get("owner", {}).get("login", ""),
                     "name": item.get("name", ""),
-                } for item in search_data.get("items", [])]
-                self._send_json(200, {"query": q, "total": search_data.get("total_count", 0), "items": items})
+                } for item in raw_items]
+
+                # Sort strictly by stars descending so top canonical projects always rank #1
+                items.sort(key=lambda x: x["stars"], reverse=True)
+
+                self._send_json(200, {"query": q, "total": search_data.get("total_count", len(items)), "items": items})
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+            return
+
+        if parsed.path == "/api/github/preview":
+            repo = qs.get("repo", [""])[0].strip()
+            base_tag = qs.get("base_tag", [""])[0].strip()
+            head_tag = qs.get("head_tag", [""])[0].strip()
+            pr_num = qs.get("pr_number", ["0"])[0].strip()
+            if not repo:
+                self._send_json(400, {"error": "Missing 'repo' parameter"})
+                return
+            try:
+                if pr_num and pr_num != "0":
+                    fx = fetch_pr_fixture(repo=repo, pr_number=int(pr_num))
+                else:
+                    fx = fetch_release_fixture(repo=repo, base_tag=base_tag or "HEAD~20", head_tag=head_tag or "HEAD")
+                
+                commits = fx.commits()
+                changelog_lines = fx.changelog()
+                changelog_text = "\n".join(cl.get("text", "") for cl in changelog_lines) if changelog_lines else ""
+                
+                self._send_json(200, {
+                    "repo": repo,
+                    "item_id": fx.item_id,
+                    "title": fx.title,
+                    "item_type": fx.item_type,
+                    "commits_count": len(commits),
+                    "commits": [{
+                        "sha": c.get("sha", "")[:8],
+                        "full_sha": c.get("full_sha", c.get("sha", "")),
+                        "message": c.get("subject", c.get("message", "")).split("\n")[0],
+                        "body": c.get("body", c.get("message", "")),
+                        "author": c.get("author", "unknown"),
+                    } for c in commits],
+                    "changelog_length": len(changelog_text),
+                    "changelog_text": changelog_text,
+                    "review_comments": fx.review_comments(),
+                    "diff_hunks": fx.diff_hunks(),
+                })
             except Exception as e:
                 self._send_json(500, {"error": str(e)})
             return

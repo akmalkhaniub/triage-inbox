@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #f8fafc;
   --bg-grad: radial-gradient(1200px 600px at 50% -10%, #edf2f7 0%, rgba(248,250,252,0) 60%);
   --bg-elev: #ffffff;
@@ -99,18 +99,17 @@ nav.top {
   backdrop-filter: blur(12px);
   box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
-.nav-inner { display: flex; align-items: center; gap: 14px; padding: 10px 24px; max-width: 1100px; margin: 0 auto; flex-wrap: wrap; }
-.logo-box { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
+.nav-inner { display: flex; align-items: center; gap: 20px; padding: 10px 24px; max-width: 1200px; margin: 0 auto; flex-wrap: nowrap; }
+.logo-box { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 17px; letter-spacing: -0.02em; white-space: nowrap; }
 .logo-icon {
   width: 28px; height: 28px; background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: white; border-radius: 7px; display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 800;
+  font-size: 14px; font-weight: 800; flex-shrink: 0;
 }
-.logo-sub { font-size: 11.5px; font-weight: 500; color: var(--text-faint); margin-left: 2px; }
 
 .nav-tabs {
-  display: flex; gap: 3px; margin-left: 8px; background: var(--bg-elev2);
-  padding: 3px; border-radius: 9px; border: 1px solid var(--border);
+  display: flex; gap: 4px; background: var(--bg-elev2);
+  padding: 3px; border-radius: 9px; border: 1px solid var(--border); flex-shrink: 0;
 }
 .nav-tab-btn {
   background: none; border: none; padding: 6px 13px; font-size: 13px; font-weight: 500;

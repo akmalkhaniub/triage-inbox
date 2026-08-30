@@ -519,7 +519,6 @@ export default function App() {
           <div className="logo-box" style={{ cursor: "pointer" }} onClick={() => navigateTab("video")}>
             <div className="logo-icon">T</div>
             <span>Triage Inbox</span>
-            <span className="logo-sub">Evidence-First Maintainer Copilot</span>
           </div>
 
           <div className="nav-tabs">
@@ -560,7 +559,6 @@ export default function App() {
           <button className="theme-toggle" onClick={toggleTheme} title="Toggle light/dark mode">
             {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
           </button>
-          <span className="badge-model" title="Active evaluation model">{results.model || `${provider}: ${model}`}</span>
         </div>
       </nav>
 

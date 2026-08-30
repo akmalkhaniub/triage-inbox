@@ -2,10 +2,10 @@
   "agent": "baseline",
   "item_id": "case09_review_partial",
   "provider": "openai",
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 441,
-  "output_tokens": 201,
+  "output_tokens": 194,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "[\n    {\n        \"verdict\": \"partial\",\n        \"subject\": \"Comment c1\",\n        \"evidence\": [\n            {\n                \"kind\": \"diff\",\n                \"ref\": \"src/report.py\",\n                \"quote\": \"-    d = summarize(rows)\\n+    records = summarize(rows)\"\n            }\n        ],\n        \"confidence\": 0.8,\n        \"rationale\": \"The variable `d` was renamed to `records`, but the requested unit test for the empty-input case was not addressed.\"\n    },\n    {\n        \"verdict\": \"addressed\",\n        \"subject\": \"Comment c2\",\n        \"evidence\": [\n            {\n                \"kind\": \"diff\",\n                \"ref\": \"src/report.py\",\n                \"quote\": \"-import itertools\\n import json\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The unused import `itertools` was successfully removed, addressing the comment.\"\n    }\n]"
+          "text": "```json\n[\n  {\n    \"verdict\": \"partial\",\n    \"subject\": \"c1\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunk\",\n        \"ref\": \"h1\",\n        \"quote\": \"+    records = summarize(rows)\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The variable `d` was renamed to `records`, but there is no evidence in the diff indicating that a unit test was added for the empty-input case.\"\n  },\n  {\n    \"verdict\": \"addressed\",\n    \"subject\": \"c2\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunk\",\n        \"ref\": \"h2\",\n        \"quote\": \"-import itertools\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The unused import was removed as requested.\"\n  }\n]\n```"
         }
       ]
     }

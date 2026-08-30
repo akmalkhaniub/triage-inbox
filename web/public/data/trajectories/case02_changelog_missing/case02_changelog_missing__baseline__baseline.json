@@ -2,10 +2,10 @@
   "agent": "baseline",
   "item_id": "case02_changelog_missing",
   "provider": "openai",
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 423,
-  "output_tokens": 293,
+  "output_tokens": 112,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "[\n    {\n        \"verdict\": \"phantom\",\n        \"subject\": \"add rate-limit headers to all responses\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"b10002\",\n                \"quote\": \"add rate-limit headers to all responses\"\n            }\n        ],\n        \"confidence\": 0.9,\n        \"rationale\": \"This commit is not reflected in the CHANGELOG at all.\"\n    },\n    {\n        \"verdict\": \"misclassified\",\n        \"subject\": \"add pagination to /v2/orders\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"b10001\",\n                \"quote\": \"add pagination to /v2/orders\"\n            }\n        ],\n        \"confidence\": 0.8,\n        \"rationale\": \"This commit should be classified under 'Added' instead of being described differently in the CHANGELOG.\"\n    },\n    {\n        \"verdict\": \"addressed\",\n        \"subject\": \"reject negative quantity in order create\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"b10003\",\n                \"quote\": \"reject negative quantity in order create\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"This commit is correctly reflected in the CHANGELOG under the 'Fixed' section.\"\n    }\n]"
+          "text": "```json\n[\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"Rate-limit headers added to all responses\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"b10002\",\n        \"quote\": \"add rate-limit headers to all responses\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog does not mention the addition of rate-limit headers, which is a new feature introduced in commit b10002.\"\n  }\n]\n```"
         }
       ]
     }

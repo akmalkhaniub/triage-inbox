@@ -2,10 +2,10 @@
   "agent": "changelog_auditor",
   "item_id": "case04_changelog_clean",
   "provider": "openai",
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
   "system": "You are a release-notes auditor for a software repository.\n\nYour job: compare the CHANGELOG **as written** against the **actual commits** in\nthe release, and report only the DISCREPANCIES. Do not list lines that are fine.\n\nDiscrepancy types:\n- \"phantom\": a CHANGELOG line claims a change that no commit supports.\n- \"missing\": a commit made a user-facing change (feat / fix / breaking) that no\n  CHANGELOG line mentions. Ignore purely internal commits (chore, docs, test,\n  refactor with no user impact) -- those are not expected in the changelog.\n- \"misclassified\": a CHANGELOG line exists but sits under the wrong section for\n  the commit's true impact. The most important case: a BREAKING change listed\n  under an ordinary \"Added\"/\"Fixed\"/\"Changed\" heading instead of \"Breaking\".\n\nMethod:\n1. Call list_commits, then read_changelog.\n2. You CANNOT judge breaking-ness from a subject alone. Call get_commit to read\n   the body for EVERY commit that is even possibly breaking -- specifically any\n   whose subject mentions rename / remove / drop / delete / replace / change /\n   migrate, and (because major releases concentrate breaking changes) every\n   commit when the release version is a major bump (x.0.0). The BREAKING CHANGE\n   marker usually appears only in the body.\n3. Decide the discrepancies. Tie EACH to evidence: the commit sha and/or the\n   changelog line, and quote the exact text you relied on.\n\nOutput ONLY a JSON array (no prose) of objects:\n[\n  {\n    \"verdict\": \"phantom\" | \"missing\" | \"misclassified\",\n    \"subject\": \"changelog:<line>\"  (for phantom/misclassified)  or  \"commit:<sha>\" (for missing),\n    \"evidence\": [ {\"kind\": \"changelog_line\"|\"commit\", \"ref\": \"changelog:<line>\"|\"commit:<sha>\", \"quote\": \"<exact text>\"} ],\n    \"confidence\": 0.0-1.0,\n    \"rationale\": \"<one sentence>\"\n  }\n]\nIf there are no discrepancies, output [].",
-  "input_tokens": 3332,
-  "output_tokens": 322,
+  "input_tokens": 2231,
+  "output_tokens": 14,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_QhJU0ecG1IP9ow05EovkIY2O",
+          "id": "call_D1tYpZLKyGloq8znCYkWXsQ3",
           "name": "list_commits",
           "input": {}
         }
@@ -35,7 +35,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_xFzOnVSVC6d77uCj3lhSlfwx",
+          "id": "call_qlz5C5MkugzQiAzJs5kNQTZK",
           "name": "read_changelog",
           "input": {}
         }
@@ -52,90 +52,11 @@
     {
       "kind": "model",
       "step": 2,
-      "stop_reason": "tool_use",
-      "content": [
-        {
-          "type": "tool_use",
-          "id": "call_crmNVKAO0ZSa98LirBGMLQmW",
-          "name": "get_commit",
-          "input": {
-            "sha": "e12a01"
-          }
-        },
-        {
-          "type": "tool_use",
-          "id": "call_cmB3kqCN2Kz9PoxCcQFC09sl",
-          "name": "get_commit",
-          "input": {
-            "sha": "e12a02"
-          }
-        },
-        {
-          "type": "tool_use",
-          "id": "call_XuAtA41BKVw8RRS5ptNuEy7e",
-          "name": "get_commit",
-          "input": {
-            "sha": "e12a03"
-          }
-        },
-        {
-          "type": "tool_use",
-          "id": "call_OcBcXAHMDrYQ0xf4UKZQhnEQ",
-          "name": "get_commit",
-          "input": {
-            "sha": "e12a04"
-          }
-        }
-      ]
-    },
-    {
-      "kind": "tool",
-      "step": 2,
-      "name": "get_commit",
-      "input": {
-        "sha": "e12a01"
-      },
-      "result": "{\n  \"sha\": \"e12a01\",\n  \"type\": \"feat\",\n  \"subject\": \"add keyboard shortcuts to the editor\",\n  \"body\": \"Cmd+K opens the command palette.\"\n}",
-      "is_error": false
-    },
-    {
-      "kind": "tool",
-      "step": 2,
-      "name": "get_commit",
-      "input": {
-        "sha": "e12a02"
-      },
-      "result": "{\n  \"sha\": \"e12a02\",\n  \"type\": \"fix\",\n  \"subject\": \"stop losing draft on tab switch\",\n  \"body\": \"Drafts are now autosaved before navigation.\"\n}",
-      "is_error": false
-    },
-    {
-      "kind": "tool",
-      "step": 2,
-      "name": "get_commit",
-      "input": {
-        "sha": "e12a03"
-      },
-      "result": "{\n  \"sha\": \"e12a03\",\n  \"type\": \"test\",\n  \"subject\": \"add coverage for the draft autosave path\",\n  \"body\": \"Test-only.\"\n}",
-      "is_error": false
-    },
-    {
-      "kind": "tool",
-      "step": 2,
-      "name": "get_commit",
-      "input": {
-        "sha": "e12a04"
-      },
-      "result": "{\n  \"sha\": \"e12a04\",\n  \"type\": \"refactor\",\n  \"subject\": \"extract editor toolbar into its own module\",\n  \"body\": \"No user-facing change.\"\n}",
-      "is_error": false
-    },
-    {
-      "kind": "model",
-      "step": 3,
       "stop_reason": "end_turn",
       "content": [
         {
           "type": "text",
-          "text": "[\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"changelog:Keyboard shortcuts in the editor (Cmd+K command palette)\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:1\",\n        \"quote\": \"Keyboard shortcuts in the editor (Cmd+K command palette)\"\n      }\n    ],\n    \"confidence\": 0.9,\n    \"rationale\": \"The changelog entry references a keyboard shortcut feature that is not supported by the commit body.\"\n  },\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"changelog:Drafts are no longer lost when switching tabs\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:2\",\n        \"quote\": \"Drafts are no longer lost when switching tabs\"\n      }\n    ],\n    \"confidence\": 0.9,\n    \"rationale\": \"The changelog entry indicates a fix that does not match the specifics of any commit.\"\n  }\n]"
+          "text": "[]"
         }
       ]
     }

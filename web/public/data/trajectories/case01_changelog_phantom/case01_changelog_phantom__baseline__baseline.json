@@ -2,10 +2,10 @@
   "agent": "baseline",
   "item_id": "case01_changelog_phantom",
   "provider": "openai",
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 462,
-  "output_tokens": 285,
+  "output_tokens": 218,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "[\n    {\n        \"verdict\": \"missing\",\n        \"subject\": \"Dark mode for the settings page\",\n        \"evidence\": [],\n        \"confidence\": 1.0,\n        \"rationale\": \"The changelog mentions a feature for 'Dark mode for the settings page', but there is no corresponding commit reflecting this change.\"\n    },\n    {\n        \"verdict\": \"phantom\",\n        \"subject\": \"CSV export for the reports view\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"a1b2c3\",\n                \"quote\": \"add CSV export to reports view\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The changelog correctly identifies the CSV export feature, which matches commit 'a1b2c3'.\"\n    },\n    {\n        \"verdict\": \"phantom\",\n        \"subject\": \"Daily digest timezone offset for UTC+1 users\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"d4e5f6\",\n                \"quote\": \"correct timezone offset in daily digest\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The changelog correctly identifies the timezone fix, which corresponds to commit 'd4e5f6'.\"\n    }\n]"
+          "text": "```json\n[\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"Dark mode for the settings page\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_entry\",\n        \"ref\": \"line 3\",\n        \"quote\": \"Dark mode for the settings page\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog mentions a feature 'Dark mode for the settings page' which has no corresponding feature commit in the provided list of commits.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"bump eslint to 9.2\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"77aa88\",\n        \"quote\": \"bump eslint to 9.2\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"Commit for 'bump eslint to 9.2' is not mentioned in the changelog.\"\n  }\n]\n```"
         }
       ]
     }

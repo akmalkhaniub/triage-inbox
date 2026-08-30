@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case07_review_ignored`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 488 in / 184 out*
+*Backend: openai / gpt-4o  ·  Tokens: 488 in / 220 out*
 
 ## System instructions
 ```
@@ -18,31 +18,4 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[
-    {
-        "verdict": "ignored",
-        "subject": "Comment c1",
-        "evidence": [
-            {
-                "kind": "diff",
-                "ref": "h1",
-                "quote": "No guard was added for None user check."
-            }
-        ],
-        "confidence": 0.9,
-        "rationale": "The primary concern regarding the handling of a None user was not addressed in the diff."
-    },
-    {
-        "verdict": "addressed",
-        "subject": "Comment c2",
-        "evidence": [
-            {
-                "kind": "diff",
-                "ref": "h2",
-                "quote": "raise AuthError(\"unauthorized\")"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "The typo in the error message was corrected as requested."
-    }
-]
+[{"verdict": "ignored", "subject": "authenticate() will crash if `user` is None. Please add a guard before accessing user.role.", "evidence": [{"kind": "diff", "ref": "h1", "quote": "+    user = request.user\n+    return user.role in ALLOWED_ROLES"}], "confidence": 1.0, "rationale": "The code changes do not include a guard for 'user' being None. The change made was cosmetic (just renaming a variable) and does not address the potential crash issue."}, {"verdict": "addressed", "subject": "Typo in the error message: 'unathorized' should be 'unauthorized'.", "evidence": [{"kind": "diff", "ref": "h2", "quote": "+    raise AuthError(\"unauthorized\")"}], "confidence": 1.0, "rationale": "The typo 'unathorized' was corrected to 'unauthorized' in the error message as requested."}]

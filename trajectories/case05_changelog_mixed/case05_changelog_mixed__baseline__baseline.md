@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case05_changelog_mixed`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 454 in / 201 out*
+*Backend: openai / gpt-4o  ·  Tokens: 454 in / 442 out*
 
 ## System instructions
 ```
@@ -18,23 +18,60 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
     {
+        "verdict": "addressed",
+        "subject": "add biometric unlock",
+        "evidence": [
+            {
+                "kind": "commit",
+                "ref": "f43a01",
+                "quote": "add biometric unlock"
+            },
+            {
+                "kind": "changelog",
+                "ref": "line 1",
+                "quote": "Biometric unlock (Face ID / fingerprint)"
+            }
+        ],
+        "confidence": 1.0,
+        "rationale": "The changelog entry matches the corresponding commit for adding biometric unlock."
+    },
+    {
+        "verdict": "addressed",
+        "subject": "fix crash when opening a deleted chat",
+        "evidence": [
+            {
+                "kind": "commit",
+                "ref": "f43a02",
+                "quote": "fix crash when opening a deleted chat"
+            },
+            {
+                "kind": "changelog",
+                "ref": "line 2",
+                "quote": "Crash when opening a deleted chat"
+            }
+        ],
+        "confidence": 1.0,
+        "rationale": "The changelog entry matches the corresponding commit for fixing the crash."
+    },
+    {
         "verdict": "missing",
-        "subject": "feat: add offline message queue",
+        "subject": "add offline message queue",
         "evidence": [
             {
                 "kind": "commit",
                 "ref": "f43a03",
-                "quote": "add offline message queue: Messages composed offline send automatically on reconnect."
+                "quote": "add offline message queue"
             }
         ],
-        "confidence": 0.9,
-        "rationale": "The commit for adding the offline message queue is present, but its entry is missing from the CHANGELOG."
+        "confidence": 1.0,
+        "rationale": "The commit for adding offline message queue is not reflected in the changelog."
     },
     {
         "verdict": "phantom",
-        "subject": "in-app video calling",
+        "subject": "In-app video calling",
         "evidence": [
             {
                 "kind": "changelog",
@@ -43,6 +80,7 @@ Output ONLY a JSON array of findings:
             }
         ],
         "confidence": 1.0,
-        "rationale": "The changelog entry for in-app video calling has no corresponding commit present."
+        "rationale": "The changelog entry for in-app video calling does not correspond to any commit."
     }
 ]
+```

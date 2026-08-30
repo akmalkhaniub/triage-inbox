@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case06_changelog_internal_noise`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 3378 in / 283 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2342 in / 125 out*
 
 ## System instructions
 ```
@@ -95,45 +95,8 @@ If there are no discrepancies, output [].
 ]
 ```
 
-## Model turn 2  (stop: `tool_use`)
-**calls** `get_commit`(`{"sha": "g50a01"}`)
-**calls** `get_commit`(`{"sha": "g50a05"}`)
-
-### tool `get_commit` ->
-```
-{
-  "sha": "g50a01",
-  "type": "fix",
-  "subject": "fix memory leak in the cache eviction loop",
-  "body": "Long-running processes no longer grow unbounded."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "g50a05",
-  "type": "feat",
-  "subject": "expose cache stats via getCacheStats()",
-  "body": "New public API returning hit/miss counts."
-}
-```
-
-## Model turn 3  (stop: `end_turn`)
+## Model turn 2  (stop: `end_turn`)
 [
-  {
-    "verdict": "phantom",
-    "subject": "changelog:Memory leak in cache eviction for long-running processes",
-    "evidence": [
-      {
-        "kind": "changelog_line",
-        "ref": "changelog:1",
-        "quote": "Memory leak in cache eviction for long-running processes"
-      }
-    ],
-    "confidence": 1.0,
-    "rationale": "There is no commit that corresponds to this alleged memory leak fix, as the only related commit is for fixing the memory leak in a different context."
-  },
   {
     "verdict": "missing",
     "subject": "commit:g50a05",
@@ -141,10 +104,10 @@ If there are no discrepancies, output [].
       {
         "kind": "commit",
         "ref": "commit:g50a05",
-        "quote": "expose cache stats via getCacheStats()"
+        "quote": "feat: expose cache stats via getCacheStats()"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The new feature of exposing cache stats is missing from the CHANGELOG."
+    "rationale": "The commit 'expose cache stats via getCacheStats()' is a feature addition but is not documented in the CHANGELOG."
   }
 ]

@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case09_review_partial`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 441 in / 201 out*
+*Backend: openai / gpt-4o  ·  Tokens: 441 in / 194 out*
 
 ## System instructions
 ```
@@ -18,31 +18,33 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
-    {
-        "verdict": "partial",
-        "subject": "Comment c1",
-        "evidence": [
-            {
-                "kind": "diff",
-                "ref": "src/report.py",
-                "quote": "-    d = summarize(rows)\n+    records = summarize(rows)"
-            }
-        ],
-        "confidence": 0.8,
-        "rationale": "The variable `d` was renamed to `records`, but the requested unit test for the empty-input case was not addressed."
-    },
-    {
-        "verdict": "addressed",
-        "subject": "Comment c2",
-        "evidence": [
-            {
-                "kind": "diff",
-                "ref": "src/report.py",
-                "quote": "-import itertools\n import json"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "The unused import `itertools` was successfully removed, addressing the comment."
-    }
+  {
+    "verdict": "partial",
+    "subject": "c1",
+    "evidence": [
+      {
+        "kind": "diff_hunk",
+        "ref": "h1",
+        "quote": "+    records = summarize(rows)"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The variable `d` was renamed to `records`, but there is no evidence in the diff indicating that a unit test was added for the empty-input case."
+  },
+  {
+    "verdict": "addressed",
+    "subject": "c2",
+    "evidence": [
+      {
+        "kind": "diff_hunk",
+        "ref": "h2",
+        "quote": "-import itertools"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The unused import was removed as requested."
+  }
 ]
+```

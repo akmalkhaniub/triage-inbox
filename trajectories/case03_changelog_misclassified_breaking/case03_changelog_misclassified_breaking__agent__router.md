@@ -1,6 +1,6 @@
 # Trajectory: `router` on `case03_changelog_misclassified_breaking`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 243 in / 34 out*
+*Backend: openai / gpt-4o  ·  Tokens: 243 in / 44 out*
 
 ## System instructions
 ```
@@ -19,4 +19,4 @@ Output ONLY JSON: {"item_type": "<one of the above>", "why": "<short reason>"}
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-{"item_type": "changelog_audit", "why": "The item is about reconciling a CHANGELOG with the commits and identifying a breaking change."}
+{"item_type": "changelog_audit", "why": "The item involves auditing a CHANGELOG for a specific version, focusing on reconciling it with the commit history, especially for a breaking change."}

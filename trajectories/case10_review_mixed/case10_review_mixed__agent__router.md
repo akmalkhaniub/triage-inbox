@@ -1,6 +1,6 @@
 # Trajectory: `router` on `case10_review_mixed`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 236 in / 27 out*
+*Backend: openai / gpt-4o  ·  Tokens: 236 in / 34 out*
 
 ## System instructions
 ```
@@ -19,4 +19,4 @@ Output ONLY JSON: {"item_type": "<one of the above>", "why": "<short reason>"}
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-{"item_type": "review_resolution", "why": "The item is about assessing whether a PR adequately addressed its review comments."}
+{"item_type": "review_resolution", "why": "The item is about determining whether PR #560 addressed the review comments completely, partially, or ignored them."}

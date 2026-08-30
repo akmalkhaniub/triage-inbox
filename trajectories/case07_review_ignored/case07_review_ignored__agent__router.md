@@ -1,6 +1,6 @@
 # Trajectory: `router` on `case07_review_ignored`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 244 in / 25 out*
+*Backend: openai / gpt-4o  ·  Tokens: 244 in / 31 out*
 
 ## System instructions
 ```
@@ -19,4 +19,4 @@ Output ONLY JSON: {"item_type": "<one of the above>", "why": "<short reason>"}
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-{"item_type": "review_resolution", "why": "The item is about whether a PR addressed its review comments."}
+{"item_type": "review_resolution", "why": "The item concerns evaluating whether a PR has addressed review comments, which aligns with review_resolution."}

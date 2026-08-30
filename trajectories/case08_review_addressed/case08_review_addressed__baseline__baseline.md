@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case08_review_addressed`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 487 in / 217 out*
+*Backend: openai / gpt-4o  ·  Tokens: 487 in / 242 out*
 
 ## System instructions
 ```
@@ -19,30 +19,30 @@ Output ONLY a JSON array of findings:
 
 ## Model turn 0  (stop: `end_turn`)
 [
-    {
-        "verdict": "addressed",
-        "subject": "Review comment c1",
-        "evidence": [
-            {
-                "kind": "diff",
-                "ref": "h1",
-                "quote": "if limit <= 0:\n        raise ValueError(\"limit must be positive\")"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "The inclusion of a validation check for the 'limit' parameter clearly addresses the review comment regarding the enforcement of positive limits."
-    },
-    {
-        "verdict": "addressed",
-        "subject": "Review comment c2",
-        "evidence": [
-            {
-                "kind": "diff",
-                "ref": "h2",
-                "quote": "DEFAULT_PAGE_SIZE = 20"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "The introduction of a named constant 'DEFAULT_PAGE_SIZE' instead of using the magic number '20' directly addresses the review comment."
-    }
+  {
+    "verdict": "addressed",
+    "subject": "c1",
+    "evidence": [
+      {
+        "kind": "diff",
+        "ref": "h1",
+        "quote": "if limit <= 0:\n        raise ValueError(\"limit must be positive\")"
+      }
+    ],
+    "confidence": 0.9,
+    "rationale": "The code now validates that the limit is positive, throwing a ValueError if not, which addresses the review comment."
+  },
+  {
+    "verdict": "addressed",
+    "subject": "c2",
+    "evidence": [
+      {
+        "kind": "diff",
+        "ref": "h2",
+        "quote": "+DEFAULT_PAGE_SIZE = 20\n@@ -58,7 +60,7 @@ def _page(page):\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"
+      }
+    ],
+    "confidence": 0.95,
+    "rationale": "A constant DEFAULT_PAGE_SIZE is introduced and used in place of the magic number 20, directly addressing the review comment."
+  }
 ]

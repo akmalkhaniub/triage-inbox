@@ -1,6 +1,6 @@
 # Trajectory: `review_resolver` on `case08_review_addressed`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 3105 in / 319 out*
+*Backend: openai / gpt-4o  ·  Tokens: 1968 in / 286 out*
 
 ## System instructions
 ```
@@ -93,31 +93,8 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
 ]
 ```
 
-## Model turn 2  (stop: `tool_use`)
-**calls** `get_hunk`(`{"hunk_id": "h1"}`)
-**calls** `get_hunk`(`{"hunk_id": "h2"}`)
-
-### tool `get_hunk` ->
-```
-{
-  "id": "h1",
-  "path": "src/api/orders.py",
-  "header": "@@ -12,6 +12,8 @@ def list_orders(limit, page):",
-  "patch": "     limit = int(limit)\n+    if limit <= 0:\n+        raise ValueError(\"limit must be positive\")"
-}
-```
-
-### tool `get_hunk` ->
-```
-{
-  "id": "h2",
-  "path": "src/api/orders.py",
-  "header": "@@ -1,4 +1,6 @@",
-  "patch": "+DEFAULT_PAGE_SIZE = 20\n@@ -58,7 +60,7 @@ def _page(page):\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"
-}
-```
-
-## Model turn 3  (stop: `end_turn`)
+## Model turn 2  (stop: `end_turn`)
+```json
 [
   {
     "verdict": "addressed",
@@ -125,12 +102,12 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
     "evidence": [
       {
         "kind": "diff_hunk",
-        "ref": "h1",
-        "quote": "if limit <= 0:\n        raise ValueError(\"limit must be positive\")"
+        "ref": "hunk:h1",
+        "quote": "    if limit <= 0:\n        raise ValueError(\"limit must be positive\")"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The code now checks if the limit is positive and raises a ValueError if it is not."
+    "rationale": "The diff hunk adds a validation to ensure `limit` is positive as requested."
   },
   {
     "verdict": "addressed",
@@ -138,11 +115,12 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
     "evidence": [
       {
         "kind": "diff_hunk",
-        "ref": "h2",
-        "quote": "DEFAULT_PAGE_SIZE = 20\n    size = DEFAULT_PAGE_SIZE"
+        "ref": "hunk:h2",
+        "quote": "+DEFAULT_PAGE_SIZE = 20\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The magic number 20 has been replaced with a named constant DEFAULT_PAGE_SIZE."
+    "rationale": "The diff hunk uses a named constant for the page size instead of the magic number 20."
   }
 ]
+```

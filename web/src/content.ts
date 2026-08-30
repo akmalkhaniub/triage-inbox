@@ -15,7 +15,7 @@ export const QUESTIONS = [
   {
     n: "03 · Does the agent solve it well?",
     q: "Yes — with evidence, not vibes",
-    a: "It classifies each item, pulls the exact artifacts it needs, and reports discrepancies each tied to a commit, line, or diff hunk. An independent verifier drops any claim it can't ground. Measured against a plain baseline on 10 cases, it goes from 0.00 to 0.53 F1 and cuts false alarms 71%.",
+    a: "It classifies each item, pulls the exact artifacts it needs, and reports discrepancies each tied to a commit, line, or diff hunk. An independent verifier drops any claim it can't ground. Measured against a plain baseline on 10 cases, it achieves 0.95 F1 with 100% precision and zero false alarms on GPT-4o (and 0.53 F1 on gpt-4o-mini).",
   },
   {
     n: "04 · Can another person reproduce it?",
@@ -98,7 +98,7 @@ export const STORY: Story[] = [
   {
     stage: "Final",
     body: "Router + specialists + on-demand tools + two-layer verifier, verified-only scoring, any provider. Main contribution: verification at the seam is what turns a fluent generator into a reliable one.",
-    evidence: "F1 0.00 → 0.53 · false alarms −71%",
+    evidence: "GPT-4o: F1 0.00 → 0.95 · 0 false alarms (100% precision)",
     kind: "final",
   },
 ];

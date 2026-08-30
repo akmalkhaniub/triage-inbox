@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case05_changelog_mixed`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 3197 in / 283 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2171 in / 209 out*
 
 ## System instructions
 ```
@@ -90,43 +90,21 @@ If there are no discrepancies, output [].
 ]
 ```
 
-## Model turn 2  (stop: `tool_use`)
-**calls** `get_commit`(`{"sha": "f43a01"}`)
-**calls** `get_commit`(`{"sha": "f43a02"}`)
-**calls** `get_commit`(`{"sha": "f43a03"}`)
-
-### tool `get_commit` ->
-```
-{
-  "sha": "f43a01",
-  "type": "feat",
-  "subject": "add biometric unlock",
-  "body": "Face ID / fingerprint unlock on supported devices."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "f43a02",
-  "type": "fix",
-  "subject": "fix crash when opening a deleted chat",
-  "body": "Null-checked the chat before render."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "f43a03",
-  "type": "feat",
-  "subject": "add offline message queue",
-  "body": "Messages composed offline send automatically on reconnect."
-}
-```
-
-## Model turn 3  (stop: `end_turn`)
+## Model turn 2  (stop: `end_turn`)
 [
+  {
+    "verdict": "phantom",
+    "subject": "changelog:3",
+    "evidence": [
+      {
+        "kind": "changelog_line",
+        "ref": "changelog:3",
+        "quote": "In-app video calling"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "There is a changelog entry for 'In-app video calling' with no supporting commit in the release."
+  },
   {
     "verdict": "missing",
     "subject": "commit:f43a03",
@@ -138,19 +116,6 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "The changelog does not mention the addition of the offline message queue."
-  },
-  {
-    "verdict": "phantom",
-    "subject": "changelog:Added: In-app video calling",
-    "evidence": [
-      {
-        "kind": "changelog_line",
-        "ref": "changelog:In-app video calling",
-        "quote": "In-app video calling"
-      }
-    ],
-    "confidence": 1.0,
-    "rationale": "The changelog claims the addition of in-app video calling, but there are no commits that support this change."
+    "rationale": "The commit for 'add offline message queue' is missing from the changelog."
   }
 ]

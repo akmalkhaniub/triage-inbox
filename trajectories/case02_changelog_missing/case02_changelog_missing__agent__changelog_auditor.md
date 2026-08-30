@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case02_changelog_missing`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 4285 in / 337 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2149 in / 252 out*
 
 ## System instructions
 ```
@@ -85,79 +85,25 @@ If there are no discrepancies, output [].
 ]
 ```
 
-## Model turn 2  (stop: `tool_use`)
-**calls** `get_commit`(`{"sha": "b10001"}`)
-**calls** `get_commit`(`{"sha": "b10002"}`)
-**calls** `get_commit`(`{"sha": "b10003"}`)
-
-### tool `get_commit` ->
-```
-{
-  "sha": "b10001",
-  "type": "feat",
-  "subject": "add pagination to /v2/orders",
-  "body": "New page and per_page query params."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "b10002",
-  "type": "feat",
-  "subject": "add rate-limit headers to all responses",
-  "body": "Returns X-RateLimit-Remaining on every response."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "b10003",
-  "type": "fix",
-  "subject": "reject negative quantity in order create",
-  "body": "Previously accepted negative quantities."
-}
-```
-
-## Model turn 3  (stop: `tool_use`)
-**calls** `get_commit`(`{"sha": "b10002"}`)
-**calls** `get_commit`(`{"sha": "b10003"}`)
-
-### tool `get_commit` ->
-```
-{
-  "sha": "b10002",
-  "type": "feat",
-  "subject": "add rate-limit headers to all responses",
-  "body": "Returns X-RateLimit-Remaining on every response."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "b10003",
-  "type": "fix",
-  "subject": "reject negative quantity in order create",
-  "body": "Previously accepted negative quantities."
-}
-```
-
-## Model turn 4  (stop: `end_turn`)
+## Model turn 2  (stop: `end_turn`)
 [
   {
     "verdict": "phantom",
-    "subject": "changelog:Pagination on the /v2/orders endpoint",
+    "subject": "changelog:2",
     "evidence": [
       {
+        "kind": "commit",
+        "ref": "commit:b10003",
+        "quote": "reject negative quantity in order create"
+      },
+      {
         "kind": "changelog_line",
-        "ref": "changelog:1",
-        "quote": "Pagination on the /v2/orders endpoint"
+        "ref": "changelog:2",
+        "quote": "Order creation now rejects negative quantities"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The changelog mentions pagination on the /v2/orders endpoint, but there is no corresponding commit for it."
+    "rationale": "A fix for negative order quantity is claimed in the CHANGELOG under 'Fixed', but it is not a phantom as there is a supporting commit."
   },
   {
     "verdict": "missing",
@@ -170,6 +116,6 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "The commit adds rate-limit headers to responses, but this is not mentioned in the changelog."
+    "rationale": "The feature addition of rate-limit headers was not mentioned in the CHANGELOG."
   }
 ]

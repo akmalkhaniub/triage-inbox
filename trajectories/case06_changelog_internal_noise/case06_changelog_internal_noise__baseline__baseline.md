@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case06_changelog_internal_noise`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 539 in / 545 out*
+*Backend: openai / gpt-4o  ·  Tokens: 539 in / 138 out*
 
 ## System instructions
 ```
@@ -18,70 +18,25 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
-    {
-        "verdict": "partial",
-        "subject": "migrate CI from Travis to GitHub Actions",
-        "evidence": [
-            {
-                "kind": "chore",
-                "ref": "g50a02",
-                "quote": "migrate CI from Travis to GitHub Actions"
-            }
-        ],
-        "confidence": 0.8,
-        "rationale": "This commit is classified as a 'chore' but does not appear in the changelog which may imply a lack of coverage for CI changes in the listed change entries."
-    },
-    {
-        "verdict": "ignored",
-        "subject": "split the god-object Manager class",
-        "evidence": [
-            {
-                "kind": "refactor",
-                "ref": "g50a03",
-                "quote": "split the god-object Manager class"
-            }
-        ],
-        "confidence": 0.9,
-        "rationale": "This commit is a refactor and is omitted from the changelog, as expected due to its internal nature, but it still should be acknowledged as an internal change."
-    },
-    {
-        "verdict": "ignored",
-        "subject": "add regression test for the cache leak",
-        "evidence": [
-            {
-                "kind": "test",
-                "ref": "g50a04",
-                "quote": "add regression test for the cache leak"
-            }
-        ],
-        "confidence": 0.9,
-        "rationale": "This commit is test-related and is appropriately excluded from the changelog as it does not affect functionality."
-    },
-    {
-        "verdict": "ignored",
-        "subject": "expose cache stats via getCacheStats()",
-        "evidence": [
-            {
-                "kind": "feat",
-                "ref": "g50a05",
-                "quote": "expose cache stats via getCacheStats()"
-            }
-        ],
-        "confidence": 0.9,
-        "rationale": "This feature is expected to be included in the changelog but is not directly referenced, suggesting a potential oversight."
-    },
-    {
-        "verdict": "ignored",
-        "subject": "update copyright year in headers",
-        "evidence": [
-            {
-                "kind": "chore",
-                "ref": "g50a06",
-                "quote": "update copyright year in headers"
-            }
-        ],
-        "confidence": 0.9,
-        "rationale": "This cosmetic change is appropriately ignored in the changelog due to its non-impact on application functionality."
-    }
+  {
+    "verdict": "missing",
+    "subject": "g50a05",
+    "evidence": [
+      {
+        "kind": "commit",
+        "ref": "g50a05",
+        "quote": "expose cache stats via getCacheStats()"
+      },
+      {
+        "kind": "changelog",
+        "ref": "line 1",
+        "quote": ""
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The commit introduces a new feature that adds to the public API and should be reflected in the changelog, but is missing."
+  }
 ]
+```

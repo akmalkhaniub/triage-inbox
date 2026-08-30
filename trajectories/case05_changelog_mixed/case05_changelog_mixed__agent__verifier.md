@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case05_changelog_mixed`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 611 in / 44 out*
+*Backend: openai / gpt-4o  ·  Tokens: 699 in / 90 out*
 
 ## System instructions
 ```
@@ -26,9 +26,6 @@ Output ONLY a JSON array, one object per finding, in the same order:
 
 ## Model turn 0  (stop: `end_turn`)
 [
-  {
-    "claim_id": "commit:f43a03",
-    "sound": true,
-    "note": "The cited commit is user-facing and the changelog does not mention it."
-  }
+  {"claim_id": "changelog:3", "sound": true, "note": "No commit mentions 'In-app video calling', so the 'phantom' verdict is correct."},
+  {"claim_id": "commit:f43a03", "sound": true, "note": "The cited commit for 'add offline message queue' is not mentioned in the changelog, making the 'missing' verdict correct."}
 ]

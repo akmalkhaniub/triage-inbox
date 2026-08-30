@@ -2,10 +2,10 @@
   "agent": "router",
   "item_id": "case02_changelog_missing",
   "provider": "openai",
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
   "system": "You route items in a repository maintainer's triage queue to the\ncorrect specialist. Given a short preview of one item, classify it as exactly one\nof: changelog_audit, review_resolution, dep_bump, flaky_test, issue_triage.\n\nGuidance:\n- changelog_audit: the item is about reconciling a CHANGELOG / release notes with commits.\n- review_resolution: the item is about whether a PR addressed its review comments.\n- dep_bump: a dependency-version-bump PR to assess for safety.\n- flaky_test: a failing CI test to judge as real-vs-flaky.\n- issue_triage: a new bug report to sort as actionable / needs-info / duplicate.\n\nOutput ONLY JSON: {\"item_type\": \"<one of the above>\", \"why\": \"<short reason>\"}",
   "input_tokens": 232,
-  "output_tokens": 36,
+  "output_tokens": 35,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item is about auditing the CHANGELOG for the specific version and reconciling it with the commits.\"}"
+          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item concerns auditing the CHANGELOG for a specific version to ensure it corresponds accurately with the commits.\"}"
         }
       ]
     }

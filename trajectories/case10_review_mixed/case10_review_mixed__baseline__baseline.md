@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case10_review_mixed`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 566 in / 332 out*
+*Backend: openai / gpt-4o  ·  Tokens: 566 in / 251 out*
 
 ## System instructions
 ```
@@ -18,38 +18,4 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[
-    {
-        "verdict": "addressed",
-        "subject": "Add a docstring to `get()` explaining the return value.",
-        "evidence": [
-            {
-                "kind": "diff",
-                "ref": "h1",
-                "quote": "\"\"\"Return the cached value for key, or None if absent or expired.\"\"\""
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "The docstring was added to the `get` method as requested."
-    },
-    {
-        "verdict": "ignored",
-        "subject": "hit_rate() can divide by zero when total == 0 -- please guard it.",
-        "evidence": [],
-        "confidence": 1.0,
-        "rationale": "There is no change made in the diffs related to guarding against zero division in `hit_rate()`."
-    },
-    {
-        "verdict": "ignored",
-        "subject": "Extract the eviction logic into a helper and cover it with a test.",
-        "evidence": [
-            {
-                "kind": "diff",
-                "ref": "h2",
-                "quote": "def _evict(self):\n        while len(self._store) > self.capacity:\n            self._store.popitem(last=False)"
-            }
-        ],
-        "confidence": 0.5,
-        "rationale": "While the eviction logic is extracted into a helper method `_evict`, the review comment requested it be covered with a test, and no tests are included in the provided diffs."
-    }
-]
+[{"verdict": "addressed", "subject": "c1", "evidence": [{"kind": "diff_hunk", "ref": "h1", "quote": "\"\"\"Return the cached value for key, or None if absent or expired.\"\"\""}], "confidence": 1.0, "rationale": "The required docstring explaining the return value of `get()` has been added."}, {"verdict": "ignored", "subject": "c2", "evidence": [], "confidence": 1.0, "rationale": "There are no changes related to preventing division by zero in `hit_rate()` within the provided diff hunks."}, {"verdict": "addressed", "subject": "c3", "evidence": [{"kind": "diff_hunk", "ref": "h2", "quote": "+        self._evict()\n\n    def _evict(self):\n        while len(self._store) > self.capacity:\n            self._store.popitem(last=False)"}], "confidence": 1.0, "rationale": "The eviction logic has been extracted into a helper method `_evict()`."}]

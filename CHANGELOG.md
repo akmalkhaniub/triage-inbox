@@ -3,12 +3,31 @@
 The story of how the solution evolved, baseline → final. Each row is a
 meaningful experiment: what we tried, why, the evidence, and what we decided.
 
-> **On evidence:** numbers below come from real `python eval.py` runs. The
-> headline is a full run on **openai / gpt-4o-mini** (2026-08-29); re-run on any
-> provider to reproduce. Metric = F1 over correctly-labelled problems,
-> micro-averaged across the 10 cases, agent findings counted only when verified.
+> **On evidence:** numbers below come from real `python eval.py` runs. Two
+> headline runs are shown: **openai / gpt-4o** (2026-08-30) and **openai /
+> gpt-4o-mini** (2026-08-29). Re-run on any provider to reproduce. Metric = F1
+> over correctly-labelled problems, micro-averaged across the 10 cases, agent
+> findings counted only when verified.
 
-### Headline result (openai / gpt-4o-mini, 10 cases)
+### Headline result (openai / gpt-4o, 10 cases) — **primary**
+
+| Metric | Baseline | Agent | Change |
+|---|---|---|---|
+| **Problem F1** | **0.00** | **0.95** | **+0.95** |
+| Precision | 0.00 | 1.00 | +1.00 |
+| Recall | 0.00 | 0.90 | +0.90 |
+| False alarms / case | 1.1 | **0.0** | **−100%** |
+| True positives | 0 / 10 | 9 / 10 | +9 |
+| Cost / task | $0.0035 | $0.0109 | +$0.0074 |
+
+The agent achieved **near-perfect F1 (0.95) with zero false positives** on
+GPT-4o. 9 of 10 cases scored F1 = 1.0. The only miss: case06 (internal noise),
+where the agent correctly avoided all false alarms but missed one genuine
+finding. The baseline still scored **zero** — 0 correct findings, 11 false
+positives — confirming that model capability alone doesn't fix this; the
+architecture does.
+
+### Cross-model comparison (openai / gpt-4o-mini, 10 cases)
 
 | Metric | Baseline | Agent | Change |
 |---|---|---|---|
@@ -35,7 +54,7 @@ rationale* were not measured in isolation; the Baseline and Final rows are.
 | **Iter 5 — commit-body drill-down heuristic (gap found via smoke test)** | Observed on case03 (breaking change flagged only in the commit body): the model finalized without calling `get_commit`, so it missed the misclassification. Added an explicit heuristic — always read the body for rename/remove/change-type subjects and for major (x.0.0) releases. | Qualitative: case03 flipped `0 findings → 1 verified misclassified` (action `escalate`) even on the weak gpt-oss-120b. | **Kept.** Helps every model; you genuinely cannot classify a rename's breaking-ness without the body. |
 | **Iter 6 — provider/model abstraction** | Made the loop provider-agnostic (Anthropic native + one OpenAI-compatible adapter for OpenAI/Groq/OpenRouter) so the eval can compare the same agent across backends with one env var. | Pipeline verified end-to-end on Groq free tier. | **Kept.** Turns the harness into a model-comparison tool, not just a Claude runner. |
 | **Removed experiment — force structured output on the generator** | Tried constraining the specialist to a strict JSON schema *instead of* the verifier, hoping format discipline would curb hallucination. | qualitative | **Removed.** It made outputs well-formed but not *true* — a cleanly-formatted finding citing a non-existent sha is still wrong. Taught us the problem is grounding, not formatting; motivated Iter 3. Structured output kept only as an output-parsing convenience, not a correctness mechanism. |
-| **Final** | Router + specialists + on-demand tools + two-layer verifier, verified-only scoring. | **F1 = 0.53** · precision = 0.56 · false-alarms/case = 0.4 · cost/task = $0.0009 (measured) | Main contribution: **verification at the seam** is what turns a fluent generator into a reliable one — F1 0.00 → 0.53, false alarms −71%. |
+| **Final** | Router + specialists + on-demand tools + two-layer verifier, verified-only scoring. Human approval gate added (Ground Rule #04). | **GPT-4o: F1 = 0.95** · precision = 1.00 · false-alarms/case = 0.0 · cost/task = $0.011 (measured). **gpt-4o-mini: F1 = 0.53** · precision = 0.56 · false-alarms/case = 0.4 · cost/task = $0.0009 (measured). | Main contribution: **verification at the seam** turns a fluent generator into a reliable one. On GPT-4o: F1 0.00 → 0.95, false alarms −100%. The architecture scales with model capability. |
 
 ### How to populate this table
 

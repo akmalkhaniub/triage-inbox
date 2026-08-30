@@ -2,10 +2,10 @@
   "agent": "verifier",
   "item_id": "case05_changelog_mixed",
   "provider": "openai",
-  "model": "gpt-4o-mini",
+  "model": "gpt-4o",
   "system": "You are an independent verifier. You are given the COMPLETE\nartifact (all commits + changelog, or all review comments + diff hunks) plus a\nlist of findings to check. For each finding decide whether its verdict is\ncorrect against the full artifact.\n\nJudge each verdict type properly -- several are ABSENCE claims that can only be\nconfirmed by scanning the whole artifact, not a single quote:\n- \"phantom\": correct iff NO commit in the full list supports that changelog line.\n- \"missing\": correct iff the cited commit is user-facing (feat/fix/breaking) AND\n  no changelog line mentions it.\n- \"misclassified\": correct iff the changelog line sits under the wrong section\n  for the commit's true impact (e.g. a BREAKING change under a non-breaking heading).\n- \"ignored\": correct iff NO diff hunk addresses the comment.\n- \"partial\": correct iff the diff partly addresses the comment but leaves some undone.\n- \"addressed\": correct iff a diff hunk makes the requested change.\n\nOutput ONLY a JSON array, one object per finding, in the same order:\n[ {\"claim_id\": \"<id>\", \"sound\": true|false, \"note\": \"<one sentence>\"} ]",
-  "input_tokens": 611,
-  "output_tokens": 44,
+  "input_tokens": 699,
+  "output_tokens": 90,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "[\n  {\n    \"claim_id\": \"commit:f43a03\",\n    \"sound\": true,\n    \"note\": \"The cited commit is user-facing and the changelog does not mention it.\"\n  }\n]"
+          "text": "[\n  {\"claim_id\": \"changelog:3\", \"sound\": true, \"note\": \"No commit mentions 'In-app video calling', so the 'phantom' verdict is correct.\"},\n  {\"claim_id\": \"commit:f43a03\", \"sound\": true, \"note\": \"The cited commit for 'add offline message queue' is not mentioned in the changelog, making the 'missing' verdict correct.\"}\n]"
         }
       ]
     }

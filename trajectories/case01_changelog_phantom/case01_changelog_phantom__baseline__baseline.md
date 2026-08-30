@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case01_changelog_phantom`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 462 in / 285 out*
+*Backend: openai / gpt-4o  ·  Tokens: 462 in / 218 out*
 
 ## System instructions
 ```
@@ -18,38 +18,33 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
-    {
-        "verdict": "missing",
-        "subject": "Dark mode for the settings page",
-        "evidence": [],
-        "confidence": 1.0,
-        "rationale": "The changelog mentions a feature for 'Dark mode for the settings page', but there is no corresponding commit reflecting this change."
-    },
-    {
-        "verdict": "phantom",
-        "subject": "CSV export for the reports view",
-        "evidence": [
-            {
-                "kind": "commit",
-                "ref": "a1b2c3",
-                "quote": "add CSV export to reports view"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "The changelog correctly identifies the CSV export feature, which matches commit 'a1b2c3'."
-    },
-    {
-        "verdict": "phantom",
-        "subject": "Daily digest timezone offset for UTC+1 users",
-        "evidence": [
-            {
-                "kind": "commit",
-                "ref": "d4e5f6",
-                "quote": "correct timezone offset in daily digest"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "The changelog correctly identifies the timezone fix, which corresponds to commit 'd4e5f6'."
-    }
+  {
+    "verdict": "phantom",
+    "subject": "Dark mode for the settings page",
+    "evidence": [
+      {
+        "kind": "changelog_entry",
+        "ref": "line 3",
+        "quote": "Dark mode for the settings page"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The changelog mentions a feature 'Dark mode for the settings page' which has no corresponding feature commit in the provided list of commits."
+  },
+  {
+    "verdict": "missing",
+    "subject": "bump eslint to 9.2",
+    "evidence": [
+      {
+        "kind": "commit",
+        "ref": "77aa88",
+        "quote": "bump eslint to 9.2"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "Commit for 'bump eslint to 9.2' is not mentioned in the changelog."
+  }
 ]
+```

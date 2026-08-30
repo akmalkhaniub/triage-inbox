@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case01_changelog_phantom`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 4257 in / 424 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2194 in / 113 out*
 
 ## System instructions
 ```
@@ -90,48 +90,12 @@ If there are no discrepancies, output [].
 ]
 ```
 
-## Model turn 2  (stop: `tool_use`)
-**calls** `get_commit`(`{"sha": "a1b2c3"}`)
-**calls** `get_commit`(`{"sha": "d4e5f6"}`)
-
-### tool `get_commit` ->
-```
-{
-  "sha": "a1b2c3",
-  "type": "feat",
-  "subject": "add CSV export to reports view",
-  "body": "Users can download any report as CSV."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "d4e5f6",
-  "type": "fix",
-  "subject": "correct timezone offset in daily digest",
-  "body": "Digest was sent one hour late for UTC+1 users."
-}
-```
-
-## Model turn 3  (stop: `tool_use`)
-**calls** `get_commit`(`{"sha": "77aa88"}`)
-
-### tool `get_commit` ->
-```
-{
-  "sha": "77aa88",
-  "type": "chore",
-  "subject": "bump eslint to 9.2",
-  "body": "Dev-only tooling update."
-}
-```
-
-## Model turn 4  (stop: `end_turn`)
+## Model turn 2  (stop: `end_turn`)
+```json
 [
   {
     "verdict": "phantom",
-    "subject": "changelog:Dark mode for the settings page",
+    "subject": "changelog:3",
     "evidence": [
       {
         "kind": "changelog_line",
@@ -140,37 +104,7 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "No commit references a change related to dark mode."
-  },
-  {
-    "verdict": "missing",
-    "subject": "commit:a1b2c3",
-    "evidence": [
-      {
-        "kind": "commit",
-        "ref": "commit:a1b2c3",
-        "quote": "Users can download any report as CSV."
-      }
-    ],
-    "confidence": 1.0,
-    "rationale": "The commit for CSV export is not mentioned in the CHANGELOG."
-  },
-  {
-    "verdict": "misclassified",
-    "subject": "changelog:Daily digest timezone offset for UTC+1 users",
-    "evidence": [
-      {
-        "kind": "changelog_line",
-        "ref": "changelog:2",
-        "quote": "Daily digest timezone offset for UTC+1 users"
-      },
-      {
-        "kind": "commit",
-        "ref": "commit:d4e5f6",
-        "quote": "Digest was sent one hour late for UTC+1 users."
-      }
-    ],
-    "confidence": 1.0,
-    "rationale": "The timezone offset fix should be categorized under 'Fixed'."
+    "rationale": "No commit supports the addition of dark mode for the settings page."
   }
 ]
+```

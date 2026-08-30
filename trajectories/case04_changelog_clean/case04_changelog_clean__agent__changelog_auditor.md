@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case04_changelog_clean`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 3332 in / 322 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2231 in / 14 out*
 
 ## System instructions
 ```
@@ -90,78 +90,5 @@ If there are no discrepancies, output [].
 ]
 ```
 
-## Model turn 2  (stop: `tool_use`)
-**calls** `get_commit`(`{"sha": "e12a01"}`)
-**calls** `get_commit`(`{"sha": "e12a02"}`)
-**calls** `get_commit`(`{"sha": "e12a03"}`)
-**calls** `get_commit`(`{"sha": "e12a04"}`)
-
-### tool `get_commit` ->
-```
-{
-  "sha": "e12a01",
-  "type": "feat",
-  "subject": "add keyboard shortcuts to the editor",
-  "body": "Cmd+K opens the command palette."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "e12a02",
-  "type": "fix",
-  "subject": "stop losing draft on tab switch",
-  "body": "Drafts are now autosaved before navigation."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "e12a03",
-  "type": "test",
-  "subject": "add coverage for the draft autosave path",
-  "body": "Test-only."
-}
-```
-
-### tool `get_commit` ->
-```
-{
-  "sha": "e12a04",
-  "type": "refactor",
-  "subject": "extract editor toolbar into its own module",
-  "body": "No user-facing change."
-}
-```
-
-## Model turn 3  (stop: `end_turn`)
-[
-  {
-    "verdict": "phantom",
-    "subject": "changelog:Keyboard shortcuts in the editor (Cmd+K command palette)",
-    "evidence": [
-      {
-        "kind": "changelog_line",
-        "ref": "changelog:1",
-        "quote": "Keyboard shortcuts in the editor (Cmd+K command palette)"
-      }
-    ],
-    "confidence": 0.9,
-    "rationale": "The changelog entry references a keyboard shortcut feature that is not supported by the commit body."
-  },
-  {
-    "verdict": "phantom",
-    "subject": "changelog:Drafts are no longer lost when switching tabs",
-    "evidence": [
-      {
-        "kind": "changelog_line",
-        "ref": "changelog:2",
-        "quote": "Drafts are no longer lost when switching tabs"
-      }
-    ],
-    "confidence": 0.9,
-    "rationale": "The changelog entry indicates a fix that does not match the specifics of any commit."
-  }
-]
+## Model turn 2  (stop: `end_turn`)
+[]

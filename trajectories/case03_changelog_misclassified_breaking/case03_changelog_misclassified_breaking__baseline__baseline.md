@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case03_changelog_misclassified_breaking`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 453 in / 424 out*
+*Backend: openai / gpt-4o  ·  Tokens: 453 in / 450 out*
 
 ## System instructions
 ```
@@ -18,54 +18,56 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
   {
-    "verdict": "phantom",
-    "subject": "Breaking Change",
+    "verdict": "misclassified",
+    "subject": "rename --timeout flag to --timeout-ms",
     "evidence": [
       {
         "kind": "commit",
         "ref": "c30a01",
         "quote": "BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds."
-      }
-    ],
-    "confidence": 0.9,
-    "rationale": "The changelog does not mention the breaking change regarding the removal of the --timeout flag, which is clearly stated in the commit."
-  },
-  {
-    "verdict": "misclassified",
-    "subject": "Changed Section",
-    "evidence": [
+      },
       {
         "kind": "changelog",
         "ref": "line 1",
         "quote": "Renamed the --timeout flag to --timeout-ms"
-      },
-      {
-        "kind": "commit",
-        "ref": "c30a01",
-        "quote": "BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds."
       }
     ],
-    "confidence": 0.8,
-    "rationale": "The changelog classifies the renaming of the --timeout flag as 'Changed' rather than as a breaking change, which is how it is defined in the commit."
+    "confidence": 1.0,
+    "rationale": "The changelog entry for renaming the --timeout flag fails to mention that it is a breaking change, as the semantics of the flag have changed (specifying the value in milliseconds rather than seconds). It should be listed under a 'Breaking Changes' section."
   },
   {
-    "verdict": "missing",
-    "subject": "New --json output mode",
+    "verdict": "addressed",
+    "subject": "add --json output mode",
     "evidence": [
-      {
-        "kind": "changelog",
-        "ref": "line 2",
-        "quote": "New --json output mode for all commands"
-      },
       {
         "kind": "commit",
         "ref": "c30a02",
         "quote": "add --json output mode"
+      },
+      {
+        "kind": "changelog",
+        "ref": "line 2",
+        "quote": "New --json output mode for all commands"
       }
     ],
-    "confidence": 0.95,
-    "rationale": "The changelog correctly reflects the addition of the --json output mode, aligning with the corresponding commit."
+    "confidence": 1.0,
+    "rationale": "The changelog accurately reflects the addition of the --json output mode as implemented in the commit."
+  },
+  {
+    "verdict": "missing",
+    "subject": "expand the quickstart guide",
+    "evidence": [
+      {
+        "kind": "commit",
+        "ref": "c30a03",
+        "quote": "expand the quickstart guide"
+      }
+    ],
+    "confidence": 0.9,
+    "rationale": "There is no mention of documentation updates in the changelog, despite a commit indicating an expansion of the quickstart guide. Significant documentation updates should typically be included in a 'Docs' section of the changelog."
   }
 ]
+```

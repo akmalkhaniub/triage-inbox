@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case02_changelog_missing`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 423 in / 293 out*
+*Backend: openai / gpt-4o  ·  Tokens: 423 in / 112 out*
 
 ## System instructions
 ```
@@ -18,44 +18,20 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
-    {
-        "verdict": "phantom",
-        "subject": "add rate-limit headers to all responses",
-        "evidence": [
-            {
-                "kind": "commit",
-                "ref": "b10002",
-                "quote": "add rate-limit headers to all responses"
-            }
-        ],
-        "confidence": 0.9,
-        "rationale": "This commit is not reflected in the CHANGELOG at all."
-    },
-    {
-        "verdict": "misclassified",
-        "subject": "add pagination to /v2/orders",
-        "evidence": [
-            {
-                "kind": "commit",
-                "ref": "b10001",
-                "quote": "add pagination to /v2/orders"
-            }
-        ],
-        "confidence": 0.8,
-        "rationale": "This commit should be classified under 'Added' instead of being described differently in the CHANGELOG."
-    },
-    {
-        "verdict": "addressed",
-        "subject": "reject negative quantity in order create",
-        "evidence": [
-            {
-                "kind": "commit",
-                "ref": "b10003",
-                "quote": "reject negative quantity in order create"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "This commit is correctly reflected in the CHANGELOG under the 'Fixed' section."
-    }
+  {
+    "verdict": "missing",
+    "subject": "Rate-limit headers added to all responses",
+    "evidence": [
+      {
+        "kind": "commit",
+        "ref": "b10002",
+        "quote": "add rate-limit headers to all responses"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The changelog does not mention the addition of rate-limit headers, which is a new feature introduced in commit b10002."
+  }
 ]
+```

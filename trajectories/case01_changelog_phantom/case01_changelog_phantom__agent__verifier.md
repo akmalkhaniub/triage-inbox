@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case01_changelog_phantom`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 842 in / 131 out*
+*Backend: openai / gpt-4o  ·  Tokens: 617 in / 46 out*
 
 ## System instructions
 ```
@@ -25,20 +25,4 @@ Output ONLY a JSON array, one object per finding, in the same order:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[
-  {
-    "claim_id": "changelog:Dark mode for the settings page",
-    "sound": true,
-    "note": "No commit references a change related to dark mode."
-  },
-  {
-    "claim_id": "commit:a1b2c3",
-    "sound": true,
-    "note": "The commit for CSV export is not mentioned in the CHANGELOG."
-  },
-  {
-    "claim_id": "changelog:Daily digest timezone offset for UTC+1 users",
-    "sound": false,
-    "note": "The timezone offset fix is correctly categorized under 'Fixed'."
-  }
-]
+[{"claim_id": "changelog:3", "sound": true, "note": "No commit in the provided list supports the addition of dark mode for the settings page, confirming the 'phantom' claim."}]

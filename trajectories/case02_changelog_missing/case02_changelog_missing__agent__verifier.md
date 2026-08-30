@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case02_changelog_missing`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 692 in / 92 out*
+*Backend: openai / gpt-4o  ·  Tokens: 717 in / 88 out*
 
 ## System instructions
 ```
@@ -27,13 +27,13 @@ Output ONLY a JSON array, one object per finding, in the same order:
 ## Model turn 0  (stop: `end_turn`)
 [
   {
-    "claim_id": "changelog:Pagination on the /v2/orders endpoint",
+    "claim_id": "changelog:2",
     "sound": false,
-    "note": "There is a corresponding commit (b10001) that supports the changelog line about pagination."
+    "note": "The phantom verdict is incorrect; commit b10003 supports the changelog entry."
   },
   {
     "claim_id": "commit:b10002",
     "sound": true,
-    "note": "The commit exists but is not mentioned in the changelog."
+    "note": "Commit b10002 introduces a user-facing feature that is not mentioned in the changelog."
   }
 ]

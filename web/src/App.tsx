@@ -10,8 +10,9 @@ export default function App() {
   const [cases, setCases] = useState<Cases | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const [currentTab, setCurrentTab] = useState<"queue" | "github" | "architecture" | "reproduce">("queue");
+  const [currentTab, setCurrentTab] = useState<"video" | "queue" | "github" | "architecture" | "reproduce">("video");
   const [caseFilter, setCaseFilter] = useState<"all" | "changelog" | "review" | "hard" | "wins">("all");
+  const [videoStep, setVideoStep] = useState<number>(1);
   
   // Default to LIGHT mode
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -90,6 +91,12 @@ export default function App() {
 
           <div className="nav-tabs">
             <button
+              className={`nav-tab-btn video-highlight ${currentTab === "video" ? "active" : ""}`}
+              onClick={() => setCurrentTab("video")}
+            >
+              🎬 Video Presenter Mode
+            </button>
+            <button
               className={`nav-tab-btn ${currentTab === "queue" ? "active" : ""}`}
               onClick={() => setCurrentTab("queue")}
             >
@@ -125,6 +132,185 @@ export default function App() {
       </nav>
 
       <div className="wrap tab-content">
+        {/* ========================================================================= */}
+        {/* TAB 0: DEDICATED 5-MINUTE VIDEO PRESENTER SUITE */}
+        {/* ========================================================================= */}
+        {currentTab === "video" && (
+          <section id="video" className="video-suite">
+            <div className="page-head">
+              <div className="page-title-area">
+                <h1>🎬 5-Minute Video Recording Suite</h1>
+                <p>
+                  Use this interactive sequential walkthrough to record your hackathon submission video.
+                  Follow the step-by-step speaker script and live interactive demonstrations.
+                </p>
+              </div>
+            </div>
+
+            {/* STEP SELECTOR */}
+            <div className="video-stepper">
+              <button className={`step-btn ${videoStep === 1 ? "active" : ""}`} onClick={() => setVideoStep(1)}>
+                <div className="time">0:00 – 1:00</div>
+                <div className="title">1. The Problem &amp; Pain</div>
+              </button>
+              <button className={`step-btn ${videoStep === 2 ? "active" : ""}`} onClick={() => setVideoStep(2)}>
+                <div className="time">1:00 – 1:45</div>
+                <div className="title">2. The Baseline Failure</div>
+              </button>
+              <button className={`step-btn ${videoStep === 3 ? "active" : ""}`} onClick={() => setVideoStep(3)}>
+                <div className="time">1:45 – 3:00</div>
+                <div className="title">3. Live Agent Solution</div>
+              </button>
+              <button className={`step-btn ${videoStep === 4 ? "active" : ""}`} onClick={() => setVideoStep(4)}>
+                <div className="time">3:00 – 4:00</div>
+                <div className="title">4. Evidence &amp; Changelog</div>
+              </button>
+              <button className={`step-btn ${videoStep === 5 ? "active" : ""}`} onClick={() => setVideoStep(5)}>
+                <div className="time">4:00 – 5:00</div>
+                <div className="title">5. Hot Take &amp; Lessons</div>
+              </button>
+            </div>
+
+            {/* STEP 1: THE PROBLEM */}
+            {videoStep === 1 && (
+              <div>
+                <div className="script-box">
+                  <div className="script-speaker">🎙️ Speaker Script (Read during recording):</div>
+                  <div className="script-quote">
+                    "Hi everyone! This is <strong>Triage Inbox</strong> — an evidence-first agentic workflow designed for repository maintainers.<br /><br />
+                    Every maintainer faces Monday morning triage overload: checking if release CHANGELOGs match what actually shipped, and verifying if PR authors genuinely addressed reviewer comments. Skimming leads to silent breaking changes and cosmetic PR merges."
+                  </div>
+                </div>
+
+                <div className="value-props" style={{ marginTop: 20 }}>
+                  <div className="vprop-card">
+                    <div className="vprop-icon">📦</div>
+                    <h3>1. The CHANGELOG Audit Dilemma (Lane G)</h3>
+                    <p>Did someone hide a breaking API change under a minor heading, or list a feature that never actually merged?</p>
+                  </div>
+                  <div className="vprop-card">
+                    <div className="vprop-icon">💬</div>
+                    <h3>2. The PR Review Resolution Dilemma (Lane E)</h3>
+                    <p>The author wrote "Fixed your feedback 👍", but did their code diff actually resolve the review comments?</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2: THE BASELINE FAILURE */}
+            {videoStep === 2 && (
+              <div>
+                <div className="script-box">
+                  <div className="script-speaker">🎙️ Speaker Script:</div>
+                  <div className="script-quote">
+                    "When people first try solving this with LLMs, they dump the entire commit history or PR diff into a single prompt. But here is what happens: the baseline model is fluent, yet produces confident false positives — hallucinating citations and missing breaking changes. Across our 10 benchmark cases, the flat baseline scored an F1 of 0.00 with 14 false alarms."
+                  </div>
+                </div>
+
+                <div className="callout" style={{ borderLeftColor: "var(--bad)", marginTop: 20 }}>
+                  <strong style={{ color: "var(--bad)" }}>🚨 Why Flat Single-Prompt AI Fails at Repository Triage:</strong>
+                  <p>
+                    Dumping raw diffs into one prompt invites the model to skim. It fabricates non-existent commit SHAs and guesses whether changes were breaking from subject lines instead of drilling into commit bodies.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: LIVE AGENT SOLUTION */}
+            {videoStep === 3 && (
+              <div>
+                <div className="script-box">
+                  <div className="script-speaker">🎙️ Speaker Script:</div>
+                  <div className="script-quote">
+                    "Our solution attacks this with a 3-stage agentic pipeline: A Router dispatches to a focused specialist; the specialist uses on-demand tools (`list_commits`, `get_commit`, `get_diff`) to drill into commit bodies; and a Two-Layer Verifier checks deterministic code grounding before checking reasoning. Click below to inspect a live case execution:"
+                  </div>
+                </div>
+
+                <div className="pipe-container" style={{ margin: "20px 0" }}>
+                  <div className="pipe-flow">
+                    <div className="pipe-card active">
+                      <div className="pc-title">1. Router Agent</div>
+                      <div className="pc-desc">Classifies item type and selects dedicated specialist.</div>
+                    </div>
+                    <span className="pipe-arrow">→</span>
+                    <div className="pipe-card active">
+                      <div className="pc-title">2. Specialist + Tools</div>
+                      <div className="pc-desc">Fetches on-demand commit bodies and code patches.</div>
+                    </div>
+                    <span className="pipe-arrow">→</span>
+                    <div className="pipe-card verified">
+                      <div className="pc-title">3. Two-Layer Verifier</div>
+                      <div className="pc-desc">Grounding (quote exists) + Soundness (reasoning check).</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ textAlign: "center", margin: "16px 0" }}>
+                  <button
+                    className="filter-btn active"
+                    style={{ padding: "10px 20px", fontSize: 14 }}
+                    onClick={() => setSelected("case03_changelog_misclassified_breaking")}
+                  >
+                    🔍 Click to Inspect Live Trajectory (Case #3: Misclassified Breaking Change)
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 4: MEASURED EVIDENCE & CHANGELOG */}
+            {videoStep === 4 && (
+              <div>
+                <div className="script-box">
+                  <div className="script-speaker">🎙️ Speaker Script:</div>
+                  <div className="script-quote">
+                    "We evaluated both arms across 10 diverse synthetic test cases. Our Problem F1 jumped from 0.00 to 0.53 on gpt-4o-mini, while false alarms dropped by 71%. Our 6-iteration changelog shows how on-demand tools and verification at the seam drove this improvement."
+                  </div>
+                </div>
+
+                <div className="metric-strip" style={{ margin: "20px 0", justifyContent: "center" }}>
+                  <div className="metric-pill" style={{ padding: "12px 18px" }}>
+                    <span className="mp-lbl">Problem F1</span>
+                    <span className="mp-val good" style={{ fontSize: 20 }}>0.00 → 0.53 (+0.53)</span>
+                  </div>
+                  <div className="metric-pill" style={{ padding: "12px 18px" }}>
+                    <span className="mp-lbl">False Alarms / Task</span>
+                    <span className="mp-val good" style={{ fontSize: 20 }}>1.4 → 0.4 (−71%)</span>
+                  </div>
+                  <div className="metric-pill" style={{ padding: "12px 18px" }}>
+                    <span className="mp-lbl">Precision</span>
+                    <span className="mp-val good" style={{ fontSize: 20 }}>0% → 56% (+56%)</span>
+                  </div>
+                  <div className="metric-pill" style={{ padding: "12px 18px" }}>
+                    <span className="mp-lbl">Head-to-Head</span>
+                    <span className="mp-val" style={{ fontSize: 20 }}>5 Wins / 0 Losses</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP 5: HOT TAKE & TAKEAWAYS */}
+            {videoStep === 5 && (
+              <div>
+                <div className="script-box">
+                  <div className="script-speaker">🎙️ Speaker Script:</div>
+                  <div className="script-quote">
+                    "Two critical learnings came from this project:<br />
+                    1. One experiment we removed: We tried forcing strict JSON formatting on the generator. It made outputs well-formed but didn't stop hallucinations — proving grounding, not formatting, is the answer.<br />
+                    2. Our Hot Take: For judgment-over-artifacts tasks, reliability is not a smarter prompt — it is making the agent unable to assert what it cannot point at. Thank you!"
+                  </div>
+                </div>
+
+                <div className="callout hot" style={{ marginTop: 20 }}>
+                  <strong>Hot Take: Grounding at the seam turns a fluent generator into a reliable one.</strong>
+                  <p>
+                    Deterministic grounding removes hallucinated evidence for free before any expensive secondary model call. Every claim must point to a real file, SHA, or patch quote.
+                  </p>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* ========================================================================= */}
         {/* TAB 1: MAINTAINER QUEUE (IMMEDIATELY VISIBLE WORKSPACE) */}
         {/* ========================================================================= */}
@@ -296,32 +482,7 @@ python run_github.py pr tiangolo/fastapi 11500`}
               </div>
             </div>
 
-            {/* 3 VALUE CARDS */}
-            <div className="value-props">
-              <div className="vprop-card">
-                <div className="vprop-icon">🔍</div>
-                <h3>1. On-Demand Artifact Tools</h3>
-                <p>
-                  Specialists call <code>list_commits</code> and <code>get_diff</code> on-demand to inspect commit bodies and code patches, rather than skimming vague subject lines.
-                </p>
-              </div>
-              <div className="vprop-card">
-                <div className="vprop-icon">🛡️</div>
-                <h3>2. Two-Layer Proof Verifier</h3>
-                <p>
-                  Every finding undergoes deterministic grounding (ref &amp; quote verification) followed by an independent soundness audit before reaching human review.
-                </p>
-              </div>
-              <div className="vprop-card">
-                <div className="vprop-icon">⚡</div>
-                <h3>3. Actionable Verdicts</h3>
-                <p>
-                  Outputs clear, trusted actions (<code>AUTO_OK</code>, <code>NEEDS_HUMAN</code>, <code>ESCALATE</code>) backed by cited line numbers and SHAs.
-                </p>
-              </div>
-            </div>
-
-            <div className="sec-head" style={{ marginTop: 24 }}>
+            <div className="sec-head" style={{ marginTop: 10 }}>
               <span className="sec-num">01</span>
               <h2>Pipeline Flow</h2>
             </div>

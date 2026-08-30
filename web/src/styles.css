@@ -122,6 +122,14 @@ nav.top {
   background: var(--tab-active-bg); color: var(--text); font-weight: 600;
   box-shadow: var(--tab-active-shadow);
 }
+.nav-tab-btn.video-highlight {
+  background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(124,58,237,0.1));
+  color: var(--accent); font-weight: 600; border: 1px solid rgba(37,99,235,0.25);
+}
+.nav-tab-btn.video-highlight.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white; border: none;
+}
 
 .nav-spacer { flex: 1; }
 .badge-model {
@@ -137,18 +145,16 @@ nav.top {
 }
 .theme-toggle:hover { border-color: var(--accent); }
 
-/* ---- Page Header (Compact & Tab Specific) ---- */
+/* ---- Page Header ---- */
 .page-head {
-  padding: 24px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px;
+  padding: 22px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px;
   display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;
 }
 .page-title-area h1 { font-size: 26px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.02em; }
 .page-title-area p { margin: 0; font-size: 14.5px; color: var(--text-dim); max-width: 650px; }
 
-/* ---- Compact Metric Pill Strip ---- */
-.metric-strip {
-  display: flex; gap: 8px; flex-wrap: wrap; align-self: center;
-}
+/* ---- Metric Pill Strip ---- */
+.metric-strip { display: flex; gap: 8px; flex-wrap: wrap; align-self: center; }
 .metric-pill {
   background: var(--bg-elev); border: 1px solid var(--border); border-radius: 8px;
   padding: 6px 12px; display: flex; flex-direction: column; box-shadow: var(--shadow);
@@ -156,16 +162,6 @@ nav.top {
 .metric-pill .mp-lbl { font-size: 10.5px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; }
 .metric-pill .mp-val { font-size: 15px; font-weight: 700; font-family: var(--mono); color: var(--text); }
 .metric-pill .mp-val.good { color: var(--good); }
-
-/* ---- Value Props Grid ---- */
-.value-props { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 20px 0; }
-.vprop-card {
-  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
-  padding: 18px; box-shadow: var(--shadow);
-}
-.vprop-icon { font-size: 22px; margin-bottom: 8px; }
-.vprop-card h3 { margin: 0 0 6px; font-size: 15.5px; font-weight: 700; color: var(--text); }
-.vprop-card p { margin: 0; font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
 
 /* ---- Tab Content Container ---- */
 .tab-content { padding-bottom: 70px; }
@@ -228,13 +224,39 @@ section { margin-top: 10px; }
 
 .chev { color: var(--text-faint); font-size: 16px; }
 
-/* ---- Live GitHub Scanner Tab ---- */
-.gh-box {
-  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
-  padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px;
+/* ---- Video Presentation Suite ---- */
+.video-suite { display: flex; flex-direction: column; gap: 20px; }
+.video-stepper {
+  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
 }
-.gh-box h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
-.gh-box p { margin: 0 0 12px; font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
+.step-btn {
+  background: var(--bg-elev); border: 1px solid var(--border); padding: 10px 14px;
+  border-radius: 10px; cursor: pointer; text-align: left; min-width: 190px;
+  transition: all 0.15s ease; box-shadow: var(--shadow);
+}
+.step-btn:hover { border-color: var(--accent); }
+.step-btn.active {
+  border-color: var(--accent); background: var(--accent-light);
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+}
+.step-btn .time { font-size: 11px; font-weight: 700; color: var(--accent); font-family: var(--mono); }
+.step-btn .title { font-size: 13px; font-weight: 700; color: var(--text); margin-top: 2px; }
+
+.script-box {
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px 24px; box-shadow: var(--shadow); border-left: 5px solid var(--accent);
+}
+.script-speaker {
+  font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase;
+  letter-spacing: 0.04em; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+}
+.script-quote {
+  font-size: 15.5px; font-style: italic; color: var(--text); line-height: 1.6; margin: 0 0 14px;
+}
+.script-action-box {
+  background: var(--bg-elev2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 10px;
+}
 
 /* ---- Pipeline Architecture Visualizer ---- */
 .pipe-container {
@@ -251,6 +273,24 @@ section { margin-top: 10px; }
 .pc-title { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
 .pc-desc { font-size: 12.5px; color: var(--text-dim); line-height: 1.45; }
 .pipe-arrow { color: var(--text-faint); font-size: 20px; font-weight: 300; }
+
+/* ---- Value Props Grid ---- */
+.value-props { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 16px 0; }
+.vprop-card {
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+  padding: 18px; box-shadow: var(--shadow);
+}
+.vprop-icon { font-size: 22px; margin-bottom: 8px; }
+.vprop-card h3 { margin: 0 0 6px; font-size: 15.5px; font-weight: 700; color: var(--text); }
+.vprop-card p { margin: 0; font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
+
+/* ---- Live GitHub Scanner Tab ---- */
+.gh-box {
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px;
+}
+.gh-box h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.gh-box p { margin: 0 0 12px; font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
 
 /* ---- Timeline & Callouts ---- */
 .timeline { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }

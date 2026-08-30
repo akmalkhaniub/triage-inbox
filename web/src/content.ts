@@ -26,20 +26,20 @@ export const QUESTIONS = [
 
 export const CHOICES = [
   {
-    h: "Router → specialists (not one mega-prompt)",
-    p: "A single prompt doing both jobs blurs each task's rules (“ignore internal commits”, “judge the code not the reply”). Separate lanes keep each specialist sharp and make new lanes drop-in.",
+    h: "Router ➔ Parallel Domain Specialists (not one mega-prompt)",
+    p: "A single prompt doing both tasks blurs domain rules (“ignore internal chore commits”, “judge the code diff not the author reply”). Dedicated specialists execute in parallel and keep domain rules sharp.",
   },
   {
-    h: "Tools that fetch on demand",
-    p: "The specialist calls list_commits / get_commit / read_diff only as needed — so it reads the commit body where a breaking change actually hides, instead of guessing from a subject line.",
+    h: "On-Demand Tools that fetch exact code slices",
+    p: "Specialists call list_commits, get_commit, and get_diff concurrently as needed — reading the commit body where breaking changes hide instead of guessing from vague subject lines.",
   },
   {
-    h: "A two-layer verifier",
-    p: "Deterministic grounding (the cited ref and quote must exist) catches hallucinated evidence for free; an independent soundness pass then checks the verdict follows. Only verified findings score.",
+    h: "Two-Layer Verification Seam (Load-Bearing in Score)",
+    p: "Deterministic grounding asserts cited SHAs and quotes physically exist in code; an independent soundness pass audits logical validity. Only verified findings reach maintainers.",
   },
   {
-    h: "One agent, any provider",
-    p: "The loop is provider-agnostic: Anthropic natively, plus OpenAI / Groq / OpenRouter through one adapter. The eval becomes a model-comparison harness, not a single-model demo.",
+    h: "Universal Finding Contract & Multi-Provider Engine",
+    p: "The engine is provider-agnostic across OpenAI, Anthropic, Groq, and OpenRouter, outputting standardized Finding schemas for any repository lane.",
   },
 ];
 

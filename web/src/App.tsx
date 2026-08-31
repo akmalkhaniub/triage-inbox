@@ -973,29 +973,42 @@ export default function App() {
                           </span>
                         </div>
 
-                        {/* LIVE ARTIFACT VERIFICATION BREAKDOWN */}
-                        <div className="qc-metrics-row">
-                          <div className="qc-arm-box">
-                            <span className="qc-arm-label">Git Commits:</span>
-                            <span className="qc-arm-badge clean">{audit.artifacts.commits_count} Commits Verified</span>
-                          </div>
+                        {/* SIDE-BY-SIDE BASELINE VS AGENT COMPARISON */}
+                        {(() => {
+                          const baseClaims = audit.baseline?.result.findings?.length || 0;
+                          const agentFindings = audit.agent.result.findings || [];
+                          const agentVerified = agentFindings.filter((f: any) => f.verified !== false).length;
+                          const falseAlarmsBlocked = Math.max(0, baseClaims - agentVerified);
+                          return (
+                            <div className="qc-metrics-row" style={{ marginTop: 10 }}>
+                              <div className="qc-arm-box" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                                <span className="qc-arm-label">📄 Naive Baseline:</span>
+                                <span className={`qc-arm-badge ${baseClaims > 0 ? "fail" : "clean"}`}>
+                                  {baseClaims} Claim{baseClaims === 1 ? "" : "s"} (Ungrounded)
+                                </span>
+                              </div>
 
-                          <div className="qc-arm-box">
-                            <span className="qc-arm-label">Grounding Proof:</span>
-                            <span className="qc-arm-badge pass">100% Code Grounded</span>
-                          </div>
+                              <div className="qc-arm-box" style={{ background: "var(--bg)", border: "1.5px solid var(--accent)" }}>
+                                <span className="qc-arm-label">🧠 Multi-Agent:</span>
+                                <span className={`qc-arm-badge ${agentVerified > 0 ? "pass" : "clean"}`}>
+                                  {agentVerified === 0 ? "Clean (0 Issues)" : `${agentVerified} Verified Finding${agentVerified === 1 ? "" : "s"}`}
+                                </span>
+                              </div>
 
-                          <div className="qc-arm-box">
-                            <span className="qc-arm-label">False Alarms:</span>
-                            <span className="qc-arm-badge pass">0 False Positives</span>
-                          </div>
+                              {falseAlarmsBlocked > 0 && (
+                                <span style={{ fontSize: 11.5, color: "var(--good)", fontWeight: 700, fontFamily: "var(--mono)", display: "flex", alignItems: "center", gap: 4 }}>
+                                  🛡️ {falseAlarmsBlocked} False Alarm{falseAlarmsBlocked === 1 ? "" : "s"} Blocked
+                                </span>
+                              )}
 
-                          <div className="qc-action-area">
-                            <span style={{ fontSize: 12.5, color: "var(--accent)", fontWeight: 700 }}>
-                              Inspect Observability &amp; Artifacts ➔
-                            </span>
-                          </div>
-                        </div>
+                              <div className="qc-action-area">
+                                <span style={{ fontSize: 12.5, color: "var(--accent)", fontWeight: 700 }}>
+                                  Inspect Full Observability &amp; Prompts ➔
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })}

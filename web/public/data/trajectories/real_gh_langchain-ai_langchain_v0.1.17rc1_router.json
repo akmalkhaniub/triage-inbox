@@ -1,0 +1,20 @@
+{
+  "agent": "router",
+  "item_id": "real_gh_langchain-ai_langchain_v0.1.17rc1",
+  "system": "You route items in a repository maintainer's triage queue to the\ncorrect specialist. Given a short preview of one item, classify it as exactly one\nof: changelog_audit, review_resolution, dep_bump, flaky_test, issue_triage.\n\nGuidance:\n- changelog_audit: the item is about reconciling a CHANGELOG / release notes with commits.\n- review_resolution: the item is about whether a PR addressed its review comments.\n- dep_bump: a dependency-version-bump PR to assess for safety.\n- flaky_test: a failing CI test to judge as real-vs-flaky.\n- issue_triage: a new bug report to sort as actionable / needs-info / duplicate.\n\nOutput ONLY JSON: {\"item_type\": \"<one of the above>\", \"why\": \"<short reason>\"}",
+  "steps": [
+    {
+      "kind": "model",
+      "step": 0,
+      "stop_reason": "end_turn",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item involves auditing a real release by comparing the changelog with commits.\"}"
+        }
+      ]
+    }
+  ],
+  "input_tokens": 266,
+  "output_tokens": 30
+}

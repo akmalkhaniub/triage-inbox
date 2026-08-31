@@ -292,7 +292,7 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                         })
                     return out
 
-                self._send_json(200, {
+                response_payload = {
                     "success": True,
                     "item_id": fx.item_id,
                     "title": fx.title,
@@ -307,7 +307,32 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                         "result": baseline_res.to_dict() if baseline_res else None,
                         "trajectories": serialize_trajs(baseline_trajs),
                     } if run_both and baseline_res else None,
-                })
+                }
+
+                # 6. Persist live run to disk files for offline reference and permanence
+                try:
+                    save_dir = Path("evalcases/saved_runs")
+                    save_dir.mkdir(parents=True, exist_ok=True)
+                    run_file = save_dir / f"{fx.item_id}.json"
+                    run_file.write_text(json.dumps(response_payload, indent=2), encoding="utf-8")
+
+                    # Also persist trajectories to web/public/data/trajectories
+                    traj_dir = Path("web/public/data/trajectories")
+                    traj_dir.mkdir(parents=True, exist_ok=True)
+                    for t in agent_trajs:
+                        t_file = traj_dir / f"{fx.item_id}_{t.agent}.json"
+                        t_file.write_text(json.dumps({
+                            "agent": t.agent,
+                            "item_id": t.item_id,
+                            "system": t.system,
+                            "steps": [{"kind": s.kind, **s.detail} for s in t.steps],
+                            "input_tokens": t.input_tokens,
+                            "output_tokens": t.output_tokens,
+                        }, indent=2), encoding="utf-8")
+                except Exception as pe:
+                    print("Error saving run to disk:", pe)
+
+                self._send_json(200, response_payload)
             except Exception as e:
                 import traceback
                 traceback.print_exc()

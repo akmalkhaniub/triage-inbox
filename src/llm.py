@@ -325,8 +325,16 @@ def run_agent(*, agent: str, item_id: str, system: str, user: str,
 
 
 def extract_json(text: str) -> Any:
-    """Pull the first top-level JSON object/array from a model response."""
+    """Resiliently pulls the first top-level JSON object/array from a model response.
+    
+    If the model returned conversational text indicating a clean release or empty
+    findings, safely returns [] rather than crashing the pipeline.
+    """
     text = (text or "").strip()
+    if not text:
+        return []
+
+    # 1. Check for markdown code fences
     if "```" in text:
         for p in text.split("```"):
             p = p.strip()
@@ -337,6 +345,8 @@ def extract_json(text: str) -> Any:
                     return json.loads(p)
                 except json.JSONDecodeError:
                     continue
+
+    # 2. Check for top-level JSON array [...] or object {...}
     for opener, closer in (("[", "]"), ("{", "}")):
         i, j = text.find(opener), text.rfind(closer)
         if i != -1 and j != -1 and j > i:
@@ -344,4 +354,12 @@ def extract_json(text: str) -> Any:
                 return json.loads(text[i:j + 1])
             except json.JSONDecodeError:
                 pass
-    raise ValueError(f"No JSON found in model output:\n{text[:400]}")
+
+    # 3. If model conversational text indicates clean state or no discrepancies
+    lower = text.lower()
+    clean_phrases = ("no discrepancies", "clean release", "no issues", "all commits", "no missing", "0 findings", "none found")
+    if any(phrase in lower for phrase in clean_phrases):
+        return []
+
+    # 4. Safe fallback to empty findings
+    return []

@@ -290,29 +290,10 @@ export default function App() {
   const [isRunningLive, setIsRunningLive] = useState<boolean>(false);
   const [liveData, setLiveData] = useState<LiveTriageData | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
-  const [rawPreviewData, setRawPreviewData] = useState<any | null>(null);
-  const [isPreviewingRaw, setIsPreviewingRaw] = useState<boolean>(false);
+
   const [activeArtifactTab, setActiveArtifactTab] = useState<"commits" | "changelog" | "diffs" | "comments">("commits");
 
-  const handlePreviewRawData = async () => {
-    if (!repoInput.trim()) return;
-    setIsPreviewingRaw(true);
-    setLiveError(null);
-    try {
-      const res = await fetch(`http://localhost:8000/api/github/preview?repo=${encodeURIComponent(repoInput.trim())}&base_tag=${encodeURIComponent(baseTag.trim())}&head_tag=${encodeURIComponent(headTag.trim())}&pr_number=${encodeURIComponent(prNumber.trim())}`);
-      if (!res.ok) {
-        const errJson = await res.json();
-        throw new Error(errJson.error || `HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      setRawPreviewData(data);
-    } catch (e: any) {
-      setLiveError(`Failed to fetch raw artifacts: ${e.message || String(e)}`);
-    } finally {
-      setIsPreviewingRaw(false);
-    }
-  };
-  const [expandedTrajStep, setExpandedTrajStep] = useState<number | null>(null);
+const [expandedTrajStep, setExpandedTrajStep] = useState<number | null>(null);
 
   // Default to LIGHT mode
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -1446,22 +1427,14 @@ export default function App() {
                 </div>
               </div>
 
-              {/* ACTION BUTTONS */}
-              <div style={{ marginTop: 20, display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+              {/* ACTION BUTTON */}
+              <div style={{ marginTop: 20, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
                 <button
                   className="run-btn"
                   onClick={handleRunLiveTriage}
                   disabled={isRunningLive || !repoInput.trim()}
                 >
                   {isRunningLive ? "⏳ Querying GitHub REST API & Running Triage Agents…" : "🚀 Execute Multi-Agent Repository Triage"}
-                </button>
-                <button
-                  className="filter-btn active"
-                  onClick={handlePreviewRawData}
-                  disabled={isPreviewingRaw || !repoInput.trim()}
-                  style={{ padding: "10px 18px", fontSize: 13 }}
-                >
-                  {isPreviewingRaw ? "📥 Fetching Raw Git Data…" : "📦 Preview Raw Fetched Data"}
                 </button>
                 {isRunningLive && (
                   <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
@@ -1530,108 +1503,6 @@ export default function App() {
               <div className="callout" style={{ borderLeftColor: "var(--bad)", marginTop: 16 }}>
                 <strong style={{ color: "var(--bad)" }}>Execution Error</strong>
                 <p>{liveError}</p>
-              </div>
-            )}
-
-            {/* RAW FETCHED DATA PREVIEW CARD */}
-            {rawPreviewData && (
-              <div className="gh-box" style={{ marginTop: 20, margin: "20px 0 0" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: 17 }}>📦 Raw Fetched GitHub Data ({rawPreviewData.repo})</h3>
-                    <span style={{ fontSize: 12, color: "var(--text-faint)" }}>
-                      {rawPreviewData.commits_count} commits fetched · {rawPreviewData.changelog_length || 0} changelog chars · {rawPreviewData.diff_hunks?.length || 0} diff hunks
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setRawPreviewData(null)}
-                    style={{ background: "none", border: "none", color: "var(--text-faint)", cursor: "pointer", fontSize: 13 }}
-                  >
-                    Close Preview ✕
-                  </button>
-                </div>
-
-                <div className="rc-tabs" style={{ marginBottom: 14 }}>
-                  <button
-                    className={`rc-tab ${activeArtifactTab === "commits" ? "active" : ""}`}
-                    onClick={() => setActiveArtifactTab("commits")}
-                  >
-                    Git Commits ({rawPreviewData.commits_count})
-                  </button>
-                  <button
-                    className={`rc-tab ${activeArtifactTab === "changelog" ? "active" : ""}`}
-                    onClick={() => setActiveArtifactTab("changelog")}
-                  >
-                    CHANGELOG Content
-                  </button>
-                  <button
-                    className={`rc-tab ${activeArtifactTab === "comments" ? "active" : ""}`}
-                    onClick={() => setActiveArtifactTab("comments")}
-                  >
-                    Review Comments ({rawPreviewData.review_comments?.length || 0})
-                  </button>
-                  <button
-                    className={`rc-tab ${activeArtifactTab === "diffs" ? "active" : ""}`}
-                    onClick={() => setActiveArtifactTab("diffs")}
-                  >
-                    Raw JSON Payload
-                  </button>
-                </div>
-
-                {activeArtifactTab === "commits" && (
-                  <div style={{ maxHeight: 320, overflowY: "auto", border: "1px solid var(--border)", borderRadius: 8, background: "var(--bg)" }}>
-                    {rawPreviewData.commits.map((c: any, i: number) => (
-                      <div key={i} style={{ padding: "8px 12px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10, fontSize: 12.5 }}>
-                        <a
-                          href={`https://github.com/${rawPreviewData.repo}/commit/${c.full_sha}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ fontFamily: "var(--mono)", fontWeight: 700, fontSize: 11.5 }}
-                        >
-                          {c.sha}
-                        </a>
-                        <span style={{ fontWeight: 600, color: "var(--text)", flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {c.message}
-                        </span>
-                        <span style={{ fontSize: 11, color: "var(--text-faint)" }}>@{c.author}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {activeArtifactTab === "changelog" && (
-                  <div>
-                    {rawPreviewData.changelog_text ? (
-                      <pre style={{ maxHeight: 300, margin: 0, whiteSpace: "pre-wrap", fontSize: 12.5 }}>
-                        {rawPreviewData.changelog_text}
-                      </pre>
-                    ) : (
-                      <p style={{ margin: 0, fontSize: 13, color: "var(--text-dim)" }}>
-                        No CHANGELOG.md file found at repository root.
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {activeArtifactTab === "comments" && (
-                  <div style={{ maxHeight: 300, overflowY: "auto" }}>
-                    {(!rawPreviewData.review_comments || rawPreviewData.review_comments.length === 0) ? (
-                      <p style={{ margin: 0, fontSize: 13, color: "var(--text-dim)" }}>No PR review comments on this target scope.</p>
-                    ) : (
-                      rawPreviewData.review_comments.map((rc: any, idx: number) => (
-                        <div key={idx} className="finding-card" style={{ marginBottom: 8 }}>
-                          <strong>@{rc.author || "reviewer"}:</strong> {rc.body}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-
-                {activeArtifactTab === "diffs" && (
-                  <pre style={{ maxHeight: 300, margin: 0, fontSize: 11.5, overflowY: "auto" }}>
-                    {JSON.stringify(rawPreviewData, null, 2)}
-                  </pre>
-                )}
               </div>
             )}
 

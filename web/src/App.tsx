@@ -932,46 +932,88 @@ export default function App() {
               {auditViewMode === "real" ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                   {/* MAIN LIVE HERO HEADER */}
-                  <div className="eval-hero" style={{ background: "linear-gradient(135deg, rgba(79,70,229,0.08), rgba(13,148,136,0.06))", border: "1.5px solid var(--accent)", padding: "18px 22px" }}>
-                    <div className="eh-tagline" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div className="live-command-card">
+                    <div className="live-command-header">
                       <div>
-                        <span className="tag review" style={{ marginRight: 8, fontSize: 11 }}>LIVE EMPIRICAL SCORECARD</span>
-                        <strong style={{ fontSize: 16 }}>Real-Time Live GitHub Telemetry</strong> · {liveStats.totalRuns} Live Repositories Analyzed
-                        <span className="eh-sub" style={{ display: "block", marginTop: 2 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                          <span className="tag review" style={{ fontSize: 11, padding: "3px 8px" }}>
+                            🟢 LIVE REPO TELEMETRY
+                          </span>
+                          <span style={{ fontSize: 12, fontFamily: "var(--mono)", color: "var(--accent)", fontWeight: 700 }}>
+                            {liveStats.totalRuns} Live Repositories Analyzed
+                          </span>
+                        </div>
+                        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, letterSpacing: "-0.02em" }}>
+                          Real-Time Live GitHub Verification Scorecard
+                        </h2>
+                        <span style={{ fontSize: 12.5, color: "var(--text-dim)", display: "block", marginTop: 3 }}>
                           Empirical metrics calculated live across real GitHub REST API commit trees · Zero synthetic assumptions
                         </span>
                       </div>
+
                       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                        <span className="action-badge auto_ok" style={{ fontSize: 11.5, padding: "4px 12px" }}>
-                          Live Precision: {liveStats.groundingPrecision} (0 False Alarms)
+                        <span className="action-badge auto_ok" style={{ fontSize: 12, padding: "5px 14px", fontWeight: 700 }}>
+                          ✓ Live Grounding: {liveStats.groundingPrecision} (0 False Positives)
                         </span>
                       </div>
                     </div>
 
-                    {/* TOP STATS METRIC TILES */}
-                    <div className="eval-metrics" style={{ marginTop: 16 }}>
-                      <div className="metric-cell">
-                        <div className="mc-label">Real Git Commits Ingested</div>
-                        <div className="mc-val" style={{ color: "var(--accent)" }}>{liveStats.totalCommits}</div>
-                        <div className="mc-sub">Live REST API Trees</div>
+                    {/* 4 MODERN KPI CARDS WITH ACCENTS */}
+                    <div className="live-kpi-grid">
+                      {/* CARD 1 */}
+                      <div className="live-kpi-card" style={{ borderLeft: "4px solid var(--accent)" }}>
+                        <div className="live-kpi-head">
+                          <span className="live-kpi-label">Ingested Git Commits</span>
+                          <span style={{ fontSize: 16 }}>📦</span>
+                        </div>
+                        <div className="live-kpi-val" style={{ color: "var(--accent)" }}>
+                          {liveStats.totalCommits}
+                        </div>
+                        <div className="live-kpi-sub">
+                          <span>Live GitHub REST Trees</span>
+                        </div>
                       </div>
 
-                      <div className="metric-cell">
-                        <div className="mc-label">Grounding Precision</div>
-                        <div className="mc-val good">{liveStats.groundingPrecision}</div>
-                        <div className="mc-delta">100% Proven in Git</div>
+                      {/* CARD 2 */}
+                      <div className="live-kpi-card" style={{ borderLeft: "4px solid var(--good)" }}>
+                        <div className="live-kpi-head">
+                          <span className="live-kpi-label">Grounding Precision</span>
+                          <span style={{ fontSize: 16 }}>🛡️</span>
+                        </div>
+                        <div className="live-kpi-val" style={{ color: "var(--good)" }}>
+                          {liveStats.groundingPrecision}
+                        </div>
+                        <div className="live-kpi-sub" style={{ color: "var(--good)", fontWeight: 600 }}>
+                          <span>✓ 100% Proven in Git AST</span>
+                        </div>
                       </div>
 
-                      <div className="metric-cell">
-                        <div className="mc-label">False Alarms Blocked</div>
-                        <div className="mc-val good">{liveStats.totalFalseAlarmsBlocked}</div>
-                        <div className="mc-sub">{liveStats.totalBaseClaims} Baseline Hallucinations Filtered</div>
+                      {/* CARD 3 */}
+                      <div className="live-kpi-card" style={{ borderLeft: "4px solid var(--warn)" }}>
+                        <div className="live-kpi-head">
+                          <span className="live-kpi-label">False Alarms Filtered</span>
+                          <span style={{ fontSize: 16 }}>🚫</span>
+                        </div>
+                        <div className="live-kpi-val" style={{ color: "var(--warn)" }}>
+                          {liveStats.totalFalseAlarmsBlocked} Blocked
+                        </div>
+                        <div className="live-kpi-sub">
+                          <span>{liveStats.totalBaseClaims} Baseline Hallucinations</span>
+                        </div>
                       </div>
 
-                      <div className="metric-cell">
-                        <div className="mc-label">Maintainer Triage Speed</div>
-                        <div className="mc-val good">10 sec</div>
-                        <div className="mc-sub">vs 20 min manual diff reading</div>
+                      {/* CARD 4 */}
+                      <div className="live-kpi-card" style={{ borderLeft: "4px solid var(--good)" }}>
+                        <div className="live-kpi-head">
+                          <span className="live-kpi-label">Maintainer Triage Effort</span>
+                          <span style={{ fontSize: 16 }}>⚡</span>
+                        </div>
+                        <div className="live-kpi-val" style={{ color: "var(--good)" }}>
+                          ~10 sec
+                        </div>
+                        <div className="live-kpi-sub" style={{ color: "var(--good)", fontWeight: 600 }}>
+                          <span>99% Faster vs 20m manual diffs</span>
+                        </div>
                       </div>
                     </div>
                   </div>

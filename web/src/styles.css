@@ -875,3 +875,70 @@ footer { border-top: 1px solid var(--border); padding: 24px 0; font-size: 12.5px
   from { transform: translateX(100%) !important; }
   to { transform: translateX(0) !important; }
 }
+
+/* ---- Ultra-Premium Live Command Center ---- */
+.live-command-card {
+  background: var(--bg-elev);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+.live-command-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.live-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.live-kpi-card {
+  background: var(--bg-elev2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.live-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.live-kpi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.live-kpi-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.live-kpi-val {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-family: var(--mono);
+}
+.live-kpi-sub {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

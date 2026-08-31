@@ -215,7 +215,7 @@ const SEED_REAL_AUDITS: LiveTriageData[] = [
   },
 ];
 
-type TabType = "video" | "audits" | "verification" | "github" | "architecture" | "reproduce";
+type TabType = "video" | "verification" | "github" | "architecture" | "reproduce";
 
 export default function App() {
   const [results, setResults] = useState<Results | null>(null);
@@ -247,8 +247,10 @@ export default function App() {
   // URL Hash Sync for Tab Navigation
   const [currentTab, setCurrentTab] = useState<TabType>(() => {
     const hash = window.location.hash.replace(/^#\/?/, "").toLowerCase();
-    if (hash.startsWith("case/") || hash === "queue") return "audits";
-    if (["video", "audits", "github", "architecture", "reproduce"].includes(hash)) {
+    if (hash.startsWith("case/") || hash === "queue" || hash === "audits" || hash === "verification") {
+      return "verification";
+    }
+    if (["video", "verification", "github", "architecture", "reproduce"].includes(hash)) {
       return hash as TabType;
     }
     return "video";
@@ -572,10 +574,10 @@ export default function App() {
               🐙 Live GitHub Scanner
             </button>
             <button
-              className={`nav-tab-btn ${currentTab === "audits" ? "active" : ""}`}
-              onClick={() => navigateTab("audits")}
+              className={`nav-tab-btn ${currentTab === "verification" ? "active" : ""}`}
+              onClick={() => navigateTab("verification")}
             >
-              📋 Verification Reports
+              🛡️ Verification Reports
             </button>
             <button
               className={`nav-tab-btn ${currentTab === "reproduce" ? "active" : ""}`}
@@ -849,7 +851,7 @@ export default function App() {
         {/* ========================================================================= */}
         {/* TAB 3: REPOSITORY VERIFICATION REPORTS & BENCHMARK                       */}
         {/* ========================================================================= */}
-        {(currentTab === "verification" || currentTab === "audits") && (
+        {currentTab === "verification" && (
           <section id="audits">
             <div className="page-head">
               <div className="page-title-area">

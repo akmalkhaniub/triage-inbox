@@ -38,8 +38,8 @@ prompt (see the live GitHub audits).
 > baseline's substantively-correct findings (e.g. it *did* catch the hidden
 > breaking change on case03) were counted as misses + false positives. The scorer
 > now canonicalizes subjects for both arms (`src/scoring.py::canonical_subject`),
-> which is idempotent on the agent (its score is unchanged, 9/0/1) and credits the
-> baseline fairly. The **gpt-4o-mini** cross-model table was withdrawn for the same
+> which is idempotent on the agent (its score is unchanged — the agent already
+> emits canonical refs) and credits the baseline fairly. The **gpt-4o-mini** cross-model table was withdrawn for the same
 > reason — regenerate it with `TRIAGE_PROVIDER=openai TRIAGE_MODEL=gpt-4o-mini
 > python eval.py` under the corrected scorer. Per-stage rows below marked *design
 > rationale* were not measured in isolation; the Baseline and Final rows are.

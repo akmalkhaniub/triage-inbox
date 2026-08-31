@@ -22,9 +22,9 @@ Picture an open-source maintainer or release manager on a Monday morning. The in
    - *The Danger:* A reviewer asks for critical error handling. The author replies *"Addressed 👍"*, but their code diff only reformatted whitespace. Tired reviewers assume it was fixed and merge bug-ridden code.
 
 ### Where Flat Single-Prompt LLMs Fall Short at Repository Triage
-When people first try solving this with LLMs, they dump the entire commit history or PR diff into a single prompt (**the Naive Baseline**). On our small fixtures a capable model (GPT-4o) actually recalls most real problems this way — but it **over-flags**: it asserts discrepancies it cannot ground, invents "missing docs" entries, and guesses breaking-ness from subject lines. Measured fairly, the baseline reaches **F1 = 0.86 with precision 0.82 and 0.2 false alarms per task** — good recall, but it cries wolf. The agent's job is to keep that recall while **eliminating the false alarms** (precision → 1.00), and to keep working when the artifact is a real 500-commit repo you *cannot* dump into one prompt.
+When people first try solving this with LLMs, they dump the entire commit history or PR diff into a single prompt (**the Naive Baseline**). On our small fixtures a capable model (GPT-4o) actually recalls most real problems this way — but it **over-flags**: it asserts discrepancies it cannot ground, invents "missing docs" entries, and guesses breaking-ness from subject lines. Measured fairly across 3 runs, the baseline averages **F1 = 0.78, precision 0.70, and 0.37 false alarms per task** — decent recall, but it cries wolf. The agent's job is to keep that recall while **eliminating the false alarms** (precision → 1.00, zero false alarms in every run), and to keep working when the artifact is a real 500-commit repo you *cannot* dump into one prompt.
 
-> **On the old "F1 = 0.00" claim:** an earlier version of this README reported the baseline at F1 = 0.00. That number was a *scoring artifact*, not a real capability gap — the scorer matched findings on an exact subject-ref string (`changelog:1`) that only the specialist prompts were taught, so the baseline's substantively-correct findings failed to match. The scorer now canonicalizes subjects for **both** arms ([`src/scoring.py`](src/scoring.py)); re-score any saved run offline with `python rescore.py`. The honest, canonicalized numbers are used throughout below.
+> **On the old "F1 = 0.00" claim:** an earlier version of this README reported the baseline at F1 = 0.00. That number was a *scoring artifact*, not a real capability gap — the scorer matched findings on an exact subject-ref string (`changelog:1`) that only the specialist prompts were taught, so the baseline's substantively-correct findings failed to match. The scorer now canonicalizes subjects for **both** arms ([`src/scoring.py`](src/scoring.py)); re-score any saved run offline with `python rescore.py`. The honest, canonicalized numbers (averaged over 3 live runs) are used throughout below.
 
 ---
 
@@ -100,7 +100,7 @@ Evaluated across **10 synthetic and hard edge cases** (`evalcases/cases/`), incl
 
 Per-run F1 (baseline → agent): run 1 `0.78 → 0.82`, run 2 `0.73 → 0.82`, run 3 `0.82 → 0.95`. Raw runs in `results/runs/`.
 
-*(Reproduce: `python eval.py` re-runs the models (~$0.036/run on gpt-4o, ~2 min); `python rescore.py` re-scores saved trajectories offline for free and reproduces a run's table exactly.)*
+*(Reproduce: `python eval.py` re-runs both arms on gpt-4o — ~$0.14 and ~2–3 min per full run; `python rescore.py` re-scores saved trajectories offline for free and reproduces a run's table exactly.)*
 
 > **Key Takeaway — the win is reliability, and it has zero variance:** across all 3 runs the agent scored **precision = 1.00 and false alarms = 0.00, every time.** Every alert it raises carries verifiable evidence, and its F1 beat the baseline in **every** run (agent min 0.82 > baseline max 0.82). That is the durable contribution of *verification at the seam*. The honest trade-off: the agent is **more conservative** — mean recall 0.77 vs the baseline's 0.87 — because it stays silent rather than surface a claim it cannot ground. So recall is the axis to improve; precision/reliability is already solved. The router + on-demand tools additionally earn their keep on **scale** — a real release with hundreds of commits cannot be dumped into one prompt at all (see the [Live GitHub audits](#-live-real-time-open-source-github-audits)).
 
@@ -127,13 +127,27 @@ python run_github.py pr tiangolo/fastapi 11500 --save evalcases/cases/case11_fas
 
 ## 💻 Web Dashboard & Visual Agent Graph
 
-The web dashboard is running at **[http://localhost:5173/](http://localhost:5173/)** with 5 purposeful views:
+An optional Vite + React dashboard presents the whole project visually. It reads a **pre-generated data bundle** (committed under `web/public/data/`), so the static views need **no API keys and no server**:
 
-1. **🎬 Video & Pitch (`#/video`):** Interactive presentation suite with 5 structured teleprompter steps and 4 concrete failure-mode use cases.
-2. **📥 Maintainer Queue (`#/queue`):** 10 benchmark cases with visual win pills, ground truth cards, and slide-out trajectory proof drawers.
-3. **🐙 Live GitHub Scanner (`#/github`):** Real-time search bar for open-source GitHub repos with live tag/PR auto-fetching, side-by-side execution, and raw artifact inspectors.
-4. **🧠 Architecture & Graph (`#/architecture`):** Interactive Multi-Agent Node Graph, Design Choices, 4 Questions, and 6-Iteration Changelog.
-5. **🚀 Reproduce & CI (`#/reproduce`):** Clean-room execution guide and automated continuous triage.
+```bash
+cd web
+npm install
+npm run dev          # → http://localhost:5173
+```
+
+To also use the **Live GitHub Scanner** (audit any public repo on demand), start the local API in a second terminal — the dev server proxies `/api` to it:
+
+```bash
+python server.py     # → http://127.0.0.1:8000 (needs an API key in .env)
+```
+
+The dashboard has 5 purposeful views:
+
+1. **🎬 Solution Pitch (`#/video`):** Five-part presentation — problem, baseline, a real inline pipeline run, measured evidence, and hot take.
+2. **🛡️ Verification Reports (`#/verification`):** Live GitHub audit scorecard **and** the 10-case ground-truth benchmark, with slide-out trajectory proof drawers.
+3. **🐙 Live GitHub Scanner (`#/github`):** Search open-source repos, live tag/PR auto-fetching, side-by-side agent-vs-baseline execution, and raw artifact inspectors.
+4. **🧠 Architecture & Graph (`#/architecture`):** Interactive multi-agent node graph, design choices, and the iteration changelog.
+5. **🚀 Reproduce & CI (`#/reproduce`):** Clean-room execution guide and continuous-triage workflow.
 
 ---
 
@@ -172,7 +186,7 @@ Outputs are written to `results/results.json`, `results/results.csv`, and all tr
 ```bash
 python rescore.py    # rebuilds the F1 table from saved trajectories/, writes results/results_rescored.json
 ```
-`rescore.py` reconstructs each arm's findings from the saved traces and re-scores them with the current (fair) scorer — useful for verifying the headline table, or seeing the effect of a scorer change, without spending a cent. It re-derives the agent's `verified` flags exactly as the pipeline does (deterministic grounding **and** the recorded soundness verdicts), and reproduces the original agent score exactly (9/0/1), which is what validates the baseline numbers beside it.
+`rescore.py` reconstructs each arm's findings from the saved traces and re-scores them with the current (fair) scorer — useful for verifying a run's table, or seeing the effect of a scorer change, without spending a cent. It re-derives the agent's `verified` flags exactly as the pipeline does (deterministic grounding **and** the recorded soundness verdicts), and reproduces that run's agent score exactly — which is what validates the baseline numbers scored alongside it.
 
 ---
 

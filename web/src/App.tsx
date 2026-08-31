@@ -1307,6 +1307,29 @@ export default function App() {
             {/* VIEW MODE B: BENCHMARK EVALUATION TEST SUITE */}
             {auditViewMode === "benchmark" && (
               <div>
+                {/* CONTROLLED BENCHMARK CONTEXT CALLOUT */}
+                <div className="callout" style={{ borderLeftColor: "var(--accent2)", background: "var(--bg-elev2)", margin: "0 0 16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                        <span className="tag" style={{ background: "rgba(124,58,237,0.12)", color: "var(--accent2)", border: "1px solid rgba(124,58,237,0.25)", fontSize: 11, fontWeight: 700 }}>
+                          🔬 CONTROLLED OFFLINE EVALUATION SUITE
+                        </span>
+                        <strong style={{ fontSize: 14 }}>10 Standardized Golden Test Cases</strong>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 12.5, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                        This is the <strong>fixed scientific evaluation dataset</strong> with human-verified ground-truth labels. It allows mathematical scoring (F1, Precision, Recall) to benchmark different LLM architectures (GPT-4o vs Claude vs Baseline) under identical offline conditions.
+                      </p>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <span style={{ fontSize: 11.5, background: "var(--bg)", border: "1px solid var(--border)", padding: "4px 10px", borderRadius: 6, fontFamily: "var(--mono)", color: "var(--text-dim)" }}>
+                        <code>python eval.py</code>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* VERDICT TAXONOMY GUIDE */}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 10, margin: "14px 0 16px" }}>
                   <div style={{ background: "var(--bg-elev2)", border: "1px solid var(--border)", borderLeft: "4px solid var(--good)", borderRadius: 8, padding: "10px 14px" }}>
@@ -1383,13 +1406,13 @@ export default function App() {
                       <div className="queue-card-premium" key={id} onClick={() => handleSelectCase(id)}>
                         <div className="qc-top-row">
                           <div className="qc-badge-strip">
+                            <span className="tag" style={{ background: "rgba(124,58,237,0.1)", color: "var(--accent2)", border: "1px solid rgba(124,58,237,0.25)" }}>
+                              🧪 Golden Benchmark #{id}
+                            </span>
                             <span className={`tag ${isReview ? "review" : "changelog"}`}>
                               {isReview ? "💬 PR Review Check" : "📦 Release Notes Audit"}
                             </span>
                             {isHard && <span className="tag hard">⚡ Hard Edge Case</span>}
-                            <span style={{ fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--mono)", fontWeight: 600 }}>
-                              #{id}
-                            </span>
                           </div>
 
                           <span className={`action-badge ${row.agent?.action || "needs_human"}`}>

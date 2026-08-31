@@ -1,0 +1,21 @@
+{
+  "name": "Triage Inbox",
+  "user": "ubuntu",
+  "install": "pip3 install -r requirements.txt && npm --prefix web install",
+  "ports": [
+    { "name": "web dashboard", "port": 5173 },
+    { "name": "triage api", "port": 8000 }
+  ],
+  "terminals": [
+    {
+      "name": "triage api",
+      "command": "python3 server.py",
+      "description": "Local Triage Inbox API backend (server.py) on port 8000. Serves /api/health, /api/models, GitHub search/preview, and the live triage endpoint. Live triage/eval require an LLM API key (e.g. OPENAI_API_KEY) in the environment."
+    },
+    {
+      "name": "web dashboard",
+      "command": "npm --prefix web run dev",
+      "description": "Vite + React dashboard dev server on port 5173. Serves the static results bundle in web/public/data and proxies /api to the triage api on port 8000."
+    }
+  ]
+}

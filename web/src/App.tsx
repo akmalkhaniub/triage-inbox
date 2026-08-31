@@ -930,7 +930,7 @@ export default function App() {
               <div className="page-title-area">
                 <h1>📋 Repository Verification &amp; Benchmark Reports</h1>
                 <p>
-                  Zero-hallucination release notes and PR review verification feed. View live runs executed on public GitHub repositories, or inspect the 10-case ground truth benchmark suite.
+                  Evidence-first release-notes and PR-review verification feed — every surfaced finding is grounded in a real commit, line, or diff hunk. View live runs executed on public GitHub repositories, or inspect the 10-case ground-truth benchmark suite.
                 </p>
               </div>
 

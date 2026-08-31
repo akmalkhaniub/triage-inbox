@@ -457,6 +457,9 @@ export default function App() {
     }
 
     const selectedSingle = activeAudits.length === 1 ? activeAudits[0] : null;
+    const baseGroundedCount = Math.max(0, totalBaseClaims - totalFalseAlarmsBlocked);
+    const basePrecisionPct = totalBaseClaims > 0 ? Math.round((baseGroundedCount / totalBaseClaims) * 100) : 0;
+    const precisionGap = 100 - basePrecisionPct;
 
     return {
       totalRuns: activeAudits.length,
@@ -467,6 +470,8 @@ export default function App() {
       totalBaseClaims,
       totalVerified,
       totalFalseAlarmsBlocked,
+      basePrecisionPct,
+      precisionGap,
       groundingPrecision: "100.0%",
     };
   }, [activeAudits]);
@@ -1076,7 +1081,7 @@ export default function App() {
                     <div style={{ background: "var(--bg-elev)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 18px", boxShadow: "var(--shadow)" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                         <strong style={{ fontSize: 13.5, color: "var(--text)" }}>📊 Live Grounding Precision (%)</strong>
-                        <span style={{ fontSize: 11, color: "var(--good)", fontWeight: 700 }}>+18% Gap</span>
+                        <span style={{ fontSize: 11, color: "var(--good)", fontWeight: 700 }}>+{liveStats.precisionGap}% Gap</span>
                       </div>
 
                       {/* MULTI-AGENT BAR */}
@@ -1094,10 +1099,12 @@ export default function App() {
                       <div style={{ margin: "10px 0" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
                           <span style={{ fontWeight: 600, color: "var(--text-dim)" }}>📄 Naive Flat Baseline</span>
-                          <strong style={{ color: "var(--warn)" }}>82.0% (Unverified)</strong>
+                          <strong style={{ color: liveStats.basePrecisionPct === 0 ? "var(--bad)" : "var(--warn)" }}>
+                            {liveStats.basePrecisionPct}.0% ({liveStats.totalFalseAlarmsBlocked} Hallucinated)
+                          </strong>
                         </div>
                         <div style={{ height: 18, background: "var(--bg-elev2)", borderRadius: 6, overflow: "hidden", border: "1px solid var(--border)" }}>
-                          <div style={{ width: "82%", height: "100%", background: "var(--warn)", borderRadius: 5, transition: "width 0.6s ease" }} />
+                          <div style={{ width: `${Math.max(5, liveStats.basePrecisionPct)}%`, height: "100%", background: liveStats.basePrecisionPct === 0 ? "var(--bad)" : "var(--warn)", borderRadius: 5, transition: "width 0.6s ease" }} />
                         </div>
                       </div>
 
@@ -1110,7 +1117,9 @@ export default function App() {
                     <div style={{ background: "var(--bg-elev)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 18px", boxShadow: "var(--shadow)" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                         <strong style={{ fontSize: 13.5, color: "var(--text)" }}>🛡️ Verifier Hallucination Funnel</strong>
-                        <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 700 }}>Zero False Alarms</span>
+                        <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 700 }}>
+                          {liveStats.totalFalseAlarmsBlocked === 0 ? "Clean Run" : `${liveStats.totalFalseAlarmsBlocked} Filtered`}
+                        </span>
                       </div>
 
                       {/* FUNNEL STAGES */}
@@ -1120,26 +1129,26 @@ export default function App() {
                           <div style={{ flex: 1, height: 12, background: "var(--border)", borderRadius: 4 }}>
                             <div style={{ width: "100%", height: "100%", background: "var(--warn)", borderRadius: 4 }} />
                           </div>
-                          <span style={{ fontSize: 11.5, fontFamily: "var(--mono)", fontWeight: 700 }}>{liveStats.totalBaseClaims || 6} claims</span>
+                          <span style={{ fontSize: 11.5, fontFamily: "var(--mono)", fontWeight: 700 }}>{liveStats.totalBaseClaims} claims</span>
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ width: 140, fontSize: 11.5, color: "var(--good)" }}>2. Blocked at Verifier:</span>
+                          <span style={{ width: 140, fontSize: 11.5, color: "var(--bad)" }}>2. Blocked at Verifier:</span>
                           <div style={{ flex: 1, height: 12, background: "var(--border)", borderRadius: 4 }}>
-                            <div style={{ width: `${Math.min(100, ((liveStats.totalFalseAlarmsBlocked || 4) / (liveStats.totalBaseClaims || 6)) * 100)}%`, height: "100%", background: "var(--bad)", borderRadius: 4 }} />
+                            <div style={{ width: `${liveStats.totalBaseClaims > 0 ? (liveStats.totalFalseAlarmsBlocked / liveStats.totalBaseClaims) * 100 : 0}%`, height: "100%", background: "var(--bad)", borderRadius: 4 }} />
                           </div>
-                          <span style={{ fontSize: 11.5, fontFamily: "var(--mono)", fontWeight: 700, color: "var(--good)" }}>
-                            -{liveStats.totalFalseAlarmsBlocked || 4} dropped
+                          <span style={{ fontSize: 11.5, fontFamily: "var(--mono)", fontWeight: 700, color: "var(--bad)" }}>
+                            -{liveStats.totalFalseAlarmsBlocked} dropped
                           </span>
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                           <span style={{ width: 140, fontSize: 11.5, color: "var(--accent)", fontWeight: 700 }}>3. Surfaced to Human:</span>
                           <div style={{ flex: 1, height: 12, background: "var(--border)", borderRadius: 4 }}>
-                            <div style={{ width: `${Math.max(15, ((liveStats.totalVerified || 2) / (liveStats.totalBaseClaims || 6)) * 100)}%`, height: "100%", background: "var(--accent)", borderRadius: 4 }} />
+                            <div style={{ width: `${liveStats.totalBaseClaims > 0 ? (liveStats.totalVerified / liveStats.totalBaseClaims) * 100 : 100}%`, height: "100%", background: "var(--accent)", borderRadius: 4 }} />
                           </div>
                           <span style={{ fontSize: 11.5, fontFamily: "var(--mono)", fontWeight: 700, color: "var(--accent)" }}>
-                            {liveStats.totalVerified || 2} verified
+                            {liveStats.totalVerified} verified
                           </span>
                         </div>
                       </div>

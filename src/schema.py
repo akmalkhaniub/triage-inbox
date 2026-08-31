@@ -42,8 +42,12 @@ class Finding:
     evidence: list[Evidence] = field(default_factory=list)
     confidence: float = 0.5             # 0..1 the specialist's self-reported confidence
     rationale: str = ""
-    verified: bool | None = None        # set by the verifier: did evidence support the verdict?
-    verifier_note: str = ""
+    # Verifier signals (set by src.verifier). Kept as two distinct layers so the
+    # UI can show WHY a finding was surfaced or suppressed:
+    grounded: bool | None = None        # layer 1: refs resolve AND quotes exist (deterministic)
+    sound: bool | None = None           # layer 2: verdict follows from full artifact (LLM)
+    verified: bool | None = None        # grounded AND sound -- the gate the scorer trusts
+    verifier_note: str = ""             # human-readable reason for the decision
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)

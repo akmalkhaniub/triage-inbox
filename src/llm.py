@@ -104,12 +104,10 @@ def _anthropic_call(system: str, messages: list[dict[str, Any]], tool_specs: lis
         messages=messages,
     )
 
-    # If Claude 3.7 / 3.5 reasoning effort or thinking is configured:
-    if config.EFFORT:
-        try:
-            kwargs["output_config"] = {"effort": config.EFFORT}
-        except Exception:
-            pass
+    # NOTE: `output_config`/`effort` is NOT a parameter of the Anthropic Messages
+    # API (it belongs to higher-level SDKs), and sending it makes `messages.create`
+    # raise. We intentionally do not pass it here so the Anthropic backend runs
+    # cleanly. `config.EFFORT` is retained only as a label in trajectories/reports.
 
     if tool_specs:
         # Cache tool definitions if multiple tools are declared
@@ -347,19 +345,30 @@ def extract_json(text: str) -> Any:
                     continue
 
     # 2. Check for top-level JSON array [...] or object {...}
+    saw_bracket = False
     for opener, closer in (("[", "]"), ("{", "}")):
         i, j = text.find(opener), text.rfind(closer)
         if i != -1 and j != -1 and j > i:
+            saw_bracket = True
             try:
                 return json.loads(text[i:j + 1])
             except json.JSONDecodeError:
                 pass
 
-    # 3. If model conversational text indicates clean state or no discrepancies
+    # 3. Only treat prose as "clean" when there is NO JSON structure at all.
+    #    If we saw a bracket that failed to parse, that is a malformed-output
+    #    problem, not an empty result -- returning [] there would silently drop
+    #    real findings and manufacture a false negative. Signal the failure instead.
+    if saw_bracket:
+        raise ValueError("model returned malformed JSON that could not be parsed")
+
     lower = text.lower()
-    clean_phrases = ("no discrepancies", "clean release", "no issues", "all commits", "no missing", "0 findings", "none found")
+    clean_phrases = ("no discrepancies", "clean release", "no issues",
+                     "no missing", "0 findings", "none found",
+                     "no findings", "everything matches")
     if any(phrase in lower for phrase in clean_phrases):
         return []
 
-    # 4. Safe fallback to empty findings
-    return []
+    # 4. No JSON and no clean signal: unknown shape -- fail loudly rather than
+    #    pretend the item was clean.
+    raise ValueError("model response contained no parseable JSON")

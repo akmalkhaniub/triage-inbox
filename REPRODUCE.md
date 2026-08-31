@@ -82,8 +82,13 @@ Console prints the comparison table at the end.
 ```bash
 python eval.py --limit 2          # smoke test on the first 2 cases
 python eval.py --arm agent        # only the agent arm
-TRIAGE_MODEL=claude-sonnet-5 python eval.py   # cheaper run (env override)
+TRIAGE_MODEL=gpt-4o python eval.py   # reproduce the headline (default model is gpt-4o-mini)
+python rescore.py                 # re-score the SAVED trajectories offline, $0 cost
 ```
+
+`rescore.py` recomputes the F1 table from the trajectories already on disk using
+the current (fair, subject-canonicalizing) scorer — no API calls. It reproduces
+the agent's score exactly, which validates the baseline numbers beside it.
 
 ### Switching provider / model
 
@@ -91,14 +96,14 @@ Set `TRIAGE_PROVIDER` (and optionally `TRIAGE_MODEL`) to compare backends on the
 same cases. You only need the API key for the provider you run.
 
 ```bash
-TRIAGE_PROVIDER=anthropic  python eval.py                      # Claude (default)
+TRIAGE_PROVIDER=openai     TRIAGE_MODEL=gpt-4o python eval.py  # headline (openai is the default provider)
+TRIAGE_PROVIDER=anthropic  TRIAGE_MODEL=claude-opus-5 python eval.py
 TRIAGE_PROVIDER=groq       python run_one.py evalcases/cases/case01_changelog_phantom.json
-TRIAGE_PROVIDER=openai TRIAGE_MODEL=gpt-4o-mini python eval.py
 TRIAGE_PROVIDER=openrouter TRIAGE_MODEL=anthropic/claude-sonnet-4.5 python eval.py
 ```
 
-- `anthropic` supports the effort knob (`TRIAGE_EFFORT`); the OpenAI-compatible
-  providers ignore it.
+- `TRIAGE_EFFORT` is recorded as a label in trajectories/reports but is **not**
+  sent to any provider's API (it is not a raw Messages/Chat-Completions param).
 - **Groq free tier** has an ~8k tokens/minute cap. `run_one.py` on a single case
   fits; the full both-arms `eval.py` will hit throttling — the adapter retries
   with backoff, so it still completes, just slowly. For a fast full run use a

@@ -1,0 +1,21 @@
+{
+  "note": "offline re-score of saved trajectories with fair subject canonicalization",
+  "baseline": {
+    "tp": 9,
+    "fp": 2,
+    "fn": 1,
+    "precision": 0.8181818181818182,
+    "recall": 0.9,
+    "f1": 0.8571428571428572,
+    "false_alarms_per_case": 0.2
+  },
+  "agent": {
+    "tp": 9,
+    "fp": 0,
+    "fn": 1,
+    "precision": 1.0,
+    "recall": 0.9,
+    "f1": 0.9473684210526316,
+    "false_alarms_per_case": 0.0
+  }
+}

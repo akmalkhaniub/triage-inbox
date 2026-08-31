@@ -168,33 +168,29 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
             return
 
         if parsed.path == "/api/models":
+            # Keep these ids in sync with src/config.py (PRICING + default_model).
             models_registry = {
                 "openai": [
-                    {"id": "gpt-4o", "name": "GPT-4o (Omni Flagship — 0.95 F1 Benchmark Winner)"},
-                    {"id": "gpt-4o-mini", "name": "GPT-4o Mini (Fast & Economical)"},
-                    {"id": "o3-mini", "name": "o3-mini (High Reasoning & Logic)"},
-                    {"id": "o1", "name": "o1 (Deep Reasoning Model)"},
-                    {"id": "gpt-4.5-preview", "name": "GPT-4.5 Preview (Knowledge Flagship)"},
+                    {"id": "gpt-4o", "name": "GPT-4o (headline benchmark model)"},
+                    {"id": "gpt-4o-mini", "name": "GPT-4o Mini (fast & economical)"},
+                    {"id": "o3-mini", "name": "o3-mini (reasoning)"},
+                    {"id": "o1", "name": "o1 (deep reasoning)"},
                 ],
                 "anthropic": [
-                    {"id": "claude-3-7-sonnet-20250219", "name": "Claude 3.7 Sonnet (Hybrid Reasoning Flagship)"},
-                    {"id": "claude-3-5-sonnet-20241022", "name": "Claude 3.5 Sonnet (Coding Specialist)"},
-                    {"id": "claude-3-5-haiku-20241022", "name": "Claude 3.5 Haiku (Ultra-Fast Response)"},
-                    {"id": "claude-3-opus-20240229", "name": "Claude 3 Opus (Evaluator Model)"},
+                    {"id": "claude-opus-5", "name": "Claude Opus 5 (flagship, default)"},
+                    {"id": "claude-sonnet-5", "name": "Claude Sonnet 5 (balanced)"},
+                    {"id": "claude-haiku-4-5", "name": "Claude Haiku 4.5 (ultra-fast)"},
                 ],
                 "groq": [
-                    {"id": "deepseek-r1-distill-llama-70b", "name": "DeepSeek R1 Distill 70B (Deep Reasoning / Free)"},
-                    {"id": "llama-3.3-70b-versatile", "name": "Llama 3.3 70B Versatile (Blazing Fast / Free)"},
-                    {"id": "llama-3.1-8b-instant", "name": "Llama 3.1 8B Instant (Sub-second Latency)"},
-                    {"id": "qwen-2.5-32b", "name": "Qwen 2.5 32B (High Accuracy)"},
-                    {"id": "mixtral-8x7b-32768", "name": "Mixtral 8x7B (32k Context Window)"},
+                    {"id": "openai/gpt-oss-120b", "name": "GPT-OSS 120B (default, free tier)"},
+                    {"id": "llama-3.3-70b-versatile", "name": "Llama 3.3 70B Versatile (free)"},
+                    {"id": "llama-3.1-8b-instant", "name": "Llama 3.1 8B Instant (sub-second)"},
+                    {"id": "deepseek-r1-distill-llama-70b", "name": "DeepSeek R1 Distill 70B (reasoning / free)"},
                 ],
                 "openrouter": [
-                    {"id": "anthropic/claude-3.7-sonnet", "name": "Claude 3.7 Sonnet (via OpenRouter)"},
-                    {"id": "deepseek/deepseek-r1", "name": "DeepSeek R1 (via OpenRouter)"},
+                    {"id": "anthropic/claude-sonnet-4.5", "name": "Claude Sonnet 4.5 (via OpenRouter, default)"},
                     {"id": "openai/gpt-4o", "name": "GPT-4o (via OpenRouter)"},
-                    {"id": "google/gemini-2.0-flash-001", "name": "Gemini 2.0 Flash (via OpenRouter)"},
-                    {"id": "google/gemini-2.0-pro-exp-02-05", "name": "Gemini 2.0 Pro Experimental"},
+                    {"id": "deepseek/deepseek-r1", "name": "DeepSeek R1 (via OpenRouter)"},
                     {"id": "meta-llama/llama-3.3-70b-instruct", "name": "Llama 3.3 70B Instruct"},
                 ],
             }

@@ -98,8 +98,10 @@ def verify(fx: Fixture, findings: list[Finding]) -> Trajectory | None:
     grounded: list[Finding] = []
     for f in findings:
         ok, note = ground(fx, f)
+        f.grounded = ok
         if not ok:
-            f.verified, f.verifier_note = False, note
+            # Failed layer 1: never reaches soundness, so it is neither sound nor verified.
+            f.sound, f.verified, f.verifier_note = None, False, note
         else:
             grounded.append(f)
 
@@ -131,8 +133,10 @@ def verify(fx: Fixture, findings: list[Finding]) -> Trajectory | None:
     for f in grounded:
         v = verdicts.get(f.claim_id)
         if v is None:
-            f.verified, f.verifier_note = False, "verifier returned no decision"
+            f.sound, f.verified = False, False
+            f.verifier_note = "verifier returned no decision"
         else:
-            f.verified = bool(v.get("sound", False))
+            f.sound = bool(v.get("sound", False))
+            f.verified = f.sound  # already grounded; verified iff also sound
             f.verifier_note = v.get("note", "")
     return traj

@@ -42,8 +42,14 @@ def main() -> None:
 
     manifest: dict[str, dict[str, list[dict]]] = {}
     out_traj = WEB_DATA / "trajectories"
+    # Clear ONLY the regenerated per-case subdirectories. Top-level files here
+    # (e.g. real_gh_*.json written by live GitHub runs) are NOT rebuilt from
+    # TRAJ_SRC, so a blanket rmtree would silently delete committed live-run
+    # traces on every build. Preserve them.
     if out_traj.exists():
-        shutil.rmtree(out_traj)
+        for child in out_traj.iterdir():
+            if child.is_dir():
+                shutil.rmtree(child)
 
     for jf in sorted(TRAJ_SRC.rglob("*.json")):
         name = jf.stem                          # case__arm__agent

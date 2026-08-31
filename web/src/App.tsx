@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { isHardTitle, loadCases, loadManifest, loadResults, pct } from "./data";
 import TrajectoryPanel from "./TrajectoryPanel";
+import LiveTrajectoryCard from "./LiveTrajectoryCard";
+import FindingCard from "./FindingCard";
+import MetricsComparison from "./MetricsComparison";
 import AgentGraph from "./AgentGraph";
 import { STORY, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
@@ -37,6 +40,8 @@ interface ArmOutput {
       evidence: Array<{ kind: string; ref: string; quote: string }>;
       confidence: number;
       rationale: string;
+      grounded?: boolean | null;
+      sound?: boolean | null;
       verified: boolean | null;
       verifier_note: string;
     }>;
@@ -708,7 +713,7 @@ export default function App() {
               <div>
                 <div className="script-box">
                   <div className="script-quote">
-                    "When developers first try solving this with standard LLMs, they dump the entire commit history or PR diff into a single prompt. Here is what happens: the baseline model produces confident hallucinations. It invents commit SHAs that don't exist and guesses whether changes were breaking from vague subject lines instead of drilling into commit bodies."
+                    "When developers first try solving this with standard LLMs, they dump the entire commit history or PR diff into a single prompt. On small inputs a strong model actually recalls most of the real problems this way — but it over-flags: it asserts discrepancies it cannot ground, with total confidence and no verifiable reference, and it guesses breaking-ness from a subject line instead of drilling into the commit body. Good recall, poor precision — and it cannot scale to a real repo you can't fit in one prompt."
                   </div>
                 </div>
 
@@ -726,12 +731,12 @@ export default function App() {
                         <span className="tag" style={{ background: "var(--bad)", color: "white" }}>❌ Flat Single-Prompt LLM</span>
                         <h3 style={{ margin: "4px 0 0", fontSize: 16 }}>The Naive Approach</h3>
                       </div>
-                      <span className="action-badge needs_human">0.00 F1 Score</span>
+                      <span className="action-badge needs_human">{results.aggregate.baseline!.precision.toFixed(2)} precision · over-flags</span>
                     </div>
                     <ul style={{ margin: "12px 0 0", paddingLeft: 18, fontSize: 13, color: "var(--text)" }}>
-                      <li style={{ marginBottom: 6 }}><strong>Skims Subject Lines:</strong> Guesses whether a commit was breaking from a 5-word title without reading the commit body.</li>
-                      <li style={{ marginBottom: 6 }}><strong>Hallucinates Citations:</strong> Fabricates commit SHAs (e.g. <code>c0ffee1</code>) that do not exist in the repository.</li>
-                      <li style={{ marginBottom: 6 }}><strong>11 False Alarms:</strong> Flags internal CI chore commits as missing features, destroying maintainer trust.</li>
+                      <li style={{ marginBottom: 6 }}><strong>Over-flags:</strong> asserts discrepancies it cannot ground — e.g. a phantom "missing docs" entry — so maintainers get false alarms ({results.aggregate.baseline!.false_alarms_per_case.toFixed(1)}/task, precision {results.aggregate.baseline!.precision.toFixed(2)}).</li>
+                      <li style={{ marginBottom: 6 }}><strong>No proof attached:</strong> claims are not tied to a verifiable SHA / line / hunk, so a tired reviewer cannot quickly confirm them.</li>
+                      <li style={{ marginBottom: 6 }}><strong>Does not scale:</strong> works only because these fixtures are tiny; a real 500-commit release cannot be dumped into one prompt at all.</li>
                     </ul>
                   </div>
 
@@ -742,7 +747,7 @@ export default function App() {
                         <span className="tag" style={{ background: "var(--good)", color: "white" }}>✅ Triage Inbox Multi-Agent</span>
                         <h3 style={{ margin: "4px 0 0", fontSize: 16 }}>The Evidence-First Pipeline</h3>
                       </div>
-                      <span className="action-badge auto_ok">0.95 F1 Score</span>
+                      <span className="action-badge auto_ok">{results.aggregate.agent!.f1.toFixed(2)} F1 Score</span>
                     </div>
                     <ul style={{ margin: "12px 0 0", paddingLeft: 18, fontSize: 13, color: "var(--text)" }}>
                       <li style={{ marginBottom: 6 }}><strong>Drills into Commit Bodies:</strong> Uses <code>get_commit</code> tool calls to inspect the exact lines where breaking change notes hide.</li>
@@ -784,75 +789,23 @@ export default function App() {
               <div>
                 <div className="script-box">
                   <div className="script-quote">
-                    "I evaluated both systems across 10 benchmark cases. On GPT-4o, our solution reached 95% accuracy with 100% precision and ZERO false alarms — solving 9 of 10 cases with perfection. Even on the smaller gpt-4o-mini, accuracy reached 53% with a 71% drop in false alarms. Our 6-iteration changelog proves how on-demand tools and verification at the seam drove this improvement."
+                    "I evaluated both systems across 10 benchmark cases on GPT-4o, scored fairly for both arms. The honest result: a flat prompt already recalls the real problems on these small artifacts — recall is 0.90 either way. What it lacks is precision: it over-flags, at 0.82 precision and 0.2 false alarms per task. The multi-agent pipeline keeps that recall and drives precision to 1.00 with zero false alarms — F1 0.86 to 0.95. And because it fetches artifacts on demand instead of dumping them, it keeps working on real repos far too large to fit in one prompt. Verification at the seam is what buys the precision."
                   </div>
                 </div>
 
                 <div className="sec-head" style={{ marginTop: 24 }}>
                   <span className="sec-num">04</span>
-                  <h2>Measured Benchmark Evidence (GPT-4o vs Baseline)</h2>
+                  <h2>Measured Benchmark Evidence ({results.model} vs Baseline)</h2>
                 </div>
 
-                {/* VISUAL METRIC COMPARISON BARS */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-                  <div className="ag-tier-card">
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-faint)", textTransform: "uppercase" }}>
-                      Evidence Grounding Precision
-                    </span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                      <span style={{ fontSize: 12, width: 80, fontWeight: 600 }}>Baseline:</span>
-                      <div style={{ flex: 1, background: "var(--bg-elev2)", height: 16, borderRadius: 8, overflow: "hidden" }}>
-                        <div style={{ width: "0%", height: "100%", background: "var(--bad)" }} />
-                      </div>
-                      <span style={{ fontSize: 12, fontFamily: "var(--mono)", fontWeight: 700, color: "var(--bad)" }}>0%</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                      <span style={{ fontSize: 12, width: 80, fontWeight: 600 }}>Multi-Agent:</span>
-                      <div style={{ flex: 1, background: "var(--bg-elev2)", height: 16, borderRadius: 8, overflow: "hidden" }}>
-                        <div style={{ width: "100%", height: "100%", background: "var(--good)" }} />
-                      </div>
-                      <span style={{ fontSize: 12, fontFamily: "var(--mono)", fontWeight: 700, color: "var(--good)" }}>100%</span>
-                    </div>
-                  </div>
-
-                  <div className="ag-tier-card">
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-faint)", textTransform: "uppercase" }}>
-                      False Alarms Per Task
-                    </span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                      <span style={{ fontSize: 12, width: 80, fontWeight: 600 }}>Baseline:</span>
-                      <div style={{ flex: 1, background: "var(--bg-elev2)", height: 16, borderRadius: 8, overflow: "hidden" }}>
-                        <div style={{ width: "100%", height: "100%", background: "var(--bad)" }} />
-                      </div>
-                      <span style={{ fontSize: 12, fontFamily: "var(--mono)", fontWeight: 700, color: "var(--bad)" }}>1.1 / case</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-                      <span style={{ fontSize: 12, width: 80, fontWeight: 600 }}>Multi-Agent:</span>
-                      <div style={{ flex: 1, background: "var(--bg-elev2)", height: 16, borderRadius: 8, overflow: "hidden" }}>
-                        <div style={{ width: "0%", height: "100%", background: "var(--good)" }} />
-                      </div>
-                      <span style={{ fontSize: 12, fontFamily: "var(--mono)", fontWeight: 700, color: "var(--good)" }}>0.0 (Zero!)</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="metric-strip" style={{ margin: "20px 0", justifyContent: "center" }}>
-                  <div className="metric-pill" style={{ padding: "12px 18px" }}>
-                    <span className="mp-lbl">Accuracy / Reliability (GPT-4o)</span>
-                    <span className="mp-val good" style={{ fontSize: 20 }}>0% → 95% (+95%)</span>
-                  </div>
-                  <div className="metric-pill" style={{ padding: "12px 18px" }}>
-                    <span className="mp-lbl">False Alarms / Task</span>
-                    <span className="mp-val good" style={{ fontSize: 20 }}>1.1 → 0.0 (Zero False Alarms)</span>
-                  </div>
-                  <div className="metric-pill" style={{ padding: "12px 18px" }}>
-                    <span className="mp-lbl">Evidence Precision</span>
-                    <span className="mp-val good" style={{ fontSize: 20 }}>0% → 100% (100% Grounded)</span>
-                  </div>
-                  <div className="metric-pill" style={{ padding: "12px 18px" }}>
-                    <span className="mp-lbl">Benchmark Result</span>
-                    <span className="mp-val" style={{ fontSize: 20 }}>7 Wins / 0 Losses / 3 Clean</span>
-                  </div>
+                {/* Single source of truth: rendered straight from results.json */}
+                <div style={{ margin: "16px 0 20px" }}>
+                  <MetricsComparison
+                    baseline={results.aggregate.baseline}
+                    agent={results.aggregate.agent}
+                    model={results.model}
+                    nCases={results.n_cases}
+                  />
                 </div>
               </div>
             )}
@@ -911,106 +864,14 @@ export default function App() {
               </div>
             </div>
 
-            {/* COMPARATIVE BENCHMARK & EFFICIENCY BAR CHARTS */}
-            <div className="ag-tier-card" style={{ marginBottom: 24, padding: 20 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
-                  📊 Multi-Model Comparative Benchmark: Multi-Agent System vs Flat Baseline
-                </h3>
-                <span className="badge-model" style={{ color: "var(--accent)" }}>
-                  10 Real-World Ground-Truth Cases
-                </span>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: 20 }}>
-                {/* CHART 1: ACCURACY / GROUNDING */}
-                <div style={{ background: "var(--bg-elev2)", padding: 14, borderRadius: 8, border: "1px solid var(--border)" }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 800, textTransform: "uppercase", color: "var(--text-faint)", display: "block", marginBottom: 10 }}>
-                    Grounding Accuracy (F1 Score)
-                  </span>
-                  
-                  {/* GPT-4o */}
-                  <div style={{ marginBottom: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, marginBottom: 3 }}>
-                      <span><strong>GPT-4o:</strong> Multi-Agent (95%) vs Flat (0%)</span>
-                      <span style={{ color: "var(--good)", fontWeight: 700 }}>+95% Win</span>
-                    </div>
-                    <div style={{ height: 12, background: "var(--bg)", borderRadius: 6, overflow: "hidden", display: "flex" }}>
-                      <div style={{ width: "95%", background: "var(--good)" }} title="Multi-Agent: 95%" />
-                    </div>
-                  </div>
-
-                  {/* Claude 3.7 */}
-                  <div style={{ marginBottom: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, marginBottom: 3 }}>
-                      <span><strong>Claude 3.7:</strong> Multi-Agent (92%) vs Flat (10%)</span>
-                      <span style={{ color: "var(--good)", fontWeight: 700 }}>+82% Win</span>
-                    </div>
-                    <div style={{ height: 12, background: "var(--bg)", borderRadius: 6, overflow: "hidden", display: "flex" }}>
-                      <div style={{ width: "92%", background: "var(--good)" }} title="Multi-Agent: 92%" />
-                    </div>
-                  </div>
-
-                  {/* GPT-4o-mini */}
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, marginBottom: 3 }}>
-                      <span><strong>GPT-4o-mini:</strong> Multi-Agent (53%) vs Flat (0%)</span>
-                      <span style={{ color: "var(--good)", fontWeight: 700 }}>+53% Win</span>
-                    </div>
-                    <div style={{ height: 12, background: "var(--bg)", borderRadius: 6, overflow: "hidden", display: "flex" }}>
-                      <div style={{ width: "53%", background: "var(--good)" }} title="Multi-Agent: 53%" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* CHART 2: FALSE ALARMS */}
-                <div style={{ background: "var(--bg-elev2)", padding: 14, borderRadius: 8, border: "1px solid var(--border)" }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 800, textTransform: "uppercase", color: "var(--text-faint)", display: "block", marginBottom: 10 }}>
-                    False Alarms Per Triage Task
-                  </span>
-                  
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, marginBottom: 3 }}>
-                      <span>Flat Single-Prompt Baseline:</span>
-                      <span style={{ color: "var(--bad)", fontWeight: 700 }}>1.10 / task (11 alarms)</span>
-                    </div>
-                    <div style={{ height: 12, background: "var(--bg)", borderRadius: 6, overflow: "hidden" }}>
-                      <div style={{ width: "100%", background: "var(--bad)" }} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, marginBottom: 3 }}>
-                      <span>Triage Inbox Multi-Agent:</span>
-                      <span style={{ color: "var(--good)", fontWeight: 700 }}>0.00 / task (Zero!)</span>
-                    </div>
-                    <div style={{ height: 12, background: "var(--bg)", borderRadius: 6, overflow: "hidden" }}>
-                      <div style={{ width: "0%", background: "var(--good)" }} />
-                    </div>
-                  </div>
-                  
-                  <p style={{ margin: "10px 0 0", fontSize: 11.5, color: "var(--text-dim)" }}>
-                    ✓ Deterministic Layer 1 AST grounding prevents hallucinated findings before maintainers are notified.
-                  </p>
-                </div>
-
-                {/* CHART 3: RUNTIME & COST */}
-                <div style={{ background: "var(--bg-elev2)", padding: 14, borderRadius: 8, border: "1px solid var(--border)" }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 800, textTransform: "uppercase", color: "var(--text-faint)", display: "block", marginBottom: 10 }}>
-                    Efficiency &amp; Resource Usage
-                  </span>
-
-                  <div className="metric-pill" style={{ marginBottom: 8, padding: "6px 10px" }}>
-                    <span className="mp-lbl">Average Multi-Agent Latency</span>
-                    <span className="mp-val" style={{ fontSize: 14 }}>1.34 seconds</span>
-                  </div>
-
-                  <div className="metric-pill" style={{ padding: "6px 10px" }}>
-                    <span className="mp-lbl">Average Cost / Verified Release</span>
-                    <span className="mp-val good" style={{ fontSize: 14 }}>$0.0032 USD</span>
-                  </div>
-                </div>
-              </div>
+            {/* COMPARATIVE BENCHMARK — single source of truth, from results.json */}
+            <div style={{ marginBottom: 24 }}>
+              <MetricsComparison
+                baseline={results.aggregate.baseline}
+                agent={results.aggregate.agent}
+                model={results.model}
+                nCases={results.n_cases}
+              />
             </div>
 
             {/* VIEW MODE A: REAL GITHUB AUDITS FEED */}
@@ -1341,6 +1202,11 @@ export default function App() {
                     <option value="both">Side-by-Side (Agent vs Flat Baseline)</option>
                     <option value="agent">Agent Only (Fastest)</option>
                   </select>
+                  <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "var(--text-faint)", lineHeight: 1.4 }}>
+                    {runBothArms
+                      ? "Both arms run on this same repo: the multi-agent pipeline AND the flat single-prompt baseline (one LLM call, whole artifact dumped in, no tools/verifier). Their prompts and full traces appear below."
+                      : "Only the multi-agent pipeline runs. Switch to Side-by-Side to also run the flat baseline for comparison."}
+                  </p>
                 </div>
               </div>
 
@@ -1634,46 +1500,46 @@ export default function App() {
                       <strong>Summary:</strong> {liveData.agent.result.summary}
                     </p>
 
-                    <h4 style={{ margin: "14px 0 8px", fontSize: 13, textTransform: "uppercase", color: "var(--text-faint)" }}>
-                      Verified Findings ({liveData.agent.result.findings?.length || 0}):
-                    </h4>
+                    {(() => {
+                      const all = liveData.agent.result.findings || [];
+                      const surfaced = all.filter((f) => f.verified);
+                      const suppressed = all.filter((f) => !f.verified);
+                      return (
+                        <>
+                          <h4 style={{ margin: "14px 0 8px", fontSize: 13, textTransform: "uppercase", color: "var(--text-faint)" }}>
+                            Surfaced to maintainer ({surfaced.length}) — passed both verifier layers
+                          </h4>
+                          {all.length === 0 ? (
+                            <div className="finding-card">
+                              <span style={{ color: "var(--good)", fontWeight: 600 }}>✓ Clean Queue Item</span> — No discrepancies detected. Safe to proceed.
+                            </div>
+                          ) : surfaced.length === 0 ? (
+                            <div className="finding-card">
+                              <span style={{ color: "var(--text-faint)" }}>Nothing survived verification — every candidate below was suppressed.</span>
+                            </div>
+                          ) : (
+                            surfaced.map((f, idx) => <FindingCard f={f} key={idx} />)
+                          )}
 
-                    {(!liveData.agent.result.findings || liveData.agent.result.findings.length === 0) ? (
-                      <div className="finding-card">
-                        <span style={{ color: "var(--good)", fontWeight: 600 }}>✓ Clean Queue Item</span> — No discrepancies detected. Safe to proceed.
-                      </div>
-                    ) : (
-                      liveData.agent.result.findings.map((f, idx) => (
-                        <div className="finding-card" key={idx}>
-                          <div className="fc-head">
-                            <span className={`vlabel ${f.verdict}`}>{f.verdict}</span>
-                            <strong style={{ fontSize: 13 }}>{f.subject}</strong>
-                            <span style={{ marginLeft: "auto", fontSize: 11 }}>
-                              {f.verified ? (
-                                <span style={{ color: "var(--good)", fontWeight: 700 }}>[VERIFIED ✓]</span>
-                              ) : (
-                                <span style={{ color: "var(--bad)", fontWeight: 700 }}>[UNVERIFIED ✗]</span>
-                              )}
-                            </span>
-                          </div>
-                          {f.rationale && (
-                            <p style={{ margin: "4px 0", fontSize: 12, color: "var(--text-dim)" }}>
-                              {f.rationale}
-                            </p>
+                          {suppressed.length > 0 && (
+                            <>
+                              <h4 style={{ margin: "16px 0 6px", fontSize: 13, textTransform: "uppercase", color: "var(--warn)" }}>
+                                🛡️ Suppressed by verifier ({suppressed.length}) — would-be false alarms
+                              </h4>
+                              <p style={{ margin: "0 0 8px", fontSize: 12, color: "var(--text-dim)" }}>
+                                These candidates the specialist raised but the verifier dropped (a ref that
+                                did not resolve, a quote not found, or a verdict the full artifact did not
+                                support). In the flat baseline they would have reached the maintainer as
+                                false alarms — this is precisely where the agent's precision advantage comes from.
+                              </p>
+                              {suppressed.map((f, idx) => (
+                                <FindingCard f={f} key={idx} suppressed />
+                              ))}
+                            </>
                           )}
-                          {f.evidence && f.evidence.map((ev, i) => (
-                            <div className="fc-quote" key={i}>
-                              <strong>Ref: {ev.kind}:{ev.ref}</strong> — "{ev.quote}"
-                            </div>
-                          ))}
-                          {f.verifier_note && (
-                            <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 4 }}>
-                              <em>Verifier Note:</em> {f.verifier_note}
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    )}
+                        </>
+                      );
+                    })()}
                   </div>
 
                   {/* BASELINE ARM */}
@@ -1696,7 +1562,7 @@ export default function App() {
                       </p>
 
                       <h4 style={{ margin: "14px 0 8px", fontSize: 13, textTransform: "uppercase", color: "var(--text-faint)" }}>
-                        Ungrounded Claims ({liveData.baseline.result.findings?.length || 0}):
+                        All claims, none verified ({liveData.baseline.result.findings?.length || 0}) — every one reaches the maintainer
                       </h4>
 
                       {(!liveData.baseline.result.findings || liveData.baseline.result.findings.length === 0) ? (
@@ -1705,25 +1571,29 @@ export default function App() {
                         </div>
                       ) : (
                         liveData.baseline.result.findings.map((f, idx) => (
-                          <div className="finding-card" key={idx}>
-                            <div className="fc-head">
-                              <span className={`vlabel ${f.verdict}`}>{f.verdict}</span>
-                              <strong style={{ fontSize: 13 }}>{f.subject}</strong>
-                              <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--warn)", fontWeight: 600 }}>
-                                [NO GROUNDING PROOF]
-                              </span>
-                            </div>
-                            {f.rationale && (
-                              <p style={{ margin: "4px 0", fontSize: 12, color: "var(--text-dim)" }}>
-                                {f.rationale}
-                              </p>
-                            )}
-                          </div>
+                          <FindingCard f={f} key={idx} showChips={false} />
                         ))
                       )}
                     </div>
                   )}
                 </div>
+
+                {/* PRECISION CALLOUT — the verifier's contribution, made explicit */}
+                {liveData.baseline && (() => {
+                  const suppressed = (liveData.agent.result.findings || []).filter((f) => !f.verified).length;
+                  const surfaced = (liveData.agent.result.findings || []).filter((f) => f.verified).length;
+                  const baseCount = liveData.baseline.result.findings?.length || 0;
+                  return (
+                    <div style={{ margin: "4px 0 0", padding: "12px 16px", borderRadius: 10, border: "1px solid var(--accent)", background: "var(--bg-elev2)", fontSize: 13, color: "var(--text)" }}>
+                      <strong style={{ color: "var(--accent)" }}>Verifier contribution on this run:</strong>{" "}
+                      the baseline would forward <strong>{baseCount}</strong> unverified claim{baseCount === 1 ? "" : "s"} to the maintainer.
+                      The agent forwards <strong>{surfaced}</strong> (each grounded + sound) and{" "}
+                      <strong style={{ color: suppressed ? "var(--warn)" : "var(--good)" }}>suppresses {suppressed}</strong>{" "}
+                      before they become false alarms. That gap is the precision advantage — the same mechanism
+                      that moves precision 0.82 → 1.00 on the benchmark.
+                    </div>
+                  );
+                })()}
 
                 {/* 3. STEP-BY-STEP AGENT TRAJECTORY INSPECTOR */}
                 <div className="gh-box" style={{ margin: 0 }}>
@@ -1734,94 +1604,28 @@ export default function App() {
                     Inspect the exact sequence of subagents, on-demand tool calls (<code>list_commits</code>, <code>get_commit</code>, <code>get_diff</code>), and verification steps executed during this live triage audit.
                   </p>
 
+                  <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", color: "var(--accent)", margin: "4px 0 6px" }}>
+                    🧠 Multi-Agent Pipeline — {liveData.agent.trajectories.length} agent{liveData.agent.trajectories.length === 1 ? "" : "s"}
+                  </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     {liveData.agent.trajectories.map((traj, tIdx) => (
-                      <div className="traj-agent" key={tIdx} style={{ margin: 0 }}>
-                        <div className="ta-head">
-                          <span className="ta-name">{traj.agent}</span>
-                          <span className="ta-role">
-                            {traj.agent === "router" ? "Router Orchestrator" : traj.agent.includes("verifier") ? "Grounding & Soundness Verifier" : "Domain Specialist Agent"}
-                          </span>
-                          <span className="ta-meta">
-                            {traj.input_tokens + traj.output_tokens} tokens
-                          </span>
-                        </div>
-
-                        {traj.steps.map((step: any, sIdx: number) => {
-                          const isTool = step.kind === "tool" || !!step.name;
-                          return (
-                            <div className="step" key={sIdx} style={{ margin: "8px 0", padding: "10px 14px", background: "var(--bg-elev2)", borderRadius: 8, border: "1px solid var(--border)" }}>
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                                <div className="s-kind" style={{ fontWeight: 700, fontSize: 13, color: isTool ? "var(--accent)" : "var(--text)" }}>
-                                  Step #{sIdx + 1} · {isTool ? `🔧 Tool Call: ${step.name}` : "💭 Model Reasoning & Response"}
-                                </div>
-                                <span style={{ fontSize: 11, fontFamily: "var(--mono)", color: "var(--text-faint)" }}>
-                                  {step.stop_reason ? `stop: ${step.stop_reason}` : isTool ? "executed" : ""}
-                                </span>
-                              </div>
-
-                              {/* TOOL EXECUTION STEP */}
-                              {isTool ? (
-                                <div>
-                                  <div className="toolcall" style={{ margin: "4px 0 8px" }}>
-                                    <strong>Parameters:</strong> <code>{JSON.stringify(step.input || step.args || {})}</code>
-                                  </div>
-                                  {step.result !== undefined && (
-                                    <div>
-                                      <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-faint)", textTransform: "uppercase" }}>Returned Output:</span>
-                                      <pre className="toolresult" style={{ margin: "4px 0 0", maxHeight: 220, overflowY: "auto", fontSize: 11.5, background: "var(--bg)", padding: 8, borderRadius: 6 }}>
-                                        {typeof step.result === "string" ? step.result : JSON.stringify(step.result, null, 2)}
-                                      </pre>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                /* MODEL THOUGHT / TEXT / BLOCKS */
-                                <div>
-                                  {Array.isArray(step.content) && step.content.map((b: any, bIdx: number) => {
-                                    if (b.type === "text" && b.text?.trim()) {
-                                      return (
-                                        <div className="s-text" key={bIdx} style={{ fontSize: 12.5, margin: "6px 0", whiteSpace: "pre-wrap", color: "var(--text)" }}>
-                                          {b.text.trim()}
-                                        </div>
-                                      );
-                                    }
-                                    if (b.type === "thinking" && b.thinking) {
-                                      return (
-                                        <div key={bIdx} style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic", background: "var(--bg)", padding: 8, borderRadius: 6, margin: "6px 0", borderLeft: "3px solid var(--accent)" }}>
-                                          💭 <strong>Extended Thinking:</strong> {b.thinking}
-                                        </div>
-                                      );
-                                    }
-                                    if (b.type === "tool_use") {
-                                      return (
-                                        <div className="toolcall" key={bIdx} style={{ margin: "6px 0" }}>
-                                          <strong>🔧 Invoked Tool:</strong> <span className="tc-name">{b.name}</span>(<code>{JSON.stringify(b.input || {})}</code>)
-                                        </div>
-                                      );
-                                    }
-                                    return null;
-                                  })}
-
-                                  {/* Fallback for legacy thought / raw text */}
-                                  {step.thought && (
-                                    <div className="s-text" style={{ fontSize: 12.5, margin: "4px 0" }}>
-                                      {step.thought}
-                                    </div>
-                                  )}
-                                  {step.text && (
-                                    <div className="s-text" style={{ fontSize: 12.5, margin: "4px 0" }}>
-                                      {step.text}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                      <LiveTrajectoryCard traj={traj} key={tIdx} />
                     ))}
                   </div>
+
+                  {/* BASELINE ARM TRAJECTORY — the single flat prompt, shown only when it ran */}
+                  {liveData.baseline && liveData.baseline.trajectories && liveData.baseline.trajectories.length > 0 && (
+                    <>
+                      <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", color: "var(--text-dim)", margin: "18px 0 6px", paddingTop: 14, borderTop: "1px dashed var(--border)" }}>
+                        📄 Flat Baseline — one prompt, whole artifact dumped in, no tools / no verifier
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        {liveData.baseline.trajectories.map((traj, tIdx) => (
+                          <LiveTrajectoryCard traj={traj} key={`b${tIdx}`} />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}

@@ -1,8 +1,9 @@
 # 📥 Triage Inbox — Evidence-First Multi-Agent Maintainer Copilot
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Benchmark F1](https://img.shields.io/badge/Benchmark_F1-0.95_(GPT--4o)-success.svg)](#benchmark-evidence--measured-improvement)
-[![False Alarms](https://img.shields.io/badge/False_Alarms-0.0_per_task-brightgreen.svg)](#benchmark-evidence--measured-improvement)
+[![Benchmark F1](https://img.shields.io/badge/Agent_F1-0.95_vs_0.86_baseline_(GPT--4o)-success.svg)](#benchmark-evidence--measured-improvement)
+[![Precision](https://img.shields.io/badge/Precision-1.00_vs_0.82_baseline-brightgreen.svg)](#benchmark-evidence--measured-improvement)
+[![False Alarms](https://img.shields.io/badge/False_Alarms-0.0_vs_0.2_per_task-brightgreen.svg)](#benchmark-evidence--measured-improvement)
 [![Providers](https://img.shields.io/badge/Providers-OpenAI_|_Anthropic_|_Groq_|_OpenRouter-purple.svg)](#switching-models--providers)
 [![Ground Rule #04](https://img.shields.io/badge/Human_Approval-Ground_Rule_#04_Compliant-orange.svg)](#human-in-the-loop-approval-gate)
 
@@ -20,11 +21,10 @@ Picture an open-source maintainer or release manager on a Monday morning. The in
 2. **"Did this PR really address its review comments?"**
    - *The Danger:* A reviewer asks for critical error handling. The author replies *"Addressed 👍"*, but their code diff only reformatted whitespace. Tired reviewers assume it was fixed and merge bug-ridden code.
 
-### Why Flat Single-Prompt LLMs Fail at Repository Triage
-When people first try solving this with LLMs, they dump the entire commit history or PR diff into a single prompt (**the Naive Baseline**). The model produces **fluent, confident hallucinations**:
-- Fabricates non-existent commit SHAs and hallucinated code quotes.
-- Guesses whether a change was breaking based on vague subject lines instead of drilling into commit bodies.
-- Across our 10 benchmark cases, the naive baseline scored **F1 = 0.00** with **11 false alarms**.
+### Where Flat Single-Prompt LLMs Fall Short at Repository Triage
+When people first try solving this with LLMs, they dump the entire commit history or PR diff into a single prompt (**the Naive Baseline**). On our small fixtures a capable model (GPT-4o) actually recalls most real problems this way — but it **over-flags**: it asserts discrepancies it cannot ground, invents "missing docs" entries, and guesses breaking-ness from subject lines. Measured fairly, the baseline reaches **F1 = 0.86 with precision 0.82 and 0.2 false alarms per task** — good recall, but it cries wolf. The agent's job is to keep that recall while **eliminating the false alarms** (precision → 1.00), and to keep working when the artifact is a real 500-commit repo you *cannot* dump into one prompt.
+
+> **On the old "F1 = 0.00" claim:** an earlier version of this README reported the baseline at F1 = 0.00. That number was a *scoring artifact*, not a real capability gap — the scorer matched findings on an exact subject-ref string (`changelog:1`) that only the specialist prompts were taught, so the baseline's substantively-correct findings failed to match. The scorer now canonicalizes subjects for **both** arms ([`src/scoring.py`](src/scoring.py)); re-score any saved run offline with `python rescore.py`. The honest, canonicalized numbers are used throughout below.
 
 ---
 
@@ -86,26 +86,22 @@ When people first try solving this with LLMs, they dump the entire commit histor
 
 Evaluated across **10 synthetic and hard edge cases** (`evalcases/cases/`), including hidden breaking changes in commit bodies, noisy internal CI releases, cosmetic "done" replies, and partial review fixes.
 
-### Headline Evaluation Results (OpenAI GPT-4o — 10 Cases)
+### Headline Evaluation Results (OpenAI GPT-4o — 10 Cases, fairly scored)
 
 | Metric | Naive Baseline | Triage Inbox (Agent) | Measured Delta |
 |---|---|---|---|
-| **Primary: Problem F1** | **0.000** | **0.947** | **+0.947 (+95%)** |
-| **Precision** | 0.000 | **1.000 (100%)** | **+1.000** |
-| **Recall** | 0.000 | **0.900 (90%)** | **+0.900** |
-| **False Alarms / Task** | 1.10 | **0.00** | **−100% (Zero false alarms)** |
-| **Cases Solved Perfectly (F1 = 1.0)** | 0 / 10 | **9 / 10** | **+9 cases** |
+| **Primary: Problem F1** | 0.857 | **0.947** | **+0.09** |
+| **Precision** | 0.818 | **1.000** | **+0.18** |
+| **Recall** | 0.900 | 0.900 | 0.00 |
+| **False Alarms / Task** | 0.20 | **0.00** | **−100% (Zero false alarms)** |
+| **True positives / False positives** | 9 / 2 | **9 / 0** | **−2 false positives** |
 | **Cost per Task (USD)** | $0.0035 | $0.0109 | +$0.0074 |
 
-### Cross-Model Comparison (OpenAI gpt-4o-mini — 10 Cases)
+*(Reproduce offline from the saved trajectories: `python rescore.py`. Numbers written to `results/results_rescored.json`.)*
 
-| Metric | Naive Baseline | Triage Inbox (Agent) | Measured Delta |
-|---|---|---|---|
-| **Problem F1** | 0.000 | **0.526** | **+0.526** |
-| **Precision** | 0.000 | **0.556** | **+0.556** |
-| **False Alarms / Task** | 1.40 | **0.40** | **−71%** |
+> **Key Takeaway:** On these small fixtures the baseline already recalls the real problems (recall 0.90) — a strong model reading a small artifact is not helpless. What it lacks is **precision**: it flags 2 discrepancies it cannot ground. The agent's verifier removes exactly those, lifting precision **0.82 → 1.00** and false alarms **0.2 → 0.0 per task at equal recall**. That is the honest, measured contribution of *verification at the seam*. The router + on-demand tools earn their keep on the axis this 10-case suite deliberately understates: **scale** — a real release with hundreds of commits cannot be dumped into one prompt at all (see the [Live GitHub audits](#-live-real-time-open-source-github-audits)).
 
-> **Key Takeaway:** The naive baseline scored **0.00** across both models due to confident hallucinations. Triage Inbox achieved **0.95 F1 with zero false alarms** on GPT-4o, proving that **verification at the seam** is what turns a fluent generator into a reliable system.
+> **Cross-model note (gpt-4o-mini):** the earlier mini table was computed under the old (unfair) scorer and has been withdrawn pending a re-run under the corrected scorer — run `TRIAGE_PROVIDER=openai TRIAGE_MODEL=gpt-4o-mini python eval.py` to regenerate it. On a weaker model the verifier's precision benefit is expected to be *larger*, since weaker generators over-flag more.
 
 ---
 
@@ -163,9 +159,17 @@ python run_one.py evalcases/cases/case03_changelog_misclassified_breaking.json
 
 ### 4. Run the Full Benchmark Evaluation (Reproduce Headline Results)
 ```bash
-python eval.py
+# The headline numbers are on gpt-4o. (The default model is the cheaper
+# gpt-4o-mini, so pass gpt-4o explicitly to reproduce the headline table.)
+TRIAGE_MODEL=gpt-4o python eval.py
 ```
-Outputs are written to `results/results.json`, `results/results.csv`, and all 89 trajectory traces under `trajectories/<case>/`.
+Outputs are written to `results/results.json`, `results/results.csv`, and all trajectory traces under `trajectories/<case>/`. Approx. runtime ~2–3 min, cost ~$0.11 for the agent arm + ~$0.03 baseline on gpt-4o.
+
+### 5. Re-score an Existing Run Offline (Zero API Cost)
+```bash
+python rescore.py    # rebuilds the F1 table from saved trajectories/, writes results/results_rescored.json
+```
+`rescore.py` reconstructs each arm's findings from the saved traces and re-scores them with the current (fair) scorer — useful for verifying the headline table, or seeing the effect of a scorer change, without spending a cent. It re-derives the agent's `verified` flags exactly as the pipeline does (deterministic grounding **and** the recorded soundness verdicts), and reproduces the original agent score exactly (9/0/1), which is what validates the baseline numbers beside it.
 
 ---
 
@@ -174,17 +178,17 @@ Outputs are written to `results/results.json`, `results/results.csv`, and all 89
 Triage Inbox is provider-agnostic. Switch backends with one environment variable:
 
 ```bash
-# OpenAI GPT-4o (Primary headline)
+# OpenAI GPT-4o (primary headline; the default provider is openai)
 TRIAGE_PROVIDER=openai TRIAGE_MODEL=gpt-4o python eval.py
 
-# Anthropic Claude 3.7 Sonnet
-TRIAGE_PROVIDER=anthropic TRIAGE_MODEL=claude-3-7-sonnet-20250219 python eval.py
+# Anthropic Claude (native Messages API)
+TRIAGE_PROVIDER=anthropic TRIAGE_MODEL=claude-opus-5 python eval.py
 
-# Groq Free Tier (Ultra-fast Llama 3.3 70B)
+# Groq Free Tier (ultra-fast)
 TRIAGE_PROVIDER=groq TRIAGE_MODEL=llama-3.3-70b-versatile python eval.py
 
-# OpenRouter
-TRIAGE_PROVIDER=openrouter TRIAGE_MODEL=anthropic/claude-3.7-sonnet python eval.py
+# OpenRouter (can route to Claude, Gemini, Llama, …)
+TRIAGE_PROVIDER=openrouter TRIAGE_MODEL=anthropic/claude-sonnet-4.5 python eval.py
 ```
 
 ---

@@ -54,7 +54,9 @@ PROVIDERS = {
     },
 }
 
-PROVIDER = os.environ.get("TRIAGE_PROVIDER", "anthropic")
+# Default to openai: it is the provider the headline results were measured on, so
+# a clean `python eval.py` reproduces the documented run. Switch with TRIAGE_PROVIDER.
+PROVIDER = os.environ.get("TRIAGE_PROVIDER", "openai")
 if PROVIDER not in PROVIDERS:
     raise ValueError(f"Unknown TRIAGE_PROVIDER '{PROVIDER}'. Choose: {list(PROVIDERS)}")
 

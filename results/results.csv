@@ -1,6 +1,6 @@
 metric,baseline,agent,change
-Primary: problem F1,0.000,0.526,+0.526
-Precision,0.000,0.556,+0.556
-Recall,0.000,0.500,+0.500
-False alarms / case,1.40,0.40,-1.000
-Cost per task (USD),$0.0002,$0.0009,$+0.0007
+Primary: problem F1,0.783,0.824,+0.041
+Precision,0.692,1.000,+0.308
+Recall,0.900,0.700,-0.200
+False alarms / case,0.40,0.00,-0.400
+Cost per task (USD),$0.0036,$0.0112,$+0.0076

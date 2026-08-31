@@ -1,6 +1,6 @@
 # Trajectory: `review_resolver` on `case09_review_partial`
 
-*Backend: openai / gpt-4o  ·  Tokens: 1772 in / 467 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2629 in / 275 out*
 
 ## System instructions
 ```
@@ -55,7 +55,6 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
 
 ## Model turn 1  (stop: `tool_use`)
 **calls** `get_diff_for_path`(`{"path": "src/report.py"}`)
-**calls** `get_diff_for_path`(`{"path": "tests/report_test.py"}`)
 
 ### tool `get_diff_for_path` ->
 ```
@@ -75,45 +74,58 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
 ]
 ```
 
-### tool `get_diff_for_path` ->
+## Model turn 2  (stop: `tool_use`)
+**calls** `get_hunk`(`{"hunk_id": "h1"}`)
+**calls** `get_hunk`(`{"hunk_id": "h2"}`)
+
+### tool `get_hunk` ->
 ```
-No diff hunks touch tests/report_test.py
+{
+  "id": "h1",
+  "path": "src/report.py",
+  "header": "@@ -28,8 +28,8 @@ def build(rows):",
+  "patch": "-    d = summarize(rows)\n-    return render(d)\n+    records = summarize(rows)\n+    return render(records)"
+}
 ```
 
-## Model turn 2  (stop: `end_turn`)
-Based on the reviewer comments and the diff hunks retrieved, here are the verdicts for each comment:
+### tool `get_hunk` ->
+```
+{
+  "id": "h2",
+  "path": "src/report.py",
+  "header": "@@ -3,7 +3,6 @@",
+  "patch": "-import itertools\n import json"
+}
+```
 
-1. **Comment c1**:
-   - **Verdict**: partial
-   - **Subject**: comment:c1
-   - **Evidence**: 
-     - {"kind": "diff_hunk", "ref": "hunk:h1", "quote": "+    records = summarize(rows)\n+    return render(records)"}
-   - **Confidence**: 0.6
-   - **Rationale**: The variable `d` was renamed to `records`, addressing the first part of the comment, but there was no update or addition of a unit test for the empty-input case as requested.
-
-2. **Comment c2**:
-   - **Verdict**: addressed
-   - **Subject**: comment:c2
-   - **Evidence**: 
-     - {"kind": "diff_hunk", "ref": "hunk:h2", "quote": "-import itertools"}
-   - **Confidence**: 1.0
-   - **Rationale**: The unused import was removed as requested, fully addressing the comment. 
-
+## Model turn 3  (stop: `end_turn`)
 ```json
 [
   {
     "verdict": "partial",
     "subject": "comment:c1",
-    "evidence": [{"kind": "diff_hunk", "ref": "hunk:h1", "quote": "+    records = summarize(rows)\n+    return render(records)"}],
-    "confidence": 0.6,
-    "rationale": "Variable rename addressed, but no unit test added as requested."
+    "evidence": [
+      {
+        "kind": "diff_hunk",
+        "ref": "hunk:h1",
+        "quote": "records = summarize(rows)"
+      }
+    ],
+    "confidence": 0.8,
+    "rationale": "The variable was renamed to 'records', but no unit test for the empty-input case was added."
   },
   {
     "verdict": "addressed",
     "subject": "comment:c2",
-    "evidence": [{"kind": "diff_hunk", "ref": "hunk:h2", "quote": "-import itertools"}],
+    "evidence": [
+      {
+        "kind": "diff_hunk",
+        "ref": "hunk:h2",
+        "quote": "-import itertools"
+      }
+    ],
     "confidence": 1.0,
-    "rationale": "Unused import was removed, addressing the comment fully."
+    "rationale": "The unused import was removed as requested."
   }
 ]
 ```

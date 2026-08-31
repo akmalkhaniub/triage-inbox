@@ -1,6 +1,6 @@
 # Trajectory: `router` on `case01_changelog_phantom`
 
-*Backend: openai / gpt-4o  ·  Tokens: 232 in / 38 out*
+*Backend: openai / gpt-4o  ·  Tokens: 232 in / 32 out*
 
 ## System instructions
 ```
@@ -19,4 +19,4 @@ Output ONLY JSON: {"item_type": "<one of the above>", "why": "<short reason>"}
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-{"item_type": "changelog_audit", "why": "The item is about auditing the CHANGELOG for a specific version, which matches the definition of changelog_audit."}
+{"item_type": "changelog_audit", "why": "The item is about reconciling a CHANGELOG with commits for a specific version."}

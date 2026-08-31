@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case01_changelog_phantom`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2194 in / 113 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2236 in / 114 out*
 
 ## System instructions
 ```
@@ -51,17 +51,20 @@ If there are no discrepancies, output [].
   {
     "sha": "a1b2c3",
     "type": "feat",
-    "subject": "add CSV export to reports view"
+    "subject": "add CSV export to reports view",
+    "author": "unknown"
   },
   {
     "sha": "d4e5f6",
     "type": "fix",
-    "subject": "correct timezone offset in daily digest"
+    "subject": "correct timezone offset in daily digest",
+    "author": "unknown"
   },
   {
     "sha": "77aa88",
     "type": "chore",
-    "subject": "bump eslint to 9.2"
+    "subject": "bump eslint to 9.2",
+    "author": "unknown"
   }
 ]
 ```
@@ -91,7 +94,6 @@ If there are no discrepancies, output [].
 ```
 
 ## Model turn 2  (stop: `end_turn`)
-```json
 [
   {
     "verdict": "phantom",
@@ -104,7 +106,6 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "No commit supports the addition of dark mode for the settings page."
+    "rationale": "The changelog entry for 'Dark mode for the settings page' has no corresponding commit."
   }
 ]
-```

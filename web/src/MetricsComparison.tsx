@@ -43,7 +43,7 @@ export default function MetricsComparison({
           Measured Benchmark · {model} · {nCases} cases
         </span>
         <span style={{ fontSize: 11, color: "var(--text-faint)" }}>
-          source: <code>results.json</code> · reproduce: <code>python rescore.py</code>
+          measured by <code>python eval.py</code> (real {model} run) · re-scored offline with <code>python rescore.py</code>
         </span>
       </div>
 

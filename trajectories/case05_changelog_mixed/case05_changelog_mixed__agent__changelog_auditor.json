@@ -4,8 +4,8 @@
   "provider": "openai",
   "model": "gpt-4o",
   "system": "You are a release-notes auditor for a software repository.\n\nYour job: compare the CHANGELOG **as written** against the **actual commits** in\nthe release, and report only the DISCREPANCIES. Do not list lines that are fine.\n\nDiscrepancy types:\n- \"phantom\": a CHANGELOG line claims a change that no commit supports.\n- \"missing\": a commit made a user-facing change (feat / fix / breaking) that no\n  CHANGELOG line mentions. Ignore purely internal commits (chore, docs, test,\n  refactor with no user impact) -- those are not expected in the changelog.\n- \"misclassified\": a CHANGELOG line exists but sits under the wrong section for\n  the commit's true impact. The most important case: a BREAKING change listed\n  under an ordinary \"Added\"/\"Fixed\"/\"Changed\" heading instead of \"Breaking\".\n\nMethod:\n1. Call list_commits, then read_changelog.\n2. You CANNOT judge breaking-ness from a subject alone. Call get_commit to read\n   the body for EVERY commit that is even possibly breaking -- specifically any\n   whose subject mentions rename / remove / drop / delete / replace / change /\n   migrate, and (because major releases concentrate breaking changes) every\n   commit when the release version is a major bump (x.0.0). The BREAKING CHANGE\n   marker usually appears only in the body.\n3. Decide the discrepancies. Tie EACH to evidence: the commit sha and/or the\n   changelog line, and quote the exact text you relied on.\n\nOutput ONLY a JSON array (no prose) of objects:\n[\n  {\n    \"verdict\": \"phantom\" | \"missing\" | \"misclassified\",\n    \"subject\": \"changelog:<line>\"  (for phantom/misclassified)  or  \"commit:<sha>\" (for missing),\n    \"evidence\": [ {\"kind\": \"changelog_line\"|\"commit\", \"ref\": \"changelog:<line>\"|\"commit:<sha>\", \"quote\": \"<exact text>\"} ],\n    \"confidence\": 0.0-1.0,\n    \"rationale\": \"<one sentence>\"\n  }\n]\nIf there are no discrepancies, output [].",
-  "input_tokens": 2171,
-  "output_tokens": 209,
+  "input_tokens": 2376,
+  "output_tokens": 272,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_TA1puLIW4jXJL06XPduCQbap",
+          "id": "call_j2pwf398PrYdz3Gyd2W5VEkD",
           "name": "list_commits",
           "input": {}
         }
@@ -25,7 +25,7 @@
       "step": 0,
       "name": "list_commits",
       "input": {},
-      "result": "[\n  {\n    \"sha\": \"f43a01\",\n    \"type\": \"feat\",\n    \"subject\": \"add biometric unlock\"\n  },\n  {\n    \"sha\": \"f43a02\",\n    \"type\": \"fix\",\n    \"subject\": \"fix crash when opening a deleted chat\"\n  },\n  {\n    \"sha\": \"f43a03\",\n    \"type\": \"feat\",\n    \"subject\": \"add offline message queue\"\n  }\n]",
+      "result": "[\n  {\n    \"sha\": \"f43a01\",\n    \"type\": \"feat\",\n    \"subject\": \"add biometric unlock\",\n    \"author\": \"unknown\"\n  },\n  {\n    \"sha\": \"f43a02\",\n    \"type\": \"fix\",\n    \"subject\": \"fix crash when opening a deleted chat\",\n    \"author\": \"unknown\"\n  },\n  {\n    \"sha\": \"f43a03\",\n    \"type\": \"feat\",\n    \"subject\": \"add offline message queue\",\n    \"author\": \"unknown\"\n  }\n]",
       "is_error": false
     },
     {
@@ -35,9 +35,33 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_CeIjaHDLDbMdFsq40twsrkZ8",
+          "id": "call_kJXKgHa54HDsp54x7XsmJGdx",
           "name": "read_changelog",
           "input": {}
+        },
+        {
+          "type": "tool_use",
+          "id": "call_2NOwL0yVSDsWZZ9k2iZbxbqI",
+          "name": "get_commit",
+          "input": {
+            "sha": "f43a01"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_lKH0oBC9etQYLjKG5uiCZwkl",
+          "name": "get_commit",
+          "input": {
+            "sha": "f43a02"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "call_WrvLW5qkze4Q4uPvVHCfICgf",
+          "name": "get_commit",
+          "input": {
+            "sha": "f43a03"
+          }
         }
       ]
     },
@@ -50,13 +74,43 @@
       "is_error": false
     },
     {
+      "kind": "tool",
+      "step": 1,
+      "name": "get_commit",
+      "input": {
+        "sha": "f43a01"
+      },
+      "result": "{\n  \"sha\": \"f43a01\",\n  \"type\": \"feat\",\n  \"subject\": \"add biometric unlock\",\n  \"body\": \"Face ID / fingerprint unlock on supported devices.\"\n}",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "get_commit",
+      "input": {
+        "sha": "f43a02"
+      },
+      "result": "{\n  \"sha\": \"f43a02\",\n  \"type\": \"fix\",\n  \"subject\": \"fix crash when opening a deleted chat\",\n  \"body\": \"Null-checked the chat before render.\"\n}",
+      "is_error": false
+    },
+    {
+      "kind": "tool",
+      "step": 1,
+      "name": "get_commit",
+      "input": {
+        "sha": "f43a03"
+      },
+      "result": "{\n  \"sha\": \"f43a03\",\n  \"type\": \"feat\",\n  \"subject\": \"add offline message queue\",\n  \"body\": \"Messages composed offline send automatically on reconnect.\"\n}",
+      "is_error": false
+    },
+    {
       "kind": "model",
       "step": 2,
       "stop_reason": "end_turn",
       "content": [
         {
           "type": "text",
-          "text": "[\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"changelog:3\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:3\",\n        \"quote\": \"In-app video calling\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"There is a changelog entry for 'In-app video calling' with no supporting commit in the release.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"commit:f43a03\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:f43a03\",\n        \"quote\": \"add offline message queue\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The commit for 'add offline message queue' is missing from the changelog.\"\n  }\n]"
+          "text": "```json\n[\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"changelog:3\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:3\",\n        \"quote\": \"In-app video calling\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"No corresponding commit for 'In-app video calling' was found.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"commit:f43a03\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:f43a03\",\n        \"quote\": \"add offline message queue\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The feature 'offline message queue' was not mentioned in the CHANGELOG.\"\n  }\n]\n```"
         }
       ]
     }

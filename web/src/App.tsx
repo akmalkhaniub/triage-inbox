@@ -70,7 +70,7 @@ interface LiveTriageData {
 
 const DEFAULT_MODELS: Record<string, Array<{ id: string; name: string }>> = {
   openai: [
-    { id: "gpt-4o", name: "GPT-4o (Omni Flagship — 0.95 F1 Benchmark Winner)" },
+    { id: "gpt-4o", name: "GPT-4o (headline benchmark model)" },
     { id: "gpt-4o-mini", name: "GPT-4o Mini (Fast & Economical)" },
     { id: "o3-mini", name: "o3-mini (High Reasoning & Logic)" },
     { id: "o1", name: "o1 (Deep Reasoning Model)" },
@@ -876,7 +876,7 @@ export default function App() {
               <div>
                 <div className="script-box">
                   <div className="script-quote">
-                    "Here's the honest result across 10 cases on GPT-4o, scored fairly for both arms — and I want to be straight about it, because the number matters less than what it means. A flat prompt already <em>finds</em> the real problems: recall is 0.90 either way. But it cries wolf — 0.82 precision, a false alarm on one task in five. And a maintainer who gets false alarms does one thing: they mute the tool. The verifier is the line between a tool they trust and one they turn off. It keeps the same recall and takes precision to 1.00 with zero false alarms — every alert now carries proof. And because the agent fetches artifacts on demand instead of dumping them, it still works on a real 500-commit release that can't fit in a prompt at all. That's the whole ballgame: verification at the seam buys trust."
+                    "Here's the honest result across 10 cases on GPT-4o, from a live run — and I want to be straight, because the durable win isn't the F1 number, it's what the verifier guarantees. Precision goes from {results.aggregate.baseline!.precision.toFixed(2)} to {results.aggregate.agent!.precision.toFixed(2)} with zero false alarms — every alert the agent raises carries verifiable proof. That held on every run I did. A maintainer who gets false alarms mutes the tool; the verifier is the line between one they trust and one they turn off. Now the trade-off, because these runs vary: this time the agent was more conservative and its recall dipped below the baseline — it stayed silent rather than surface an unproven claim. So the F1 edge is modest and recall is the thing to improve. But the reliability — never crying wolf — is rock-solid. And because the agent fetches artifacts on demand, it still works on a 500-commit release that can't fit in a prompt at all."
                   </div>
                 </div>
 

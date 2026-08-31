@@ -4,8 +4,8 @@
   "provider": "openai",
   "model": "gpt-4o",
   "system": "You are a release-notes auditor for a software repository.\n\nYour job: compare the CHANGELOG **as written** against the **actual commits** in\nthe release, and report only the DISCREPANCIES. Do not list lines that are fine.\n\nDiscrepancy types:\n- \"phantom\": a CHANGELOG line claims a change that no commit supports.\n- \"missing\": a commit made a user-facing change (feat / fix / breaking) that no\n  CHANGELOG line mentions. Ignore purely internal commits (chore, docs, test,\n  refactor with no user impact) -- those are not expected in the changelog.\n- \"misclassified\": a CHANGELOG line exists but sits under the wrong section for\n  the commit's true impact. The most important case: a BREAKING change listed\n  under an ordinary \"Added\"/\"Fixed\"/\"Changed\" heading instead of \"Breaking\".\n\nMethod:\n1. Call list_commits, then read_changelog.\n2. You CANNOT judge breaking-ness from a subject alone. Call get_commit to read\n   the body for EVERY commit that is even possibly breaking -- specifically any\n   whose subject mentions rename / remove / drop / delete / replace / change /\n   migrate, and (because major releases concentrate breaking changes) every\n   commit when the release version is a major bump (x.0.0). The BREAKING CHANGE\n   marker usually appears only in the body.\n3. Decide the discrepancies. Tie EACH to evidence: the commit sha and/or the\n   changelog line, and quote the exact text you relied on.\n\nOutput ONLY a JSON array (no prose) of objects:\n[\n  {\n    \"verdict\": \"phantom\" | \"missing\" | \"misclassified\",\n    \"subject\": \"changelog:<line>\"  (for phantom/misclassified)  or  \"commit:<sha>\" (for missing),\n    \"evidence\": [ {\"kind\": \"changelog_line\"|\"commit\", \"ref\": \"changelog:<line>\"|\"commit:<sha>\", \"quote\": \"<exact text>\"} ],\n    \"confidence\": 0.0-1.0,\n    \"rationale\": \"<one sentence>\"\n  }\n]\nIf there are no discrepancies, output [].",
-  "input_tokens": 2149,
-  "output_tokens": 252,
+  "input_tokens": 2191,
+  "output_tokens": 219,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_3lZ6MQuSf2ebXAmXuUb1v7XX",
+          "id": "call_KrmPoZXteLOAdA8ezwegqqmC",
           "name": "list_commits",
           "input": {}
         }
@@ -25,7 +25,7 @@
       "step": 0,
       "name": "list_commits",
       "input": {},
-      "result": "[\n  {\n    \"sha\": \"b10001\",\n    \"type\": \"feat\",\n    \"subject\": \"add pagination to /v2/orders\"\n  },\n  {\n    \"sha\": \"b10002\",\n    \"type\": \"feat\",\n    \"subject\": \"add rate-limit headers to all responses\"\n  },\n  {\n    \"sha\": \"b10003\",\n    \"type\": \"fix\",\n    \"subject\": \"reject negative quantity in order create\"\n  }\n]",
+      "result": "[\n  {\n    \"sha\": \"b10001\",\n    \"type\": \"feat\",\n    \"subject\": \"add pagination to /v2/orders\",\n    \"author\": \"unknown\"\n  },\n  {\n    \"sha\": \"b10002\",\n    \"type\": \"feat\",\n    \"subject\": \"add rate-limit headers to all responses\",\n    \"author\": \"unknown\"\n  },\n  {\n    \"sha\": \"b10003\",\n    \"type\": \"fix\",\n    \"subject\": \"reject negative quantity in order create\",\n    \"author\": \"unknown\"\n  }\n]",
       "is_error": false
     },
     {
@@ -35,7 +35,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_YHLH6rCYaK5CPTnh5p5eeS1a",
+          "id": "call_3Ab3SOnawDafP6lNvfzaQHt6",
           "name": "read_changelog",
           "input": {}
         }
@@ -56,7 +56,7 @@
       "content": [
         {
           "type": "text",
-          "text": "[\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"changelog:2\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:b10003\",\n        \"quote\": \"reject negative quantity in order create\"\n      },\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:2\",\n        \"quote\": \"Order creation now rejects negative quantities\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"A fix for negative order quantity is claimed in the CHANGELOG under 'Fixed', but it is not a phantom as there is a supporting commit.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"commit:b10002\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:b10002\",\n        \"quote\": \"add rate-limit headers to all responses\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The feature addition of rate-limit headers was not mentioned in the CHANGELOG.\"\n  }\n]"
+          "text": "[\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"changelog:2\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:2\",\n        \"quote\": \"Order creation now rejects negative quantities\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The 'Fixed' entry regarding order creation aligns with the commit subject stating a rejection of negative quantities, so there is no discrepancy here.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"commit:b10002\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:b10002\",\n        \"quote\": \"add rate-limit headers to all responses\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The commit adding rate-limit headers to all responses is not mentioned in the changelog.\"\n  }\n]"
         }
       ]
     }

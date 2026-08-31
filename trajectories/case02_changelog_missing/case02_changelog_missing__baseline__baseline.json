@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 423,
-  "output_tokens": 112,
+  "output_tokens": 361,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "```json\n[\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"Rate-limit headers added to all responses\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"b10002\",\n        \"quote\": \"add rate-limit headers to all responses\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog does not mention the addition of rate-limit headers, which is a new feature introduced in commit b10002.\"\n  }\n]\n```"
+          "text": "[\n    {\n        \"verdict\": \"missing\",\n        \"subject\": \"add rate-limit headers to all responses\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"b10002\",\n                \"quote\": \"add rate-limit headers to all responses\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The commit related to rate-limit headers is not mentioned in the CHANGELOG.\"\n    },\n    {\n        \"verdict\": \"partial\",\n        \"subject\": \"add pagination to /v2/orders\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"b10001\",\n                \"quote\": \"add pagination to /v2/orders\"\n            },\n            {\n                \"kind\": \"changelog\",\n                \"ref\": \"line 1\",\n                \"quote\": \"Pagination on the /v2/orders endpoint\"\n            }\n        ],\n        \"confidence\": 0.8,\n        \"rationale\": \"The changelog mentions pagination but does not include detailed information on the query params page and per_page.\"\n    },\n    {\n        \"verdict\": \"addressed\",\n        \"subject\": \"reject negative quantity in order create\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"b10003\",\n                \"quote\": \"reject negative quantity in order create\"\n            },\n            {\n                \"kind\": \"changelog\",\n                \"ref\": \"line 2\",\n                \"quote\": \"Order creation now rejects negative quantities\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The changelog accurately reflects the commit regarding the rejection of negative quantities.\"\n    }\n]"
         }
       ]
     }

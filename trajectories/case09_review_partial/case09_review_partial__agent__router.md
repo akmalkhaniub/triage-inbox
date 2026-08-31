@@ -1,6 +1,6 @@
 # Trajectory: `router` on `case09_review_partial`
 
-*Backend: openai / gpt-4o  ·  Tokens: 235 in / 26 out*
+*Backend: openai / gpt-4o  ·  Tokens: 235 in / 34 out*
 
 ## System instructions
 ```
@@ -19,4 +19,4 @@ Output ONLY JSON: {"item_type": "<one of the above>", "why": "<short reason>"}
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-{"item_type": "review_resolution", "why": "The item is about checking if a PR addressed its review comments."}
+{"item_type": "review_resolution", "why": "The item is about determining if PR #331 adequately addressed review comments, which fits 'review_resolution'."}

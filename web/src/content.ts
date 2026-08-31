@@ -15,7 +15,7 @@ export const QUESTIONS = [
   {
     n: "03 · Does the agent solve it well?",
     q: "Yes — with evidence, not vibes",
-    a: "It classifies each item, pulls the exact artifacts it needs, and reports discrepancies each tied to a commit, line, or diff hunk. An independent verifier drops any claim it can't ground. Measured against a plain baseline on 10 cases (fairly scored), it matches the baseline's recall (0.90) while lifting precision 0.82 → 1.00 and eliminating false alarms (0.2 → 0.0/task) on GPT-4o — F1 0.86 → 0.95.",
+    a: "It classifies each item, pulls the exact artifacts it needs, and reports discrepancies each tied to a commit, line, or diff hunk. An independent verifier drops any claim it can't ground. Measured live against a plain baseline on 10 GPT-4o cases (fairly scored), its durable win is precision 0.69 → 1.00 with zero false alarms — every alert carries proof. Runs vary: this one traded some recall (0.90 → 0.70) for that reliability, so the F1 edge is modest and recall is the axis to improve.",
   },
   {
     n: "04 · Can another person reproduce it?",
@@ -56,7 +56,7 @@ export const STORY: Story[] = [
   {
     stage: "Baseline",
     body: "One general-purpose agent, one prompt, the whole artifact dumped in, no tools or verifier. A reasonable first attempt — and the bar to beat.",
-    evidence: "F1 0.857 · precision 0.82 · 0.2 false alarms/case (fair scorer)",
+    evidence: "F1 0.783 · precision 0.69 · 0.4 false alarms/case (live gpt-4o, fair scorer)",
   },
   {
     stage: "Iter 1 — router + specialists",
@@ -98,7 +98,7 @@ export const STORY: Story[] = [
   {
     stage: "Final",
     body: "Router + specialists + on-demand tools + two-layer verifier, verified-only scoring, any provider. Main contribution: verification at the seam is what turns a fluent generator into a reliable one.",
-    evidence: "GPT-4o: F1 0.86 → 0.95 · precision 0.82 → 1.00 · 0.2 → 0.0 false alarms",
+    evidence: "GPT-4o (live): precision 0.69 → 1.00 · false alarms 0.4 → 0.0 · F1 0.78 → 0.82 (recall run-variable)",
     kind: "final",
   },
 ];

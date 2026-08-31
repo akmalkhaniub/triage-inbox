@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 566,
-  "output_tokens": 251,
+  "output_tokens": 317,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "[{\"verdict\": \"addressed\", \"subject\": \"c1\", \"evidence\": [{\"kind\": \"diff_hunk\", \"ref\": \"h1\", \"quote\": \"\\\"\\\"\\\"Return the cached value for key, or None if absent or expired.\\\"\\\"\\\"\"}], \"confidence\": 1.0, \"rationale\": \"The required docstring explaining the return value of `get()` has been added.\"}, {\"verdict\": \"ignored\", \"subject\": \"c2\", \"evidence\": [], \"confidence\": 1.0, \"rationale\": \"There are no changes related to preventing division by zero in `hit_rate()` within the provided diff hunks.\"}, {\"verdict\": \"addressed\", \"subject\": \"c3\", \"evidence\": [{\"kind\": \"diff_hunk\", \"ref\": \"h2\", \"quote\": \"+        self._evict()\\n\\n    def _evict(self):\\n        while len(self._store) > self.capacity:\\n            self._store.popitem(last=False)\"}], \"confidence\": 1.0, \"rationale\": \"The eviction logic has been extracted into a helper method `_evict()`.\"}]"
+          "text": "[\n  {\n    \"verdict\": \"addressed\",\n    \"subject\": \"c1\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunk\",\n        \"ref\": \"h1\",\n        \"quote\": \"+        \\\"\\\"\\\"Return the cached value for key, or None if absent or expired.\\\"\\\"\\\"\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The comment to add a docstring to `get()` was addressed by adding a docstring explaining the return value.\"\n  },\n  {\n    \"verdict\": \"ignored\",\n    \"subject\": \"c2\",\n    \"evidence\": [],\n    \"confidence\": 1.0,\n    \"rationale\": \"There is no evidence in the diff hunks that the potential division by zero in `hit_rate()` was addressed by adding a guard.\"\n  },\n  {\n    \"verdict\": \"partial\",\n    \"subject\": \"c3\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunk\",\n        \"ref\": \"h2\",\n        \"quote\": \"+    def _evict(self):\\n+        while len(self._store) > self.capacity:\\n+            self._store.popitem(last=False)\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The eviction logic was extracted into a helper function `_evict()`, but there is no evidence of a test being added, which partially addresses the review comment.\"\n  }\n]"
         }
       ]
     }

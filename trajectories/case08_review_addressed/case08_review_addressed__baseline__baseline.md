@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case08_review_addressed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 487 in / 242 out*
+*Backend: openai / gpt-4o  ·  Tokens: 487 in / 246 out*
 
 ## System instructions
 ```
@@ -18,6 +18,7 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
   {
     "verdict": "addressed",
@@ -26,11 +27,11 @@ Output ONLY a JSON array of findings:
       {
         "kind": "diff",
         "ref": "h1",
-        "quote": "if limit <= 0:\n        raise ValueError(\"limit must be positive\")"
+        "quote": "+    if limit <= 0:\n+        raise ValueError(\"limit must be positive\")"
       }
     ],
-    "confidence": 0.9,
-    "rationale": "The code now validates that the limit is positive, throwing a ValueError if not, which addresses the review comment."
+    "confidence": 1.0,
+    "rationale": "The code now includes a validation check for the `limit` variable to ensure it is positive, addressing the review comment."
   },
   {
     "verdict": "addressed",
@@ -42,7 +43,8 @@ Output ONLY a JSON array of findings:
         "quote": "+DEFAULT_PAGE_SIZE = 20\n@@ -58,7 +60,7 @@ def _page(page):\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"
       }
     ],
-    "confidence": 0.95,
-    "rationale": "A constant DEFAULT_PAGE_SIZE is introduced and used in place of the magic number 20, directly addressing the review comment."
+    "confidence": 1.0,
+    "rationale": "The magic number 20 has been replaced with a named constant DEFAULT_PAGE_SIZE, addressing the review comment."
   }
 ]
+```

@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case09_review_partial`
 
-*Backend: openai / gpt-4o  ·  Tokens: 689 in / 90 out*
+*Backend: openai / gpt-4o  ·  Tokens: 695 in / 73 out*
 
 ## System instructions
 ```
@@ -25,15 +25,4 @@ Output ONLY a JSON array, one object per finding, in the same order:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[
-  {
-    "claim_id": "comment:c1",
-    "sound": true,
-    "note": "The variable was renamed, but there was no evidence of a unit test added, confirming the 'partial' verdict."
-  },
-  {
-    "claim_id": "comment:c2",
-    "sound": true,
-    "note": "The unused import statement was removed, confirming the 'addressed' verdict."
-  }
-]
+[{"claim_id": "comment:c1", "sound": true, "note": "The variable rename was done, but there is no evidence of an added unit test for the empty-input case."}, {"claim_id": "comment:c2", "sound": true, "note": "The unused import was removed, satisfying the comment's request."}]

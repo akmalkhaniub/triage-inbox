@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case02_changelog_missing`
 
-*Backend: openai / gpt-4o  ·  Tokens: 717 in / 88 out*
+*Backend: openai / gpt-4o  ·  Tokens: 686 in / 76 out*
 
 ## System instructions
 ```
@@ -26,14 +26,6 @@ Output ONLY a JSON array, one object per finding, in the same order:
 
 ## Model turn 0  (stop: `end_turn`)
 [
-  {
-    "claim_id": "changelog:2",
-    "sound": false,
-    "note": "The phantom verdict is incorrect; commit b10003 supports the changelog entry."
-  },
-  {
-    "claim_id": "commit:b10002",
-    "sound": true,
-    "note": "Commit b10002 introduces a user-facing feature that is not mentioned in the changelog."
-  }
+  {"claim_id": "changelog:2", "sound": false, "note": "The Fix entry in the changelog properly reflects the commit subject rejecting negative quantities."},
+  {"claim_id": "commit:b10002", "sound": true, "note": "The commit related to rate-limit headers is not mentioned anywhere in the changelog."}
 ]

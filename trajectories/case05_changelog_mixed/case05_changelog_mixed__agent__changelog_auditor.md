@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case05_changelog_mixed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2171 in / 209 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2376 in / 272 out*
 
 ## System instructions
 ```
@@ -51,23 +51,29 @@ If there are no discrepancies, output [].
   {
     "sha": "f43a01",
     "type": "feat",
-    "subject": "add biometric unlock"
+    "subject": "add biometric unlock",
+    "author": "unknown"
   },
   {
     "sha": "f43a02",
     "type": "fix",
-    "subject": "fix crash when opening a deleted chat"
+    "subject": "fix crash when opening a deleted chat",
+    "author": "unknown"
   },
   {
     "sha": "f43a03",
     "type": "feat",
-    "subject": "add offline message queue"
+    "subject": "add offline message queue",
+    "author": "unknown"
   }
 ]
 ```
 
 ## Model turn 1  (stop: `tool_use`)
 **calls** `read_changelog`(`{}`)
+**calls** `get_commit`(`{"sha": "f43a01"}`)
+**calls** `get_commit`(`{"sha": "f43a02"}`)
+**calls** `get_commit`(`{"sha": "f43a03"}`)
 
 ### tool `read_changelog` ->
 ```
@@ -90,7 +96,38 @@ If there are no discrepancies, output [].
 ]
 ```
 
+### tool `get_commit` ->
+```
+{
+  "sha": "f43a01",
+  "type": "feat",
+  "subject": "add biometric unlock",
+  "body": "Face ID / fingerprint unlock on supported devices."
+}
+```
+
+### tool `get_commit` ->
+```
+{
+  "sha": "f43a02",
+  "type": "fix",
+  "subject": "fix crash when opening a deleted chat",
+  "body": "Null-checked the chat before render."
+}
+```
+
+### tool `get_commit` ->
+```
+{
+  "sha": "f43a03",
+  "type": "feat",
+  "subject": "add offline message queue",
+  "body": "Messages composed offline send automatically on reconnect."
+}
+```
+
 ## Model turn 2  (stop: `end_turn`)
+```json
 [
   {
     "verdict": "phantom",
@@ -103,7 +140,7 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "There is a changelog entry for 'In-app video calling' with no supporting commit in the release."
+    "rationale": "No corresponding commit for 'In-app video calling' was found."
   },
   {
     "verdict": "missing",
@@ -116,6 +153,7 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "The commit for 'add offline message queue' is missing from the changelog."
+    "rationale": "The feature 'offline message queue' was not mentioned in the CHANGELOG."
   }
 ]
+```

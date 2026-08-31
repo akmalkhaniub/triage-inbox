@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 453,
-  "output_tokens": 450,
+  "output_tokens": 135,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "```json\n[\n  {\n    \"verdict\": \"misclassified\",\n    \"subject\": \"rename --timeout flag to --timeout-ms\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      },\n      {\n        \"kind\": \"changelog\",\n        \"ref\": \"line 1\",\n        \"quote\": \"Renamed the --timeout flag to --timeout-ms\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog entry for renaming the --timeout flag fails to mention that it is a breaking change, as the semantics of the flag have changed (specifying the value in milliseconds rather than seconds). It should be listed under a 'Breaking Changes' section.\"\n  },\n  {\n    \"verdict\": \"addressed\",\n    \"subject\": \"add --json output mode\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a02\",\n        \"quote\": \"add --json output mode\"\n      },\n      {\n        \"kind\": \"changelog\",\n        \"ref\": \"line 2\",\n        \"quote\": \"New --json output mode for all commands\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog accurately reflects the addition of the --json output mode as implemented in the commit.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"expand the quickstart guide\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a03\",\n        \"quote\": \"expand the quickstart guide\"\n      }\n    ],\n    \"confidence\": 0.9,\n    \"rationale\": \"There is no mention of documentation updates in the changelog, despite a commit indicating an expansion of the quickstart guide. Significant documentation updates should typically be included in a 'Docs' section of the changelog.\"\n  }\n]\n```"
+          "text": "```json\n[\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"BREAKING CHANGE: the --timeout flag removed\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The commit c30a01 indicates a breaking change regarding the --timeout flag, but this is not reflected explicitly in the CHANGELOG.\"\n  }\n]\n```"
         }
       ]
     }

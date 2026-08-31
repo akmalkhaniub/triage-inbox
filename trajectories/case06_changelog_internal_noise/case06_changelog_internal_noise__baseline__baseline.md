@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case06_changelog_internal_noise`
 
-*Backend: openai / gpt-4o  ·  Tokens: 539 in / 138 out*
+*Backend: openai / gpt-4o  ·  Tokens: 539 in / 142 out*
 
 ## System instructions
 ```
@@ -25,18 +25,18 @@ Output ONLY a JSON array of findings:
     "subject": "g50a05",
     "evidence": [
       {
-        "kind": "commit",
+        "kind": "commit_subject",
         "ref": "g50a05",
         "quote": "expose cache stats via getCacheStats()"
       },
       {
-        "kind": "changelog",
-        "ref": "line 1",
-        "quote": ""
+        "kind": "commit_body",
+        "ref": "g50a05",
+        "quote": "New public API returning hit/miss counts."
       }
     ],
     "confidence": 1.0,
-    "rationale": "The commit introduces a new feature that adds to the public API and should be reflected in the changelog, but is missing."
+    "rationale": "A new feature adding a public API should be documented in the changelog but is missing."
   }
 ]
 ```

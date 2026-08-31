@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case04_changelog_clean`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2231 in / 14 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2287 in / 14 out*
 
 ## System instructions
 ```
@@ -51,22 +51,26 @@ If there are no discrepancies, output [].
   {
     "sha": "e12a01",
     "type": "feat",
-    "subject": "add keyboard shortcuts to the editor"
+    "subject": "add keyboard shortcuts to the editor",
+    "author": "unknown"
   },
   {
     "sha": "e12a02",
     "type": "fix",
-    "subject": "stop losing draft on tab switch"
+    "subject": "stop losing draft on tab switch",
+    "author": "unknown"
   },
   {
     "sha": "e12a03",
     "type": "test",
-    "subject": "add coverage for the draft autosave path"
+    "subject": "add coverage for the draft autosave path",
+    "author": "unknown"
   },
   {
     "sha": "e12a04",
     "type": "refactor",
-    "subject": "extract editor toolbar into its own module"
+    "subject": "extract editor toolbar into its own module",
+    "author": "unknown"
   }
 ]
 ```

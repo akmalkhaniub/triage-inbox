@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case07_review_ignored`
 
-*Backend: openai / gpt-4o  ·  Tokens: 488 in / 220 out*
+*Backend: openai / gpt-4o  ·  Tokens: 488 in / 246 out*
 
 ## System instructions
 ```
@@ -18,4 +18,31 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[{"verdict": "ignored", "subject": "authenticate() will crash if `user` is None. Please add a guard before accessing user.role.", "evidence": [{"kind": "diff", "ref": "h1", "quote": "+    user = request.user\n+    return user.role in ALLOWED_ROLES"}], "confidence": 1.0, "rationale": "The code changes do not include a guard for 'user' being None. The change made was cosmetic (just renaming a variable) and does not address the potential crash issue."}, {"verdict": "addressed", "subject": "Typo in the error message: 'unathorized' should be 'unauthorized'.", "evidence": [{"kind": "diff", "ref": "h2", "quote": "+    raise AuthError(\"unauthorized\")"}], "confidence": 1.0, "rationale": "The typo 'unathorized' was corrected to 'unauthorized' in the error message as requested."}]
+[
+  {
+    "verdict": "ignored",
+    "subject": "c1",
+    "evidence": [
+      {
+        "kind": "diff_hunk",
+        "ref": "h1",
+        "quote": "-    u = request.user\n-    return u.role in ALLOWED_ROLES\n+    user = request.user\n+    return user.role in ALLOWED_ROLES"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The review comment requested a guard for a None check on user, but the diff only shows a cosmetic name change from 'u' to 'user', without adding the requested guard."
+  },
+  {
+    "verdict": "addressed",
+    "subject": "c2",
+    "evidence": [
+      {
+        "kind": "diff_hunk",
+        "ref": "h2",
+        "quote": "-    raise AuthError(\"unathorized\")\n+    raise AuthError(\"unauthorized\")"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The typo noted in the error message was corrected as requested."
+  }
+]

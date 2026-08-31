@@ -1,6 +1,6 @@
 # Trajectory: `review_resolver` on `case08_review_addressed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 1968 in / 286 out*
+*Backend: openai / gpt-4o  ·  Tokens: 1804 in / 252 out*
 
 ## System instructions
 ```
@@ -55,25 +55,6 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
 
 ## Model turn 1  (stop: `tool_use`)
 **calls** `get_diff_for_path`(`{"path": "src/api/orders.py"}`)
-**calls** `get_diff_for_path`(`{"path": "src/api/orders.py"}`)
-
-### tool `get_diff_for_path` ->
-```
-[
-  {
-    "id": "h1",
-    "path": "src/api/orders.py",
-    "header": "@@ -12,6 +12,8 @@ def list_orders(limit, page):",
-    "patch": "     limit = int(limit)\n+    if limit <= 0:\n+        raise ValueError(\"limit must be positive\")"
-  },
-  {
-    "id": "h2",
-    "path": "src/api/orders.py",
-    "header": "@@ -1,4 +1,6 @@",
-    "patch": "+DEFAULT_PAGE_SIZE = 20\n@@ -58,7 +60,7 @@ def _page(page):\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"
-  }
-]
-```
 
 ### tool `get_diff_for_path` ->
 ```
@@ -94,7 +75,6 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
 ```
 
 ## Model turn 2  (stop: `end_turn`)
-```json
 [
   {
     "verdict": "addressed",
@@ -103,11 +83,11 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
       {
         "kind": "diff_hunk",
         "ref": "hunk:h1",
-        "quote": "    if limit <= 0:\n        raise ValueError(\"limit must be positive\")"
+        "quote": "+    if limit <= 0:\n+        raise ValueError(\"limit must be positive\")"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The diff hunk adds a validation to ensure `limit` is positive as requested."
+    "rationale": "A validation for a positive limit was added exactly as requested."
   },
   {
     "verdict": "addressed",
@@ -120,7 +100,6 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
       }
     ],
     "confidence": 1.0,
-    "rationale": "The diff hunk uses a named constant for the page size instead of the magic number 20."
+    "rationale": "A named constant for the default page size was introduced and used."
   }
 ]
-```

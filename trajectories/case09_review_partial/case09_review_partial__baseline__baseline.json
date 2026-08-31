@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 441,
-  "output_tokens": 194,
+  "output_tokens": 219,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "```json\n[\n  {\n    \"verdict\": \"partial\",\n    \"subject\": \"c1\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunk\",\n        \"ref\": \"h1\",\n        \"quote\": \"+    records = summarize(rows)\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The variable `d` was renamed to `records`, but there is no evidence in the diff indicating that a unit test was added for the empty-input case.\"\n  },\n  {\n    \"verdict\": \"addressed\",\n    \"subject\": \"c2\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunk\",\n        \"ref\": \"h2\",\n        \"quote\": \"-import itertools\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The unused import was removed as requested.\"\n  }\n]\n```"
+          "text": "```json\n[\n  {\n    \"verdict\": \"partial\",\n    \"subject\": \"Review comment c1\",\n    \"evidence\": [\n      {\n        \"kind\": \"code_change\",\n        \"ref\": \"h1\",\n        \"quote\": \"-    d = summarize(rows)\\n+    records = summarize(rows)\"\n      }\n    ],\n    \"confidence\": 0.9,\n    \"rationale\": \"The variable `d` was renamed to `records`, addressing part of the comment. However, there is no evidence of a unit test added for the empty-input case in the provided diff.\"\n  },\n  {\n    \"verdict\": \"addressed\",\n    \"subject\": \"Review comment c2\",\n    \"evidence\": [\n      {\n        \"kind\": \"code_change\",\n        \"ref\": \"h2\",\n        \"quote\": \"-import itertools\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The unused import of `itertools` was removed as requested in the review comment.\"\n  }\n]\n```"
         }
       ]
     }

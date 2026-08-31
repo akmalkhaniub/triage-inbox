@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case02_changelog_missing`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2149 in / 252 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2191 in / 219 out*
 
 ## System instructions
 ```
@@ -51,17 +51,20 @@ If there are no discrepancies, output [].
   {
     "sha": "b10001",
     "type": "feat",
-    "subject": "add pagination to /v2/orders"
+    "subject": "add pagination to /v2/orders",
+    "author": "unknown"
   },
   {
     "sha": "b10002",
     "type": "feat",
-    "subject": "add rate-limit headers to all responses"
+    "subject": "add rate-limit headers to all responses",
+    "author": "unknown"
   },
   {
     "sha": "b10003",
     "type": "fix",
-    "subject": "reject negative quantity in order create"
+    "subject": "reject negative quantity in order create",
+    "author": "unknown"
   }
 ]
 ```
@@ -92,18 +95,13 @@ If there are no discrepancies, output [].
     "subject": "changelog:2",
     "evidence": [
       {
-        "kind": "commit",
-        "ref": "commit:b10003",
-        "quote": "reject negative quantity in order create"
-      },
-      {
         "kind": "changelog_line",
         "ref": "changelog:2",
         "quote": "Order creation now rejects negative quantities"
       }
     ],
     "confidence": 1.0,
-    "rationale": "A fix for negative order quantity is claimed in the CHANGELOG under 'Fixed', but it is not a phantom as there is a supporting commit."
+    "rationale": "The 'Fixed' entry regarding order creation aligns with the commit subject stating a rejection of negative quantities, so there is no discrepancy here."
   },
   {
     "verdict": "missing",
@@ -116,6 +114,6 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "The feature addition of rate-limit headers was not mentioned in the CHANGELOG."
+    "rationale": "The commit adding rate-limit headers to all responses is not mentioned in the changelog."
   }
 ]

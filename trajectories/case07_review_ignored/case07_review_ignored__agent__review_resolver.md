@@ -1,6 +1,6 @@
 # Trajectory: `review_resolver` on `case07_review_ignored`
 
-*Backend: openai / gpt-4o  ·  Tokens: 1792 in / 306 out*
+*Backend: openai / gpt-4o  ·  Tokens: 1792 in / 324 out*
 
 ## System instructions
 ```
@@ -88,23 +88,28 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
       {
         "kind": "diff_hunk",
         "ref": "hunk:h1",
-        "quote": "-    u = request.user\n-    return u.role in ALLOWED_ROLES\n+    user = request.user\n+    return user.role in ALLOWED_ROLES"
+        "quote": "user = request.user\nreturn user.role in ALLOWED_ROLES"
       }
     ],
-    "confidence": 1.0,
-    "rationale": "The diff changes the variable name but does not add a guard against None."
+    "confidence": 0.9,
+    "rationale": "The requested guard for None user was not added to prevent crashes."
   },
   {
     "verdict": "addressed",
     "subject": "comment:c2",
     "evidence": [
       {
+        "kind": "review_comment",
+        "ref": "comment:c2",
+        "quote": "Typo in the error message: 'unathorized' should be 'unauthorized'."
+      },
+      {
         "kind": "diff_hunk",
         "ref": "hunk:h2",
-        "quote": "-    raise AuthError(\"unathorized\")\n+    raise AuthError(\"unauthorized\")"
+        "quote": "raise AuthError(\"unauthorized\")"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The typo in the error message was corrected from 'unathorized' to 'unauthorized'."
+    "rationale": "The typo in the error message was corrected to 'unauthorized'."
   }
 ]

@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case10_review_mixed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 997 in / 127 out*
+*Backend: openai / gpt-4o  ·  Tokens: 849 in / 88 out*
 
 ## System instructions
 ```
@@ -29,16 +29,11 @@ Output ONLY a JSON array, one object per finding, in the same order:
   {
     "claim_id": "comment:c1",
     "sound": true,
-    "note": "The docstring was added to the `get()` method, addressing the comment."
+    "note": "The docstring requested in comment c1 was added in hunk h1."
   },
   {
     "claim_id": "comment:c2",
     "sound": true,
-    "note": "No changes related to `hit_rate` were made, so the comment was ignored."
-  },
-  {
-    "claim_id": "comment:c3",
-    "sound": true,
-    "note": "The eviction logic was extracted but there's no evidence of added tests, making it partial."
+    "note": "No changes related to guarding against division by zero in hit_rate() appear in the provided diffs."
   }
 ]

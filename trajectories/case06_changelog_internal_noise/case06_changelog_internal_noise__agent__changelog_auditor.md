@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case06_changelog_internal_noise`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2342 in / 125 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2426 in / 14 out*
 
 ## System instructions
 ```
@@ -51,32 +51,38 @@ If there are no discrepancies, output [].
   {
     "sha": "g50a01",
     "type": "fix",
-    "subject": "fix memory leak in the cache eviction loop"
+    "subject": "fix memory leak in the cache eviction loop",
+    "author": "unknown"
   },
   {
     "sha": "g50a02",
     "type": "chore",
-    "subject": "migrate CI from Travis to GitHub Actions"
+    "subject": "migrate CI from Travis to GitHub Actions",
+    "author": "unknown"
   },
   {
     "sha": "g50a03",
     "type": "refactor",
-    "subject": "split the god-object Manager class"
+    "subject": "split the god-object Manager class",
+    "author": "unknown"
   },
   {
     "sha": "g50a04",
     "type": "test",
-    "subject": "add regression test for the cache leak"
+    "subject": "add regression test for the cache leak",
+    "author": "unknown"
   },
   {
     "sha": "g50a05",
     "type": "feat",
-    "subject": "expose cache stats via getCacheStats()"
+    "subject": "expose cache stats via getCacheStats()",
+    "author": "unknown"
   },
   {
     "sha": "g50a06",
     "type": "chore",
-    "subject": "update copyright year in headers"
+    "subject": "update copyright year in headers",
+    "author": "unknown"
   }
 ]
 ```
@@ -96,18 +102,4 @@ If there are no discrepancies, output [].
 ```
 
 ## Model turn 2  (stop: `end_turn`)
-[
-  {
-    "verdict": "missing",
-    "subject": "commit:g50a05",
-    "evidence": [
-      {
-        "kind": "commit",
-        "ref": "commit:g50a05",
-        "quote": "feat: expose cache stats via getCacheStats()"
-      }
-    ],
-    "confidence": 1.0,
-    "rationale": "The commit 'expose cache stats via getCacheStats()' is a feature addition but is not documented in the CHANGELOG."
-  }
-]
+[]

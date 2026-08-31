@@ -1,6 +1,6 @@
-# Trajectory: `verifier` on `case01_changelog_phantom`
+# Trajectory: `verifier` on `case08_review_addressed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 622 in / 42 out*
+*Backend: openai / gpt-4o  ·  Tokens: 656 in / 43 out*
 
 ## System instructions
 ```
@@ -25,4 +25,4 @@ Output ONLY a JSON array, one object per finding, in the same order:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[{"claim_id": "changelog:3", "sound": true, "note": "There is no commit related to 'Dark mode for the settings page', confirming it is a phantom entry."}]
+[{"claim_id": "comment:c1", "sound": true, "note": "The code change in hunk h1 validates that `limit` is positive, which addresses the comment c1."}]

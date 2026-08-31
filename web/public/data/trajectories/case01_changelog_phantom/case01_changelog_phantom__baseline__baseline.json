@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 462,
-  "output_tokens": 248,
+  "output_tokens": 261,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "```json\n[\n    {\n        \"verdict\": \"phantom\",\n        \"subject\": \"Dark mode for the settings page\",\n        \"evidence\": [\n            {\n                \"kind\": \"changelog_line\",\n                \"ref\": \"3\",\n                \"quote\": \"Dark mode for the settings page\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"This entry is listed as 'Added' in the CHANGELOG but there is no corresponding commit related to 'Dark mode' in the provided commit history for v1.4.0.\"\n    },\n    {\n        \"verdict\": \"missing\",\n        \"subject\": \"bump eslint to 9.2\",\n        \"evidence\": [\n            {\n                \"kind\": \"commit\",\n                \"ref\": \"77aa88\",\n                \"quote\": \"bump eslint to 9.2\"\n            }\n        ],\n        \"confidence\": 1.0,\n        \"rationale\": \"The commit regarding the eslint update was not reflected in the CHANGELOG. Despite being a development tool update, it's common to include such entries in a separate section like 'Chore' or 'Dev Updates'.\"\n    }\n]\n```"
+          "text": "[\n  {\n    \"verdict\": \"misclassified\",\n    \"subject\": \"Dark mode for the settings page\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"line 3\",\n        \"quote\": \"Dark mode for the settings page\"\n      }\n    ],\n    \"confidence\": 0.9,\n    \"rationale\": \"The 'Dark mode for the settings page' entry in the changelog is not backed by any commit in the provided details. This indicates that it may be phatom entry or refers to an unlisted commit.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"bump eslint to 9.2\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"sha 77aa88\",\n        \"quote\": \"subject: bump eslint to 9.2\"\n      }\n    ],\n    \"confidence\": 0.95,\n    \"rationale\": \"The 'bump eslint to 9.2' chore in commit `77aa88` is not reflected in the changelog. While it's a dev-only change, it is typical to include such information in a changelog to track dependencies.\"\n  }\n]"
         }
       ]
     }

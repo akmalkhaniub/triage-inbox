@@ -4,62 +4,26 @@
   "n_cases": 10,
   "aggregate": {
     "baseline": {
-      "tp": 8.6667,
-      "fp": 3.6667,
-      "fn": 1.3333,
-      "precision": 0.703,
-      "recall": 0.8667,
-      "f1": 0.776,
-      "false_alarms_per_case": 0.3667,
-      "cost_per_task_usd": 0.0036,
-      "total_cost_usd": 0.0354,
-      "ranges": {
-        "f1": {
-          "min": 0.727,
-          "max": 0.818
-        },
-        "precision": {
-          "min": 0.667,
-          "max": 0.75
-        },
-        "recall": {
-          "min": 0.8,
-          "max": 0.9
-        },
-        "false_alarms_per_case": {
-          "min": 0.3,
-          "max": 0.4
-        }
-      }
+      "tp": 9,
+      "fp": 3,
+      "fn": 1,
+      "precision": 0.75,
+      "recall": 0.9,
+      "f1": 0.8181818181818182,
+      "false_alarms_per_case": 0.3,
+      "cost_per_task_usd": 0.0035,
+      "total_cost_usd": 0.0354
     },
     "agent": {
-      "tp": 7.6667,
+      "tp": 9,
       "fp": 0,
-      "fn": 2.3333,
+      "fn": 1,
       "precision": 1.0,
-      "recall": 0.7667,
-      "f1": 0.8648,
+      "recall": 0.9,
+      "f1": 0.9473684210526316,
       "false_alarms_per_case": 0.0,
-      "cost_per_task_usd": 0.0108,
-      "total_cost_usd": 0.1058,
-      "ranges": {
-        "f1": {
-          "min": 0.824,
-          "max": 0.947
-        },
-        "precision": {
-          "min": 1.0,
-          "max": 1.0
-        },
-        "recall": {
-          "min": 0.7,
-          "max": 0.9
-        },
-        "false_alarms_per_case": {
-          "min": 0.0,
-          "max": 0.0
-        }
-      }
+      "cost_per_task_usd": 0.0106,
+      "total_cost_usd": 0.1058
     }
   },
   "per_case": {
@@ -403,7 +367,5 @@
         "cost_usd": 0.0159
       }
     }
-  },
-  "n_runs": 3,
-  "aggregate_note": "aggregate = mean of 3 live gpt-4o runs (2026-08-31); per_case shows run 3 for the trajectory inspector"
+  }
 }

@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 539,
-  "output_tokens": 142,
+  "output_tokens": 212,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "```json\n[\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"g50a05\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit_subject\",\n        \"ref\": \"g50a05\",\n        \"quote\": \"expose cache stats via getCacheStats()\"\n      },\n      {\n        \"kind\": \"commit_body\",\n        \"ref\": \"g50a05\",\n        \"quote\": \"New public API returning hit/miss counts.\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"A new feature adding a public API should be documented in the changelog but is missing.\"\n  }\n]\n```"
+          "text": "```json\n[\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"add regression test for the cache leak\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"g50a04\",\n        \"quote\": \"add regression test for the cache leak\"\n      }\n    ],\n    \"confidence\": 0.9,\n    \"rationale\": \"Test-related changes aren't typically included in changelogs, but noting the presence of tests for a fixed issue is sometimes useful.\"\n  },\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"expose cache stats via getCacheStats()\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"g50a05\",\n        \"quote\": \"expose cache stats via getCacheStats()\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"A new public API feature should be listed in the changelog.\"\n  }\n]\n```"
         }
       ]
     }

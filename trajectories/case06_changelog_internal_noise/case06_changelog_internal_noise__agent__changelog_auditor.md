@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case06_changelog_internal_noise`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2426 in / 14 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2426 in / 122 out*
 
 ## System instructions
 ```
@@ -102,4 +102,20 @@ If there are no discrepancies, output [].
 ```
 
 ## Model turn 2  (stop: `end_turn`)
-[]
+```json
+[
+  {
+    "verdict": "missing",
+    "subject": "commit:g50a05",
+    "evidence": [
+      {
+        "kind": "commit",
+        "ref": "commit:g50a05",
+        "quote": "feat: expose cache stats via getCacheStats()"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The feature to expose cache stats via getCacheStats() is not mentioned in the changelog."
+  }
+]
+```

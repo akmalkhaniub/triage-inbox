@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 479,
-  "output_tokens": 258,
+  "output_tokens": 1,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "[\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"extract editor toolbar into its own module\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"e12a04\",\n        \"quote\": \"extract editor toolbar into its own module\\nNo user-facing change.\"\n      }\n    ],\n    \"confidence\": 0.9,\n    \"rationale\": \"The refactoring change 'extract editor toolbar into its own module' is not listed in the changelog. Typically, refactoring might not affect end users directly and may not need to be included, but it's important to ensure that all changes are properly audited.\"\n  },\n  {\n    \"verdict\": \"phantom\",\n    \"subject\": \"add coverage for the draft autosave path\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"e12a03\",\n        \"quote\": \"add coverage for the draft autosave path\\nTest-only.\"\n      }\n    ],\n    \"confidence\": 0.95,\n    \"rationale\": \"The commit 'add coverage for the draft autosave path' is a test-only change and not user-facing, hence appropriately omitted from the changelog.\"\n  }\n]"
+          "text": "[]"
         }
       ]
     }

@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case09_review_partial`
 
-*Backend: openai / gpt-4o  ·  Tokens: 441 in / 219 out*
+*Backend: openai / gpt-4o  ·  Tokens: 441 in / 235 out*
 
 ## System instructions
 ```
@@ -18,33 +18,31 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-```json
 [
   {
     "verdict": "partial",
-    "subject": "Review comment c1",
+    "subject": "c1",
     "evidence": [
       {
-        "kind": "code_change",
+        "kind": "diff_hunk",
         "ref": "h1",
-        "quote": "-    d = summarize(rows)\n+    records = summarize(rows)"
+        "quote": "-    d = summarize(rows)\n-    return render(d)\n+    records = summarize(rows)\n+    return render(records)"
       }
     ],
     "confidence": 0.9,
-    "rationale": "The variable `d` was renamed to `records`, addressing part of the comment. However, there is no evidence of a unit test added for the empty-input case in the provided diff."
+    "rationale": "The variable `d` was renamed to `records`, satisfying the first part of the review comment. However, there is no evidence in the diff hunks indicating the addition of a unit test for the empty-input case."
   },
   {
     "verdict": "addressed",
-    "subject": "Review comment c2",
+    "subject": "c2",
     "evidence": [
       {
-        "kind": "code_change",
+        "kind": "diff_hunk",
         "ref": "h2",
-        "quote": "-import itertools"
+        "quote": "-import itertools\n import json"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The unused import of `itertools` was removed as requested in the review comment."
+    "rationale": "The unused import `itertools` was removed, fully addressing the review comment."
   }
 ]
-```

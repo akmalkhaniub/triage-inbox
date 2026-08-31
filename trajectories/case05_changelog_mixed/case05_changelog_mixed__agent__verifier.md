@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case05_changelog_mixed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 690 in / 77 out*
+*Backend: openai / gpt-4o  ·  Tokens: 697 in / 77 out*
 
 ## System instructions
 ```
@@ -25,7 +25,4 @@ Output ONLY a JSON array, one object per finding, in the same order:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[
-  {"claim_id": "changelog:3", "sound": true, "note": "No commit matches 'In-app video calling'; the line is phantom."},
-  {"claim_id": "commit:f43a03", "sound": true, "note": "The 'offline message queue' feature commit is user-facing and missing from the changelog."}
-]
+[{"claim_id": "changelog:3", "sound": true, "note": "No commit mentions in-app video calling, confirming it is a phantom entry."}, {"claim_id": "commit:f43a03", "sound": true, "note": "The feature for offline message queuing in commit f43a03 is missing from the changelog."}]

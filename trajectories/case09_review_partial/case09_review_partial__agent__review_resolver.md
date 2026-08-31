@@ -1,6 +1,6 @@
 # Trajectory: `review_resolver` on `case09_review_partial`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2629 in / 275 out*
+*Backend: openai / gpt-4o  ·  Tokens: 1772 in / 274 out*
 
 ## System instructions
 ```
@@ -55,6 +55,7 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
 
 ## Model turn 1  (stop: `tool_use`)
 **calls** `get_diff_for_path`(`{"path": "src/report.py"}`)
+**calls** `get_diff_for_path`(`{"path": "tests/test_report.py"}`)
 
 ### tool `get_diff_for_path` ->
 ```
@@ -74,32 +75,12 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
 ]
 ```
 
-## Model turn 2  (stop: `tool_use`)
-**calls** `get_hunk`(`{"hunk_id": "h1"}`)
-**calls** `get_hunk`(`{"hunk_id": "h2"}`)
-
-### tool `get_hunk` ->
+### tool `get_diff_for_path` ->
 ```
-{
-  "id": "h1",
-  "path": "src/report.py",
-  "header": "@@ -28,8 +28,8 @@ def build(rows):",
-  "patch": "-    d = summarize(rows)\n-    return render(d)\n+    records = summarize(rows)\n+    return render(records)"
-}
+No diff hunks touch tests/test_report.py
 ```
 
-### tool `get_hunk` ->
-```
-{
-  "id": "h2",
-  "path": "src/report.py",
-  "header": "@@ -3,7 +3,6 @@",
-  "patch": "-import itertools\n import json"
-}
-```
-
-## Model turn 3  (stop: `end_turn`)
-```json
+## Model turn 2  (stop: `end_turn`)
 [
   {
     "verdict": "partial",
@@ -108,11 +89,11 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
       {
         "kind": "diff_hunk",
         "ref": "hunk:h1",
-        "quote": "records = summarize(rows)"
+        "quote": "-    d = summarize(rows)\n-    return render(d)\n+    records = summarize(rows)\n+    return render(records)"
       }
     ],
-    "confidence": 0.8,
-    "rationale": "The variable was renamed to 'records', but no unit test for the empty-input case was added."
+    "confidence": 0.9,
+    "rationale": "The variable `d` was renamed to `records`, addressing part of the comment; however, no unit test for the empty-input case was added."
   },
   {
     "verdict": "addressed",
@@ -121,11 +102,10 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
       {
         "kind": "diff_hunk",
         "ref": "hunk:h2",
-        "quote": "-import itertools"
+        "quote": "-import itertools\n import json"
       }
     ],
     "confidence": 1.0,
     "rationale": "The unused import was removed as requested."
   }
 ]
-```

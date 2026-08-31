@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_ypN2xYnJYrdDPW41XGelZTou",
+          "id": "call_41nEzREneGsbY191F9v2Bh6k",
           "name": "list_commits",
           "input": {}
         }
@@ -35,7 +35,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_A8D2SBs8PUHYiEqRHwahaKG1",
+          "id": "call_BWa07YkdeaTb0L3S4osZzE91",
           "name": "read_changelog",
           "input": {}
         }
@@ -56,7 +56,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_q7NiKWMeDsAkT3WsUKwnUDR4",
+          "id": "call_HXmYP5GlPEGfetmSTn8gCuKH",
           "name": "get_commit",
           "input": {
             "sha": "c30a01"
@@ -81,7 +81,7 @@
       "content": [
         {
           "type": "text",
-          "text": "```json\n[\n  {\n    \"verdict\": \"misclassified\",\n    \"subject\": \"changelog:1\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:1\",\n        \"quote\": \"Renamed the --timeout flag to --timeout-ms\"\n      },\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The commit c30a01 is a breaking change but is listed under 'Changed' instead of a 'Breaking' section.\"\n  }\n]\n```"
+          "text": "```json\n[\n  {\n    \"verdict\": \"misclassified\",\n    \"subject\": \"changelog:1\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_line\",\n        \"ref\": \"changelog:1\",\n        \"quote\": \"Renamed the --timeout flag to --timeout-ms\"\n      },\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"commit:c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog entry about renaming the --timeout flag is a breaking change and should be in the 'Breaking' section.\"\n  }\n]\n```"
         }
       ]
     }

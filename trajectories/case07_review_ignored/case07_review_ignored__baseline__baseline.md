@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case07_review_ignored`
 
-*Backend: openai / gpt-4o  ·  Tokens: 488 in / 246 out*
+*Backend: openai / gpt-4o  ·  Tokens: 488 in / 254 out*
 
 ## System instructions
 ```
@@ -18,31 +18,33 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
   {
     "verdict": "ignored",
-    "subject": "c1",
+    "subject": "Review comment c1",
     "evidence": [
       {
-        "kind": "diff_hunk",
+        "kind": "diff_hunks",
         "ref": "h1",
-        "quote": "-    u = request.user\n-    return u.role in ALLOWED_ROLES\n+    user = request.user\n+    return user.role in ALLOWED_ROLES"
+        "quote": "+    user = request.user\n+    return user.role in ALLOWED_ROLES"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The review comment requested a guard for a None check on user, but the diff only shows a cosmetic name change from 'u' to 'user', without adding the requested guard."
+    "rationale": "The review comment c1 requested a guard for a None user, but no such guard was added in the provided diff. The change made was only cosmetic (variable renaming) without addressing the issue."
   },
   {
     "verdict": "addressed",
-    "subject": "c2",
+    "subject": "Review comment c2",
     "evidence": [
       {
-        "kind": "diff_hunk",
+        "kind": "diff_hunks",
         "ref": "h2",
         "quote": "-    raise AuthError(\"unathorized\")\n+    raise AuthError(\"unauthorized\")"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The typo noted in the error message was corrected as requested."
+    "rationale": "The typo reported in review comment c2 was corrected from 'unathorized' to 'unauthorized' in the diff."
   }
 ]
+```

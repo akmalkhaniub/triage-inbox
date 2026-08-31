@@ -876,7 +876,7 @@ export default function App() {
               <div>
                 <div className="script-box">
                   <div className="script-quote">
-                    "Here's the honest result across 10 cases on GPT-4o, from a live run — and I want to be straight, because the durable win isn't the F1 number, it's what the verifier guarantees. Precision goes from {results.aggregate.baseline!.precision.toFixed(2)} to {results.aggregate.agent!.precision.toFixed(2)} with zero false alarms — every alert the agent raises carries verifiable proof. That held on every run I did. A maintainer who gets false alarms mutes the tool; the verifier is the line between one they trust and one they turn off. Now the trade-off, because these runs vary: this time the agent was more conservative and its recall dipped below the baseline — it stayed silent rather than surface an unproven claim. So the F1 edge is modest and recall is the thing to improve. But the reliability — never crying wolf — is rock-solid. And because the agent fetches artifacts on demand, it still works on a 500-commit release that can't fit in a prompt at all."
+                    "Here's the honest result across 10 cases on GPT-4o — averaged over three live runs, because a single run is noisy. The durable win isn't the F1 number, it's what the verifier guarantees. Precision goes from {results.aggregate.baseline!.precision.toFixed(2)} to {results.aggregate.agent!.precision.toFixed(2)} with zero false alarms — and that was 1.00 precision, zero false alarms, in every one of the three runs. Zero variance. A maintainer who gets false alarms mutes the tool; the verifier is the line between one they trust and one they turn off. Now the honest trade-off: the agent is more conservative, so its recall runs a bit below the baseline — it stays silent rather than surface an unproven claim. So recall is the thing to improve; reliability is already solved. And because the agent fetches artifacts on demand, it still works on a 500-commit release that can't fit in a prompt at all."
                   </div>
                 </div>
 
@@ -892,6 +892,7 @@ export default function App() {
                     agent={results.aggregate.agent}
                     model={results.model}
                     nCases={results.n_cases}
+                    nRuns={(results as any).n_runs}
                   />
                 </div>
               </div>
@@ -1205,6 +1206,7 @@ export default function App() {
                   agent={results.aggregate.agent}
                   model={results.model}
                   nCases={results.n_cases}
+                  nRuns={(results as any).n_runs}
                 />
               )}
             </div>

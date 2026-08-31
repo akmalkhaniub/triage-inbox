@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_zyqMC3CWBieFiJpt4lX7Hr3Z",
+          "id": "call_c39dYV6qVQbvMIk0HfQUqRG9",
           "name": "list_commits",
           "input": {}
         }
@@ -35,7 +35,7 @@
       "content": [
         {
           "type": "tool_use",
-          "id": "call_Ejecc7AWGb5BAeYf5qYoDVR9",
+          "id": "call_8Z25vHg5KWNkyMZ2tg93M1sr",
           "name": "read_changelog",
           "input": {}
         }

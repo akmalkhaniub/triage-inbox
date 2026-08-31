@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case02_changelog_missing`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2191 in / 219 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2191 in / 112 out*
 
 ## System instructions
 ```
@@ -91,19 +91,6 @@ If there are no discrepancies, output [].
 ## Model turn 2  (stop: `end_turn`)
 [
   {
-    "verdict": "phantom",
-    "subject": "changelog:2",
-    "evidence": [
-      {
-        "kind": "changelog_line",
-        "ref": "changelog:2",
-        "quote": "Order creation now rejects negative quantities"
-      }
-    ],
-    "confidence": 1.0,
-    "rationale": "The 'Fixed' entry regarding order creation aligns with the commit subject stating a rejection of negative quantities, so there is no discrepancy here."
-  },
-  {
     "verdict": "missing",
     "subject": "commit:b10002",
     "evidence": [
@@ -114,6 +101,6 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "The commit adding rate-limit headers to all responses is not mentioned in the changelog."
+    "rationale": "The commit adding rate-limit headers to all responses has no corresponding entry in the CHANGELOG."
   }
 ]

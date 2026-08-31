@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case10_review_mixed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 566 in / 317 out*
+*Backend: openai / gpt-4o  ·  Tokens: 566 in / 300 out*
 
 ## System instructions
 ```
@@ -18,38 +18,40 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
   {
     "verdict": "addressed",
     "subject": "c1",
     "evidence": [
       {
-        "kind": "diff_hunk",
+        "kind": "diff",
         "ref": "h1",
-        "quote": "+        \"\"\"Return the cached value for key, or None if absent or expired.\"\"\""
+        "quote": "\"\"\"Return the cached value for key, or None if absent or expired.\"\"\""
       }
     ],
     "confidence": 1.0,
-    "rationale": "The comment to add a docstring to `get()` was addressed by adding a docstring explaining the return value."
+    "rationale": "The added docstring describes the return value, addressing the review comment."
   },
   {
     "verdict": "ignored",
     "subject": "c2",
     "evidence": [],
     "confidence": 1.0,
-    "rationale": "There is no evidence in the diff hunks that the potential division by zero in `hit_rate()` was addressed by adding a guard."
+    "rationale": "There is no evidence in the diff hunks provided that the potential division by zero in `hit_rate()` was addressed."
   },
   {
     "verdict": "partial",
     "subject": "c3",
     "evidence": [
       {
-        "kind": "diff_hunk",
+        "kind": "diff",
         "ref": "h2",
-        "quote": "+    def _evict(self):\n+        while len(self._store) > self.capacity:\n+            self._store.popitem(last=False)"
+        "quote": "def _evict(self):\n+        while len(self._store) > self.capacity:\n+            self._store.popitem(last=False)"
       }
     ],
-    "confidence": 1.0,
-    "rationale": "The eviction logic was extracted into a helper function `_evict()`, but there is no evidence of a test being added, which partially addresses the review comment."
+    "confidence": 0.8,
+    "rationale": "The eviction logic was extracted into a helper method `_evict()`, but there is no evidence of a test added to cover this logic as suggested."
   }
 ]
+```

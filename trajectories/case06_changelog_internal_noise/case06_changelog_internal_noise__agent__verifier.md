@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case06_changelog_internal_noise`
 
-*Backend: openai / gpt-4o-mini  ·  Tokens: 803 in / 102 out*
+*Backend: openai / gpt-4o  ·  Tokens: 831 in / 88 out*
 
 ## System instructions
 ```
@@ -27,13 +27,13 @@ Output ONLY a JSON array, one object per finding, in the same order:
 ## Model turn 0  (stop: `end_turn`)
 [
   {
-    "claim_id": "changelog:Memory leak in cache eviction for long-running processes",
+    "claim_id": "changelog:1",
     "sound": false,
-    "note": "The memory leak fix in the changelog corresponds correctly to the commit for fixing the memory leak in the cache eviction loop."
+    "note": "Commit g50a01 addresses the memory leak, matching the changelog entry."
   },
   {
     "claim_id": "commit:g50a05",
     "sound": true,
-    "note": "The new feature of exposing cache stats is indeed missing from the CHANGELOG."
+    "note": "The feature introduced in commit g50a05 is not mentioned in the changelog."
   }
 ]

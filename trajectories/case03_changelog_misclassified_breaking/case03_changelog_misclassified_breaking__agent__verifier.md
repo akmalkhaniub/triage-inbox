@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case03_changelog_misclassified_breaking`
 
-*Backend: openai / gpt-4o  ·  Tokens: 667 in / 49 out*
+*Backend: openai / gpt-4o  ·  Tokens: 667 in / 50 out*
 
 ## System instructions
 ```
@@ -25,6 +25,4 @@ Output ONLY a JSON array, one object per finding, in the same order:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[
-  {"claim_id": "changelog:1", "sound": true, "note": "The commit c30a01 includes a breaking change but is listed under 'Changed' rather than a 'Breaking Change' section."}
-]
+[{"claim_id": "changelog:1", "sound": true, "note": "The changelog entry describes a breaking change, which should be in the 'Breaking' section, thus it is misclassified under 'Changed'."}]

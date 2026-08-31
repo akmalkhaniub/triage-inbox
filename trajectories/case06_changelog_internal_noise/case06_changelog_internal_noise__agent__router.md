@@ -1,6 +1,6 @@
 # Trajectory: `router` on `case06_changelog_internal_noise`
 
-*Backend: openai / gpt-4o  ·  Tokens: 243 in / 38 out*
+*Backend: openai / gpt-4o  ·  Tokens: 243 in / 40 out*
 
 ## System instructions
 ```
@@ -19,4 +19,4 @@ Output ONLY JSON: {"item_type": "<one of the above>", "why": "<short reason>"}
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-{"item_type": "changelog_audit", "why": "The item is about auditing a CHANGELOG for a specific version, which matches the description of changelog_audit."}
+{"item_type": "changelog_audit", "why": "The item is about auditing the CHANGELOG for the specified version, which matches the criteria for a changelog_audit task."}

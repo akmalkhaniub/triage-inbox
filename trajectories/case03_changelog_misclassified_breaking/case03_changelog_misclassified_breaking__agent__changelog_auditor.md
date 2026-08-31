@@ -120,7 +120,7 @@ If there are no discrepancies, output [].
       }
     ],
     "confidence": 1.0,
-    "rationale": "The commit c30a01 is a breaking change but is listed under 'Changed' instead of a 'Breaking' section."
+    "rationale": "The changelog entry about renaming the --timeout flag is a breaking change and should be in the 'Breaking' section."
   }
 ]
 ```

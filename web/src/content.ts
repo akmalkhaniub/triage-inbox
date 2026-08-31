@@ -56,7 +56,7 @@ export const STORY: Story[] = [
   {
     stage: "Baseline",
     body: "One general-purpose agent, one prompt, the whole artifact dumped in, no tools or verifier. A reasonable first attempt — and the bar to beat.",
-    evidence: "F1 0.783 · precision 0.69 · 0.4 false alarms/case (live gpt-4o, fair scorer)",
+    evidence: "F1 0.78 · precision 0.70 · 0.37 false alarms/case (mean of 3 live gpt-4o runs)",
   },
   {
     stage: "Iter 1 — router + specialists",
@@ -98,7 +98,7 @@ export const STORY: Story[] = [
   {
     stage: "Final",
     body: "Router + specialists + on-demand tools + two-layer verifier, verified-only scoring, any provider. Main contribution: verification at the seam is what turns a fluent generator into a reliable one.",
-    evidence: "GPT-4o (live): precision 0.69 → 1.00 · false alarms 0.4 → 0.0 · F1 0.78 → 0.82 (recall run-variable)",
+    evidence: "GPT-4o (mean of 3 runs): precision 0.70 → 1.00 · false alarms 0.37 → 0.0 (zero variance) · F1 0.78 → 0.87 · recall trade-off 0.87 → 0.77",
     kind: "final",
   },
 ];

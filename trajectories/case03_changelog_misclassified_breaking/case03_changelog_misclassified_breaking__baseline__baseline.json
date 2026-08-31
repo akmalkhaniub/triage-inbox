@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 453,
-  "output_tokens": 135,
+  "output_tokens": 296,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "```json\n[\n  {\n    \"verdict\": \"missing\",\n    \"subject\": \"BREAKING CHANGE: the --timeout flag removed\",\n    \"evidence\": [\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The commit c30a01 indicates a breaking change regarding the --timeout flag, but this is not reflected explicitly in the CHANGELOG.\"\n  }\n]\n```"
+          "text": "```json\n[\n  {\n    \"verdict\": \"misclassified\",\n    \"subject\": \"rename --timeout flag to --timeout-ms\",\n    \"evidence\": [\n      {\n        \"kind\": \"changeling_entry\",\n        \"ref\": \"line 1\",\n        \"quote\": \"Renamed the --timeout flag to --timeout-ms\"\n      },\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a01\",\n        \"quote\": \"BREAKING CHANGE: the --timeout flag is removed. Scripts must use --timeout-ms, which now takes milliseconds instead of seconds.\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog entry should be under a 'Breaking Changes' section due to the nature of the modification.\"\n  },\n  {\n    \"verdict\": \"correct\",\n    \"subject\": \"add --json output mode\",\n    \"evidence\": [\n      {\n        \"kind\": \"changelog_entry\",\n        \"ref\": \"line 2\",\n        \"quote\": \"New --json output mode for all commands\"\n      },\n      {\n        \"kind\": \"commit\",\n        \"ref\": \"c30a02\",\n        \"quote\": \"add --json output mode\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The changelog entry correctly reflects the feature addition as described in the commit.\"\n  }\n]\n```"
         }
       ]
     }

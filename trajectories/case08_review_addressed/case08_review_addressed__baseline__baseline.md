@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case08_review_addressed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 487 in / 246 out*
+*Backend: openai / gpt-4o  ·  Tokens: 487 in / 238 out*
 
 ## System instructions
 ```
@@ -25,26 +25,26 @@ Output ONLY a JSON array of findings:
     "subject": "c1",
     "evidence": [
       {
-        "kind": "diff",
+        "kind": "hunk",
         "ref": "h1",
-        "quote": "+    if limit <= 0:\n+        raise ValueError(\"limit must be positive\")"
+        "quote": "if limit <= 0:\n        raise ValueError(\"limit must be positive\")"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The code now includes a validation check for the `limit` variable to ensure it is positive, addressing the review comment."
+    "rationale": "The hunk adds a validation check that raises a ValueError if the limit is not positive, directly addressing the review comment."
   },
   {
     "verdict": "addressed",
     "subject": "c2",
     "evidence": [
       {
-        "kind": "diff",
+        "kind": "hunk",
         "ref": "h2",
-        "quote": "+DEFAULT_PAGE_SIZE = 20\n@@ -58,7 +60,7 @@ def _page(page):\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"
+        "quote": "+DEFAULT_PAGE_SIZE = 20\n-    size = 20\n+    size = DEFAULT_PAGE_SIZE"
       }
     ],
     "confidence": 1.0,
-    "rationale": "The magic number 20 has been replaced with a named constant DEFAULT_PAGE_SIZE, addressing the review comment."
+    "rationale": "The hunk introduces a named constant DEFAULT_PAGE_SIZE for the default page size and replaces the magic number 20, thus addressing the review comment."
   }
 ]
 ```

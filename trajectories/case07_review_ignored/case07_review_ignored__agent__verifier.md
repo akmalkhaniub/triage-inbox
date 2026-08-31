@@ -1,6 +1,6 @@
 # Trajectory: `verifier` on `case07_review_ignored`
 
-*Backend: openai / gpt-4o  ·  Tokens: 689 in / 37 out*
+*Backend: openai / gpt-4o  ·  Tokens: 839 in / 85 out*
 
 ## System instructions
 ```
@@ -25,4 +25,7 @@ Output ONLY a JSON array, one object per finding, in the same order:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[{"claim_id": "comment:c2", "sound": true, "note": "The diff hunk h2 corrects the typo as requested in comment c2."}]
+[
+  {"claim_id": "comment:c1", "sound": true, "note": "The diff changes the variable name but does not add any guard clause to check if `user` is None."},
+  {"claim_id": "comment:c2", "sound": true, "note": "The diff fixes the typo as requested, changing 'unathorized' to 'unauthorized'."}
+]

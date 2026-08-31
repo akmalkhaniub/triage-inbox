@@ -4,26 +4,62 @@
   "n_cases": 10,
   "aggregate": {
     "baseline": {
-      "tp": 9,
-      "fp": 4,
-      "fn": 1,
-      "precision": 0.6923076923076923,
-      "recall": 0.9,
-      "f1": 0.7826086956521738,
-      "false_alarms_per_case": 0.4,
+      "tp": 8.6667,
+      "fp": 3.6667,
+      "fn": 1.3333,
+      "precision": 0.703,
+      "recall": 0.8667,
+      "f1": 0.776,
+      "false_alarms_per_case": 0.3667,
       "cost_per_task_usd": 0.0036,
-      "total_cost_usd": 0.0357
+      "total_cost_usd": 0.0354,
+      "ranges": {
+        "f1": {
+          "min": 0.727,
+          "max": 0.818
+        },
+        "precision": {
+          "min": 0.667,
+          "max": 0.75
+        },
+        "recall": {
+          "min": 0.8,
+          "max": 0.9
+        },
+        "false_alarms_per_case": {
+          "min": 0.3,
+          "max": 0.4
+        }
+      }
     },
     "agent": {
-      "tp": 7,
+      "tp": 7.6667,
       "fp": 0,
-      "fn": 3,
+      "fn": 2.3333,
       "precision": 1.0,
-      "recall": 0.7,
-      "f1": 0.8235294117647058,
+      "recall": 0.7667,
+      "f1": 0.8648,
       "false_alarms_per_case": 0.0,
-      "cost_per_task_usd": 0.0112,
-      "total_cost_usd": 0.1119
+      "cost_per_task_usd": 0.0108,
+      "total_cost_usd": 0.1058,
+      "ranges": {
+        "f1": {
+          "min": 0.824,
+          "max": 0.947
+        },
+        "precision": {
+          "min": 1.0,
+          "max": 1.0
+        },
+        "recall": {
+          "min": 0.7,
+          "max": 0.9
+        },
+        "false_alarms_per_case": {
+          "min": 0.0,
+          "max": 0.0
+        }
+      }
     }
   },
   "per_case": {
@@ -31,19 +67,19 @@
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/widgets v1.4.0",
       "baseline": {
-        "precision": 0.5,
-        "recall": 1.0,
-        "f1": 0.667,
-        "tp": 1,
-        "fp": 1,
-        "fn": 0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 2,
+        "fn": 1,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 462,
-          "out": 248
+          "out": 261
         },
-        "cost_usd": 0.0036
+        "cost_usd": 0.0038
       },
       "agent": {
         "precision": 1.0,
@@ -55,8 +91,8 @@
         "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 3090,
-          "out": 188
+          "in": 3094,
+          "out": 191
         },
         "cost_usd": 0.0096
       }
@@ -75,9 +111,9 @@
         "error": null,
         "tokens": {
           "in": 423,
-          "out": 361
+          "out": 349
         },
-        "cost_usd": 0.0047
+        "cost_usd": 0.0045
       },
       "agent": {
         "precision": 1.0,
@@ -89,29 +125,29 @@
         "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 3109,
-          "out": 328
+          "in": 3016,
+          "out": 180
         },
-        "cost_usd": 0.0111
+        "cost_usd": 0.0093
       }
     },
     "case03_changelog_misclassified_breaking": {
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/cli v3.0.0 (HARD: breaking change hidden in commit body)",
       "baseline": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 1,
-        "fn": 1,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 453,
-          "out": 135
+          "out": 296
         },
-        "cost_usd": 0.0025
+        "cost_usd": 0.0041
       },
       "agent": {
         "precision": 1.0,
@@ -124,28 +160,28 @@
         "error": null,
         "tokens": {
           "in": 4035,
-          "out": 284
+          "out": 298
         },
-        "cost_usd": 0.0129
+        "cost_usd": 0.0131
       }
     },
     "case04_changelog_clean": {
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/web v1.2.0 (no discrepancies -- precision check)",
       "baseline": {
-        "precision": 0.0,
+        "precision": 1.0,
         "recall": 1.0,
-        "f1": 0.0,
+        "f1": 1.0,
         "tp": 0,
-        "fp": 2,
+        "fp": 0,
         "fn": 0,
-        "action": "needs_human",
+        "action": "auto_ok",
         "error": null,
         "tokens": {
           "in": 479,
-          "out": 258
+          "out": 1
         },
-        "cost_usd": 0.0038
+        "cost_usd": 0.0012
       },
       "agent": {
         "precision": 1.0,
@@ -158,9 +194,9 @@
         "error": null,
         "tokens": {
           "in": 2525,
-          "out": 43
+          "out": 56
         },
-        "cost_usd": 0.0067
+        "cost_usd": 0.0069
       }
     },
     "case05_changelog_mixed": {
@@ -177,9 +213,9 @@
         "error": null,
         "tokens": {
           "in": 454,
-          "out": 204
+          "out": 199
         },
-        "cost_usd": 0.0032
+        "cost_usd": 0.0031
       },
       "agent": {
         "precision": 1.0,
@@ -191,29 +227,29 @@
         "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 3303,
-          "out": 388
+          "in": 3147,
+          "out": 329
         },
-        "cost_usd": 0.0121
+        "cost_usd": 0.0112
       }
     },
     "case06_changelog_internal_noise": {
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/core v5.0.1 (HARD: many internal commits must NOT be flagged)",
       "baseline": {
-        "precision": 1.0,
+        "precision": 0.5,
         "recall": 1.0,
-        "f1": 1.0,
+        "f1": 0.667,
         "tp": 1,
-        "fp": 0,
+        "fp": 1,
         "fn": 0,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 539,
-          "out": 142
+          "out": 212
         },
-        "cost_usd": 0.0028
+        "cost_usd": 0.0035
       },
       "agent": {
         "precision": 1.0,
@@ -226,9 +262,9 @@
         "error": null,
         "tokens": {
           "in": 2669,
-          "out": 52
+          "out": 162
         },
-        "cost_usd": 0.0072
+        "cost_usd": 0.0083
       }
     },
     "case07_review_ignored": {
@@ -245,24 +281,24 @@
         "error": null,
         "tokens": {
           "in": 488,
-          "out": 246
+          "out": 254
         },
-        "cost_usd": 0.0037
+        "cost_usd": 0.0038
       },
       "agent": {
         "precision": 1.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
         "fp": 0,
-        "fn": 1,
-        "action": "needs_human",
+        "fn": 0,
+        "action": "escalate",
         "error": null,
         "tokens": {
-          "in": 2725,
-          "out": 393
+          "in": 3027,
+          "out": 497
         },
-        "cost_usd": 0.0107
+        "cost_usd": 0.0125
       }
     },
     "case08_review_addressed": {
@@ -279,9 +315,9 @@
         "error": null,
         "tokens": {
           "in": 487,
-          "out": 246
+          "out": 238
         },
-        "cost_usd": 0.0037
+        "cost_usd": 0.0036
       },
       "agent": {
         "precision": 1.0,
@@ -290,13 +326,13 @@
         "tp": 0,
         "fp": 0,
         "fn": 0,
-        "action": "needs_human",
+        "action": "auto_ok",
         "error": null,
         "tokens": {
-          "in": 2695,
-          "out": 326
+          "in": 2203,
+          "out": 292
         },
-        "cost_usd": 0.01
+        "cost_usd": 0.0084
       }
     },
     "case09_review_partial": {
@@ -313,9 +349,9 @@
         "error": null,
         "tokens": {
           "in": 441,
-          "out": 219
+          "out": 235
         },
-        "cost_usd": 0.0033
+        "cost_usd": 0.0035
       },
       "agent": {
         "precision": 1.0,
@@ -327,10 +363,10 @@
         "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 3559,
-          "out": 382
+          "in": 2712,
+          "out": 379
         },
-        "cost_usd": 0.0127
+        "cost_usd": 0.0106
       }
     },
     "case10_review_mixed": {
@@ -347,25 +383,27 @@
         "error": null,
         "tokens": {
           "in": 566,
-          "out": 317
+          "out": 300
         },
-        "cost_usd": 0.0046
+        "cost_usd": 0.0044
       },
       "agent": {
         "precision": 1.0,
-        "recall": 0.5,
-        "f1": 0.667,
-        "tp": 1,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
         "fp": 0,
-        "fn": 1,
+        "fn": 0,
         "action": "escalate",
         "error": null,
         "tokens": {
-          "in": 5290,
-          "out": 560
+          "in": 4121,
+          "out": 559
         },
-        "cost_usd": 0.0188
+        "cost_usd": 0.0159
       }
     }
-  }
+  },
+  "n_runs": 3,
+  "aggregate_note": "aggregate = mean of 3 live gpt-4o runs (2026-08-31); per_case shows run 3 for the trajectory inspector"
 }

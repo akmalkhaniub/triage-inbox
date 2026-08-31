@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case03_changelog_misclassified_breaking`
 
-*Backend: openai / gpt-4o  ·  Tokens: 453 in / 135 out*
+*Backend: openai / gpt-4o  ·  Tokens: 453 in / 296 out*
 
 ## System instructions
 ```
@@ -21,9 +21,14 @@ Output ONLY a JSON array of findings:
 ```json
 [
   {
-    "verdict": "missing",
-    "subject": "BREAKING CHANGE: the --timeout flag removed",
+    "verdict": "misclassified",
+    "subject": "rename --timeout flag to --timeout-ms",
     "evidence": [
+      {
+        "kind": "changeling_entry",
+        "ref": "line 1",
+        "quote": "Renamed the --timeout flag to --timeout-ms"
+      },
       {
         "kind": "commit",
         "ref": "c30a01",
@@ -31,7 +36,25 @@ Output ONLY a JSON array of findings:
       }
     ],
     "confidence": 1.0,
-    "rationale": "The commit c30a01 indicates a breaking change regarding the --timeout flag, but this is not reflected explicitly in the CHANGELOG."
+    "rationale": "The changelog entry should be under a 'Breaking Changes' section due to the nature of the modification."
+  },
+  {
+    "verdict": "correct",
+    "subject": "add --json output mode",
+    "evidence": [
+      {
+        "kind": "changelog_entry",
+        "ref": "line 2",
+        "quote": "New --json output mode for all commands"
+      },
+      {
+        "kind": "commit",
+        "ref": "c30a02",
+        "quote": "add --json output mode"
+      }
+    ],
+    "confidence": 1.0,
+    "rationale": "The changelog entry correctly reflects the feature addition as described in the commit."
   }
 ]
 ```

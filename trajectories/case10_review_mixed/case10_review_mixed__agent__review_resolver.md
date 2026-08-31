@@ -1,6 +1,6 @@
 # Trajectory: `review_resolver` on `case10_review_mixed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 4205 in / 445 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2896 in / 396 out*
 
 ## System instructions
 ```
@@ -93,40 +93,7 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
 }
 ```
 
-## Model turn 3  (stop: `tool_use`)
-**calls** `get_diff_for_path`(`{"path": "src/cache.py"}`)
-**calls** `get_hunk`(`{"hunk_id": "h1"}`)
-
-### tool `get_diff_for_path` ->
-```
-[
-  {
-    "id": "h1",
-    "path": "src/cache.py",
-    "header": "@@ -10,6 +10,9 @@ class Cache:",
-    "patch": "     def get(self, key):\n+        \"\"\"Return the cached value for key, or None if absent or expired.\"\"\"\n         return self._store.get(key)"
-  },
-  {
-    "id": "h2",
-    "path": "src/cache.py",
-    "header": "@@ -50,10 +53,14 @@ class Cache:",
-    "patch": "-        # inline eviction\n-        while len(self._store) > self.capacity:\n-            self._store.popitem(last=False)\n+        self._evict()\n+\n+    def _evict(self):\n+        while len(self._store) > self.capacity:\n+            self._store.popitem(last=False)"
-  }
-]
-```
-
-### tool `get_hunk` ->
-```
-{
-  "id": "h1",
-  "path": "src/cache.py",
-  "header": "@@ -10,6 +10,9 @@ class Cache:",
-  "patch": "     def get(self, key):\n+        \"\"\"Return the cached value for key, or None if absent or expired.\"\"\"\n         return self._store.get(key)"
-}
-```
-
-## Model turn 4  (stop: `end_turn`)
-```json
+## Model turn 3  (stop: `end_turn`)
 [
   {
     "verdict": "addressed",
@@ -135,11 +102,11 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
       {
         "kind": "diff_hunk",
         "ref": "hunk:h1",
-        "quote": "\"\"\"Return the cached value for key, or None if absent or expired.\"\"\""
+        "quote": "+        \"\"\"Return the cached value for key, or None if absent or expired.\"\"\""
       }
     ],
     "confidence": 1.0,
-    "rationale": "Added a docstring to `get()` explaining the return value as requested."
+    "rationale": "A docstring was added to `get()` as requested."
   },
   {
     "verdict": "ignored",
@@ -152,7 +119,7 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
       }
     ],
     "confidence": 1.0,
-    "rationale": "No changes related to guarding against division by zero in `hit_rate()` are present in the diff."
+    "rationale": "No diff hunk addresses any logic related to `hit_rate()` division by zero."
   },
   {
     "verdict": "partial",
@@ -161,11 +128,10 @@ Output ONLY a JSON array (no prose), exactly one object per review comment:
       {
         "kind": "diff_hunk",
         "ref": "hunk:h2",
-        "quote": "def _evict():\n+        while len(self._store) > self.capacity:\n+            self._store.popitem(last=False)"
+        "quote": "+        self._evict()\n+\n+    def _evict(self):\n+        while len(self._store) > self.capacity:\n+            self._store.popitem(last=False)"
       }
     ],
-    "confidence": 1.0,
-    "rationale": "Extracted the eviction logic into a helper method but no tests are added for it."
+    "confidence": 0.8,
+    "rationale": "The eviction logic was extracted into a helper but there's no evidence of test coverage."
   }
 ]
-```

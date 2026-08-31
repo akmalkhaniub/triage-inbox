@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case06_changelog_internal_noise`
 
-*Backend: openai / gpt-4o  ·  Tokens: 539 in / 142 out*
+*Backend: openai / gpt-4o  ·  Tokens: 539 in / 212 out*
 
 ## System instructions
 ```
@@ -22,21 +22,29 @@ Output ONLY a JSON array of findings:
 [
   {
     "verdict": "missing",
-    "subject": "g50a05",
+    "subject": "add regression test for the cache leak",
     "evidence": [
       {
-        "kind": "commit_subject",
+        "kind": "commit",
+        "ref": "g50a04",
+        "quote": "add regression test for the cache leak"
+      }
+    ],
+    "confidence": 0.9,
+    "rationale": "Test-related changes aren't typically included in changelogs, but noting the presence of tests for a fixed issue is sometimes useful."
+  },
+  {
+    "verdict": "missing",
+    "subject": "expose cache stats via getCacheStats()",
+    "evidence": [
+      {
+        "kind": "commit",
         "ref": "g50a05",
         "quote": "expose cache stats via getCacheStats()"
-      },
-      {
-        "kind": "commit_body",
-        "ref": "g50a05",
-        "quote": "New public API returning hit/miss counts."
       }
     ],
     "confidence": 1.0,
-    "rationale": "A new feature adding a public API should be documented in the changelog but is missing."
+    "rationale": "A new public API feature should be listed in the changelog."
   }
 ]
 ```

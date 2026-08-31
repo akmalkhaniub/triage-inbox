@@ -7,7 +7,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 232,
-        "out": 32,
+        "out": 39,
         "steps": 1
       },
       {
@@ -16,7 +16,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 2236,
-        "out": 114,
+        "out": 118,
         "steps": 5
       },
       {
@@ -24,8 +24,8 @@
         "file": "trajectories/case01_changelog_phantom/case01_changelog_phantom__agent__verifier.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 622,
-        "out": 42,
+        "in": 626,
+        "out": 34,
         "steps": 1
       }
     ],
@@ -36,7 +36,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 462,
-        "out": 248,
+        "out": 261,
         "steps": 1
       }
     ]
@@ -49,7 +49,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 232,
-        "out": 33,
+        "out": 34,
         "steps": 1
       },
       {
@@ -58,7 +58,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 2191,
-        "out": 219,
+        "out": 112,
         "steps": 5
       },
       {
@@ -66,8 +66,8 @@
         "file": "trajectories/case02_changelog_missing/case02_changelog_missing__agent__verifier.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 686,
-        "out": 76,
+        "in": 593,
+        "out": 34,
         "steps": 1
       }
     ],
@@ -78,7 +78,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 423,
-        "out": 361,
+        "out": 349,
         "steps": 1
       }
     ]
@@ -91,7 +91,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 243,
-        "out": 36,
+        "out": 49,
         "steps": 1
       },
       {
@@ -109,7 +109,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 667,
-        "out": 49,
+        "out": 50,
         "steps": 1
       }
     ],
@@ -120,7 +120,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 453,
-        "out": 135,
+        "out": 296,
         "steps": 1
       }
     ]
@@ -133,7 +133,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 238,
-        "out": 29,
+        "out": 42,
         "steps": 1
       },
       {
@@ -162,7 +162,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 479,
-        "out": 258,
+        "out": 1,
         "steps": 1
       }
     ]
@@ -175,7 +175,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 237,
-        "out": 39,
+        "out": 45,
         "steps": 1
       },
       {
@@ -183,16 +183,16 @@
         "file": "trajectories/case05_changelog_mixed/case05_changelog_mixed__agent__changelog_auditor.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 2376,
-        "out": 272,
-        "steps": 8
+        "in": 2213,
+        "out": 207,
+        "steps": 5
       },
       {
         "agent": "verifier",
         "file": "trajectories/case05_changelog_mixed/case05_changelog_mixed__agent__verifier.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 690,
+        "in": 697,
         "out": 77,
         "steps": 1
       }
@@ -204,7 +204,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 454,
-        "out": 204,
+        "out": 199,
         "steps": 1
       }
     ]
@@ -217,7 +217,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 243,
-        "out": 38,
+        "out": 40,
         "steps": 1
       },
       {
@@ -226,16 +226,16 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 2426,
-        "out": 14,
+        "out": 122,
         "steps": 5
       },
       {
         "agent": "verifier",
         "file": "trajectories/case06_changelog_internal_noise/case06_changelog_internal_noise__agent__verifier.json",
         "provider": "openai",
-        "model": "gpt-4o-mini",
-        "in": 803,
-        "out": 102,
+        "model": "gpt-4o",
+        "in": 831,
+        "out": 88,
         "steps": 1
       }
     ],
@@ -246,7 +246,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 539,
-        "out": 142,
+        "out": 212,
         "steps": 1
       }
     ]
@@ -259,7 +259,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 244,
-        "out": 32,
+        "out": 26,
         "steps": 1
       },
       {
@@ -267,17 +267,17 @@
         "file": "trajectories/case07_review_ignored/case07_review_ignored__agent__review_resolver.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 1792,
-        "out": 324,
-        "steps": 5
+        "in": 1944,
+        "out": 386,
+        "steps": 6
       },
       {
         "agent": "verifier",
         "file": "trajectories/case07_review_ignored/case07_review_ignored__agent__verifier.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 689,
-        "out": 37,
+        "in": 839,
+        "out": 85,
         "steps": 1
       }
     ],
@@ -288,7 +288,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 488,
-        "out": 246,
+        "out": 254,
         "steps": 1
       }
     ]
@@ -301,7 +301,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 235,
-        "out": 31,
+        "out": 25,
         "steps": 1
       },
       {
@@ -309,9 +309,9 @@
         "file": "trajectories/case08_review_addressed/case08_review_addressed__agent__review_resolver.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 1804,
-        "out": 252,
-        "steps": 5
+        "in": 1968,
+        "out": 267,
+        "steps": 6
       },
       {
         "agent": "verifier",
@@ -330,7 +330,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 487,
-        "out": 246,
+        "out": 238,
         "steps": 1
       }
     ]
@@ -343,7 +343,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 235,
-        "out": 34,
+        "out": 32,
         "steps": 1
       },
       {
@@ -351,16 +351,16 @@
         "file": "trajectories/case09_review_partial/case09_review_partial__agent__review_resolver.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 2629,
-        "out": 275,
-        "steps": 8
+        "in": 1772,
+        "out": 274,
+        "steps": 6
       },
       {
         "agent": "verifier",
         "file": "trajectories/case09_review_partial/case09_review_partial__agent__verifier.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 695,
+        "in": 705,
         "out": 73,
         "steps": 1
       }
@@ -372,7 +372,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 441,
-        "out": 219,
+        "out": 235,
         "steps": 1
       }
     ]
@@ -385,7 +385,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 236,
-        "out": 27,
+        "out": 26,
         "steps": 1
       },
       {
@@ -393,17 +393,17 @@
         "file": "trajectories/case10_review_mixed/case10_review_mixed__agent__review_resolver.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 4205,
-        "out": 445,
-        "steps": 10
+        "in": 2896,
+        "out": 396,
+        "steps": 7
       },
       {
         "agent": "verifier",
         "file": "trajectories/case10_review_mixed/case10_review_mixed__agent__verifier.json",
         "provider": "openai",
         "model": "gpt-4o",
-        "in": 849,
-        "out": 88,
+        "in": 989,
+        "out": 137,
         "steps": 1
       }
     ],
@@ -414,7 +414,7 @@
         "provider": "openai",
         "model": "gpt-4o",
         "in": 566,
-        "out": 317,
+        "out": 300,
         "steps": 1
       }
     ]

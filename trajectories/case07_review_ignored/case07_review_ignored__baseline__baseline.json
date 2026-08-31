@@ -5,7 +5,7 @@
   "model": "gpt-4o",
   "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
   "input_tokens": 488,
-  "output_tokens": 246,
+  "output_tokens": 254,
   "steps": [
     {
       "kind": "model",
@@ -14,7 +14,7 @@
       "content": [
         {
           "type": "text",
-          "text": "[\n  {\n    \"verdict\": \"ignored\",\n    \"subject\": \"c1\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunk\",\n        \"ref\": \"h1\",\n        \"quote\": \"-    u = request.user\\n-    return u.role in ALLOWED_ROLES\\n+    user = request.user\\n+    return user.role in ALLOWED_ROLES\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The review comment requested a guard for a None check on user, but the diff only shows a cosmetic name change from 'u' to 'user', without adding the requested guard.\"\n  },\n  {\n    \"verdict\": \"addressed\",\n    \"subject\": \"c2\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunk\",\n        \"ref\": \"h2\",\n        \"quote\": \"-    raise AuthError(\\\"unathorized\\\")\\n+    raise AuthError(\\\"unauthorized\\\")\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The typo noted in the error message was corrected as requested.\"\n  }\n]"
+          "text": "```json\n[\n  {\n    \"verdict\": \"ignored\",\n    \"subject\": \"Review comment c1\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunks\",\n        \"ref\": \"h1\",\n        \"quote\": \"+    user = request.user\\n+    return user.role in ALLOWED_ROLES\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The review comment c1 requested a guard for a None user, but no such guard was added in the provided diff. The change made was only cosmetic (variable renaming) without addressing the issue.\"\n  },\n  {\n    \"verdict\": \"addressed\",\n    \"subject\": \"Review comment c2\",\n    \"evidence\": [\n      {\n        \"kind\": \"diff_hunks\",\n        \"ref\": \"h2\",\n        \"quote\": \"-    raise AuthError(\\\"unathorized\\\")\\n+    raise AuthError(\\\"unauthorized\\\")\"\n      }\n    ],\n    \"confidence\": 1.0,\n    \"rationale\": \"The typo reported in review comment c2 was corrected from 'unathorized' to 'unauthorized' in the diff.\"\n  }\n]\n```"
         }
       ]
     }

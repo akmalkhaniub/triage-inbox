@@ -1,6 +1,6 @@
 # Trajectory: `changelog_auditor` on `case01_changelog_phantom`
 
-*Backend: openai / gpt-4o  ·  Tokens: 2236 in / 114 out*
+*Backend: openai / gpt-4o  ·  Tokens: 2236 in / 118 out*
 
 ## System instructions
 ```
@@ -105,7 +105,7 @@ If there are no discrepancies, output [].
         "quote": "Dark mode for the settings page"
       }
     ],
-    "confidence": 1.0,
-    "rationale": "The changelog entry for 'Dark mode for the settings page' has no corresponding commit."
+    "confidence": 0.9,
+    "rationale": "The changelog mentions adding dark mode to the settings page, but no commit in this release supports this claim."
   }
 ]

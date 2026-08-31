@@ -1,6 +1,6 @@
 # Trajectory: `router` on `case05_changelog_mixed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 237 in / 39 out*
+*Backend: openai / gpt-4o  ·  Tokens: 237 in / 45 out*
 
 ## System instructions
 ```
@@ -19,4 +19,4 @@ Output ONLY JSON: {"item_type": "<one of the above>", "why": "<short reason>"}
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-{"item_type": "changelog_audit", "why": "The item is about auditing the CHANGELOG for a specific version, which falls under reconciling release notes with commits."}
+{"item_type": "changelog_audit", "why": "The item is about auditing the CHANGELOG for the specified version and comparing it with commits, which aligns with reconciling a CHANGELOG with commits."}

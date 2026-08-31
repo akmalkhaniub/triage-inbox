@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case01_changelog_phantom`
 
-*Backend: openai / gpt-4o  ·  Tokens: 462 in / 248 out*
+*Backend: openai / gpt-4o  ·  Tokens: 462 in / 261 out*
 
 ## System instructions
 ```
@@ -18,33 +18,31 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-```json
 [
-    {
-        "verdict": "phantom",
-        "subject": "Dark mode for the settings page",
-        "evidence": [
-            {
-                "kind": "changelog_line",
-                "ref": "3",
-                "quote": "Dark mode for the settings page"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "This entry is listed as 'Added' in the CHANGELOG but there is no corresponding commit related to 'Dark mode' in the provided commit history for v1.4.0."
-    },
-    {
-        "verdict": "missing",
-        "subject": "bump eslint to 9.2",
-        "evidence": [
-            {
-                "kind": "commit",
-                "ref": "77aa88",
-                "quote": "bump eslint to 9.2"
-            }
-        ],
-        "confidence": 1.0,
-        "rationale": "The commit regarding the eslint update was not reflected in the CHANGELOG. Despite being a development tool update, it's common to include such entries in a separate section like 'Chore' or 'Dev Updates'."
-    }
+  {
+    "verdict": "misclassified",
+    "subject": "Dark mode for the settings page",
+    "evidence": [
+      {
+        "kind": "changelog_line",
+        "ref": "line 3",
+        "quote": "Dark mode for the settings page"
+      }
+    ],
+    "confidence": 0.9,
+    "rationale": "The 'Dark mode for the settings page' entry in the changelog is not backed by any commit in the provided details. This indicates that it may be phatom entry or refers to an unlisted commit."
+  },
+  {
+    "verdict": "missing",
+    "subject": "bump eslint to 9.2",
+    "evidence": [
+      {
+        "kind": "commit",
+        "ref": "sha 77aa88",
+        "quote": "subject: bump eslint to 9.2"
+      }
+    ],
+    "confidence": 0.95,
+    "rationale": "The 'bump eslint to 9.2' chore in commit `77aa88` is not reflected in the changelog. While it's a dev-only change, it is typical to include such information in a changelog to track dependencies."
+  }
 ]
-```

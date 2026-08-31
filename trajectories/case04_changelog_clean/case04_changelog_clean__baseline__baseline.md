@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case04_changelog_clean`
 
-*Backend: openai / gpt-4o  ·  Tokens: 479 in / 258 out*
+*Backend: openai / gpt-4o  ·  Tokens: 479 in / 1 out*
 
 ## System instructions
 ```
@@ -18,31 +18,4 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
-[
-  {
-    "verdict": "missing",
-    "subject": "extract editor toolbar into its own module",
-    "evidence": [
-      {
-        "kind": "commit",
-        "ref": "e12a04",
-        "quote": "extract editor toolbar into its own module\nNo user-facing change."
-      }
-    ],
-    "confidence": 0.9,
-    "rationale": "The refactoring change 'extract editor toolbar into its own module' is not listed in the changelog. Typically, refactoring might not affect end users directly and may not need to be included, but it's important to ensure that all changes are properly audited."
-  },
-  {
-    "verdict": "phantom",
-    "subject": "add coverage for the draft autosave path",
-    "evidence": [
-      {
-        "kind": "commit",
-        "ref": "e12a03",
-        "quote": "add coverage for the draft autosave path\nTest-only."
-      }
-    ],
-    "confidence": 0.95,
-    "rationale": "The commit 'add coverage for the draft autosave path' is a test-only change and not user-facing, hence appropriately omitted from the changelog."
-  }
-]
+[]

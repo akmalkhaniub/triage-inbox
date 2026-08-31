@@ -1,6 +1,6 @@
 # Trajectory: `baseline` on `case05_changelog_mixed`
 
-*Backend: openai / gpt-4o  ·  Tokens: 454 in / 204 out*
+*Backend: openai / gpt-4o  ·  Tokens: 454 in / 199 out*
 
 ## System instructions
 ```
@@ -18,10 +18,11 @@ Output ONLY a JSON array of findings:
 ```
 
 ## Model turn 0  (stop: `end_turn`)
+```json
 [
   {
     "verdict": "missing",
-    "subject": "add offline message queue",
+    "subject": "Offline message queue",
     "evidence": [
       {
         "kind": "commit",
@@ -30,7 +31,7 @@ Output ONLY a JSON array of findings:
       }
     ],
     "confidence": 1.0,
-    "rationale": "The commit mentions the addition of an offline message queue feature, but there is no corresponding entry in the CHANGELOG."
+    "rationale": "The commit mentioning the addition of the offline message queue is not reflected in the changelog."
   },
   {
     "verdict": "phantom",
@@ -43,6 +44,7 @@ Output ONLY a JSON array of findings:
       }
     ],
     "confidence": 1.0,
-    "rationale": "The CHANGELOG includes an entry for 'In-app video calling' which is not referenced by any of the commits in this version."
+    "rationale": "The changelog entry for 'In-app video calling' does not correspond to any commit present in the provided data."
   }
 ]
+```

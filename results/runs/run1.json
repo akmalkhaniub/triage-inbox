@@ -4,26 +4,26 @@
   "n_cases": 10,
   "aggregate": {
     "baseline": {
-      "tp": 0,
-      "fp": 11,
-      "fn": 10,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "false_alarms_per_case": 1.1,
-      "cost_per_task_usd": 0.0035,
-      "total_cost_usd": 0.0347
+      "tp": 9,
+      "fp": 4,
+      "fn": 1,
+      "precision": 0.6923076923076923,
+      "recall": 0.9,
+      "f1": 0.7826086956521738,
+      "false_alarms_per_case": 0.4,
+      "cost_per_task_usd": 0.0036,
+      "total_cost_usd": 0.0357
     },
     "agent": {
-      "tp": 9,
+      "tp": 7,
       "fp": 0,
-      "fn": 1,
+      "fn": 3,
       "precision": 1.0,
-      "recall": 0.9,
-      "f1": 0.9473684210526316,
+      "recall": 0.7,
+      "f1": 0.8235294117647058,
       "false_alarms_per_case": 0.0,
-      "cost_per_task_usd": 0.0109,
-      "total_cost_usd": 0.1088
+      "cost_per_task_usd": 0.0112,
+      "total_cost_usd": 0.1119
     }
   },
   "per_case": {
@@ -31,19 +31,19 @@
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/widgets v1.4.0",
       "baseline": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 2,
-        "fn": 1,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.667,
+        "tp": 1,
+        "fp": 1,
+        "fn": 0,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 462,
-          "out": 218
+          "out": 248
         },
-        "cost_usd": 0.0033
+        "cost_usd": 0.0036
       },
       "agent": {
         "precision": 1.0,
@@ -55,8 +55,8 @@
         "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 3043,
-          "out": 197
+          "in": 3090,
+          "out": 188
         },
         "cost_usd": 0.0096
       }
@@ -65,19 +65,19 @@
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/api v2.1.0",
       "baseline": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 1,
-        "fn": 1,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 423,
-          "out": 112
+          "out": 361
         },
-        "cost_usd": 0.0022
+        "cost_usd": 0.0047
       },
       "agent": {
         "precision": 1.0,
@@ -89,10 +89,10 @@
         "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 3098,
-          "out": 375
+          "in": 3109,
+          "out": 328
         },
-        "cost_usd": 0.0115
+        "cost_usd": 0.0111
       }
     },
     "case03_changelog_misclassified_breaking": {
@@ -103,15 +103,15 @@
         "recall": 0.0,
         "f1": 0.0,
         "tp": 0,
-        "fp": 2,
+        "fp": 1,
         "fn": 1,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 453,
-          "out": 450
+          "out": 135
         },
-        "cost_usd": 0.0056
+        "cost_usd": 0.0025
       },
       "agent": {
         "precision": 1.0,
@@ -123,29 +123,29 @@
         "action": "escalate",
         "error": null,
         "tokens": {
-          "in": 4041,
-          "out": 320
+          "in": 4035,
+          "out": 284
         },
-        "cost_usd": 0.0133
+        "cost_usd": 0.0129
       }
     },
     "case04_changelog_clean": {
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/web v1.2.0 (no discrepancies -- precision check)",
       "baseline": {
-        "precision": 1.0,
+        "precision": 0.0,
         "recall": 1.0,
-        "f1": 1.0,
+        "f1": 0.0,
         "tp": 0,
-        "fp": 0,
+        "fp": 2,
         "fn": 0,
-        "action": "auto_ok",
+        "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 479,
-          "out": 1
+          "out": 258
         },
-        "cost_usd": 0.0012
+        "cost_usd": 0.0038
       },
       "agent": {
         "precision": 1.0,
@@ -157,8 +157,8 @@
         "action": "auto_ok",
         "error": null,
         "tokens": {
-          "in": 2469,
-          "out": 49
+          "in": 2525,
+          "out": 43
         },
         "cost_usd": 0.0067
       }
@@ -167,19 +167,19 @@
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/mobile v4.3.0 (phantom + missing)",
       "baseline": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 2,
-        "fn": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 454,
-          "out": 442
+          "out": 204
         },
-        "cost_usd": 0.0056
+        "cost_usd": 0.0032
       },
       "agent": {
         "precision": 1.0,
@@ -191,29 +191,29 @@
         "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 3107,
-          "out": 336
+          "in": 3303,
+          "out": 388
         },
-        "cost_usd": 0.0111
+        "cost_usd": 0.0121
       }
     },
     "case06_changelog_internal_noise": {
       "item_type": "changelog_audit",
       "title": "Audit CHANGELOG for acme/core v5.0.1 (HARD: many internal commits must NOT be flagged)",
       "baseline": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 1,
-        "fn": 1,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 539,
-          "out": 138
+          "out": 142
         },
-        "cost_usd": 0.0027
+        "cost_usd": 0.0028
       },
       "agent": {
         "precision": 1.0,
@@ -225,44 +225,44 @@
         "action": "auto_ok",
         "error": null,
         "tokens": {
-          "in": 2585,
-          "out": 164
+          "in": 2669,
+          "out": 52
         },
-        "cost_usd": 0.0081
+        "cost_usd": 0.0072
       }
     },
     "case07_review_ignored": {
       "item_type": "review_resolution",
       "title": "Did PR #418 address its review? (HARD: author said 'done' but only made a cosmetic change)",
       "baseline": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 1,
-        "fn": 1,
-        "action": "needs_human",
-        "error": null,
-        "tokens": {
-          "in": 488,
-          "out": 220
-        },
-        "cost_usd": 0.0034
-      },
-      "agent": {
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
         "tp": 1,
         "fp": 0,
         "fn": 0,
-        "action": "escalate",
+        "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 2840,
-          "out": 425
+          "in": 488,
+          "out": 246
         },
-        "cost_usd": 0.0113
+        "cost_usd": 0.0037
+      },
+      "agent": {
+        "precision": 1.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "action": "needs_human",
+        "error": null,
+        "tokens": {
+          "in": 2725,
+          "out": 393
+        },
+        "cost_usd": 0.0107
       }
     },
     "case08_review_addressed": {
@@ -279,9 +279,9 @@
         "error": null,
         "tokens": {
           "in": 487,
-          "out": 242
+          "out": 246
         },
-        "cost_usd": 0.0036
+        "cost_usd": 0.0037
       },
       "agent": {
         "precision": 1.0,
@@ -290,32 +290,32 @@
         "tp": 0,
         "fp": 0,
         "fn": 0,
-        "action": "auto_ok",
+        "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 2203,
-          "out": 313
+          "in": 2695,
+          "out": 326
         },
-        "cost_usd": 0.0086
+        "cost_usd": 0.01
       }
     },
     "case09_review_partial": {
       "item_type": "review_resolution",
       "title": "Did PR #331 address its review? (one comment only partially handled)",
       "baseline": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 1,
-        "fn": 1,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
         "action": "needs_human",
         "error": null,
         "tokens": {
           "in": 441,
-          "out": 194
+          "out": 219
         },
-        "cost_usd": 0.003
+        "cost_usd": 0.0033
       },
       "agent": {
         "precision": 1.0,
@@ -327,44 +327,44 @@
         "action": "needs_human",
         "error": null,
         "tokens": {
-          "in": 2696,
-          "out": 583
+          "in": 3559,
+          "out": 382
         },
-        "cost_usd": 0.0126
+        "cost_usd": 0.0127
       }
     },
     "case10_review_mixed": {
       "item_type": "review_resolution",
       "title": "Did PR #560 address its review? (addressed + ignored + partial)",
       "baseline": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "tp": 0,
-        "fp": 1,
-        "fn": 2,
-        "action": "needs_human",
-        "error": null,
-        "tokens": {
-          "in": 566,
-          "out": 251
-        },
-        "cost_usd": 0.0039
-      },
-      "agent": {
         "precision": 1.0,
         "recall": 1.0,
         "f1": 1.0,
         "tp": 2,
         "fp": 0,
         "fn": 0,
+        "action": "needs_human",
+        "error": null,
+        "tokens": {
+          "in": 566,
+          "out": 317
+        },
+        "cost_usd": 0.0046
+      },
+      "agent": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.667,
+        "tp": 1,
+        "fp": 0,
+        "fn": 1,
         "action": "escalate",
         "error": null,
         "tokens": {
-          "in": 4129,
-          "out": 569
+          "in": 5290,
+          "out": 560
         },
-        "cost_usd": 0.016
+        "cost_usd": 0.0188
       }
     }
   }

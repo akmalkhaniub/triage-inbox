@@ -10,7 +10,7 @@
       "content": [
         {
           "type": "text",
-          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item refers to auditing a real release and mentions changelog and commits, indicating it involves reconciling a CHANGELOG with commits.\"}"
+          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item mentions reconciling a real release and includes changelog_preview, indicating a need for audit of the changelog against commits.\"}"
         }
       ]
     }

@@ -100,19 +100,34 @@ def fetch_release_fixture(
     if not force_refresh and cache_path.exists():
         try:
             cached_data = json.loads(cache_path.read_text(encoding="utf-8"))
-            if "artifacts" in cached_data or "artifact" in cached_data:
-                art = cached_data.get("artifact") or cached_data.get("artifacts")
-                # Ensure artifact shape
-                if "commits" in art:
-                    return Fixture(path=cache_path, raw={
-                        "item_id": item_id,
-                        "item_type": "changelog_audit",
-                        "title": f"Audit real release: {repo} ({base_tag} -> {head_tag})",
-                        "artifact": art,
-                        "ground_truth": {"source": "cached_github", "expected_findings": []},
-                    })
-        except Exception:
-            pass
+            art = cached_data.get("raw_artifact") or cached_data.get("artifact") or cached_data.get("artifacts")
+            if art and isinstance(art, dict) and "commits" in art:
+                # Ensure changelog lines are parsed
+                cl = art.get("changelog")
+                if not cl or not isinstance(cl, list):
+                    text = art.get("changelog_preview") or art.get("changelog_text") or (cl if isinstance(cl, str) else "")
+                    if text:
+                        parsed_lines = []
+                        h = "General"
+                        for idx, l in enumerate(text.splitlines(), start=1):
+                            st = l.strip()
+                            if st.startswith("#"):
+                                h = st.lstrip("#").strip()
+                            parsed_lines.append({"line": idx, "text": l, "heading": h})
+                        art["changelog"] = parsed_lines
+                art["version"] = head_tag
+                art["release_tag"] = head_tag
+                art["repo"] = repo
+                art["base_tag"] = base_tag
+                return Fixture(path=cache_path, raw={
+                    "item_id": item_id,
+                    "item_type": "changelog_audit",
+                    "title": f"Audit real release: {repo} ({base_tag} -> {head_tag})",
+                    "artifact": art,
+                    "ground_truth": {"source": "cached_github", "expected_findings": []},
+                })
+        except Exception as e:
+            print("Cache load error:", e)
     """Fetch real commits between base_tag and head_tag + the real CHANGELOG file."""
     repo = repo.strip("/")
     # 1. Fetch compare data
@@ -153,10 +168,13 @@ def fetch_release_fixture(
         "item_type": "changelog_audit",
         "title": f"Audit real release: {repo} ({base_tag} -> {head_tag})",
         "artifact": {
+            "version": head_tag,
+            "repo": repo,
             "release_tag": head_tag,
             "base_tag": base_tag,
             "commits": commits_list,
             "changelog": changelog_lines,
+            "changelog_preview": raw_content[:4000],
         },
         "ground_truth": {
             "source": "live_github",

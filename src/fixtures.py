@@ -49,7 +49,21 @@ class Fixture:
         return self.artifact.get("commits", [])
 
     def changelog(self) -> list[dict[str, Any]]:
-        return self.artifact.get("changelog", [])
+        cl = self.artifact.get("changelog")
+        if isinstance(cl, list) and cl and isinstance(cl[0], dict) and "line" in cl[0]:
+            return cl
+        # Reconstruct line-by-line changelog structure if stored as preview or string
+        text = self.artifact.get("changelog_preview") or self.artifact.get("changelog_text") or (cl if isinstance(cl, str) else "")
+        if text:
+            lines = []
+            heading = "General"
+            for i, line in enumerate(text.splitlines(), start=1):
+                s = line.strip()
+                if s.startswith("#"):
+                    heading = s.lstrip("#").strip()
+                lines.append({"line": i, "text": line, "heading": heading})
+            return lines
+        return []
 
     def commit(self, sha: str) -> dict[str, Any] | None:
         target = sha.strip().lower()

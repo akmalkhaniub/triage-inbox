@@ -310,6 +310,7 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                     "title": fx.title,
                     "item_type": fx.item_type,
                     "repo": repo,
+                    "raw_artifact": fx.artifact,
                     "artifacts": artifacts_summary,
                     "agent": {
                         "result": agent_res.to_dict(),

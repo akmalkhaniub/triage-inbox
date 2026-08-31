@@ -152,6 +152,21 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                 self._send_json(500, {"error": str(e)})
             return
 
+        if parsed.path == "/api/runs/saved":
+            try:
+                save_dir = Path("evalcases/saved_runs")
+                saved_runs = []
+                if save_dir.exists():
+                    for p in sorted(save_dir.glob("*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+                        try:
+                            saved_runs.append(json.loads(p.read_text(encoding="utf-8")))
+                        except Exception:
+                            continue
+                self._send_json(200, {"runs": saved_runs})
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+            return
+
         if parsed.path == "/api/models":
             models_registry = {
                 "openai": [

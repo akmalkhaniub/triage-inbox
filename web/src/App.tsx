@@ -1471,6 +1471,60 @@ export default function App() {
               </div>
             </div>
 
+{/* PAST LIVE RUNS & RAW DATA HISTORY */}
+            {savedLiveAudits.length > 0 && (
+              <div className="ag-tier-card" style={{ marginTop: 20, padding: 18 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
+                      🕒 Past Live Runs &amp; Stored Raw Artifacts ({savedLiveAudits.length})
+                    </h3>
+                    <p style={{ margin: "2px 0 0", fontSize: 12.5, color: "var(--text-dim)" }}>
+                      Click any past run to instantly load its complete raw Git commits, CHANGELOG markdown, and multi-agent reasoning trace.
+                    </p>
+                  </div>
+                  <button
+                    className="filter-btn"
+                    onClick={handleClearAllLiveAudits}
+                    style={{ fontSize: 12, color: "var(--bad)" }}
+                  >
+                    🗑️ Clear Saved Runs
+                  </button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 10 }}>
+                  {savedLiveAudits.slice(0, 6).map((pastRun) => (
+                    <div
+                      key={pastRun.item_id}
+                      onClick={() => {
+                        setLiveData(pastRun);
+                        setRepoInput(pastRun.repo);
+                      }}
+                      style={{
+                        background: liveData?.item_id === pastRun.item_id ? "var(--accent-light)" : "var(--bg-elev2)",
+                        border: liveData?.item_id === pastRun.item_id ? "2px solid var(--accent)" : "1.5px solid var(--border)",
+                        borderRadius: 8, padding: 12, cursor: "pointer", transition: "all 0.15s ease",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                        <strong style={{ fontSize: 13, color: "var(--text)" }}>{pastRun.repo}</strong>
+                        <span className={`action-badge ${pastRun.agent.result.recommended_action || "auto_ok"}`} style={{ fontSize: 10 }}>
+                          {pastRun.agent.result.recommended_action || "auto_ok"}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 6 }}>
+                        {pastRun.title}
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11, color: "var(--text-faint)" }}>
+                        <span>📦 {pastRun.artifacts.commits_count} commits</span>
+                        <span style={{ color: "var(--accent)", fontWeight: 700 }}>Inspect Raw Data ➔</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* ERROR DISPLAY */}
             {liveError && (
               <div className="callout" style={{ borderLeftColor: "var(--bad)", marginTop: 16 }}>

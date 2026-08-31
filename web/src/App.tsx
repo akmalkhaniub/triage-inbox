@@ -3,6 +3,7 @@ import { isHardTitle, loadCases, loadManifest, loadResults, pct } from "./data";
 import TrajectoryPanel from "./TrajectoryPanel";
 import LiveTrajectoryCard from "./LiveTrajectoryCard";
 import MetricsComparison from "./MetricsComparison";
+import PitchPipelineRun from "./PitchPipelineRun";
 import AgentGraph from "./AgentGraph";
 import { STORY, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
@@ -712,8 +713,8 @@ export default function App() {
               <div>
                 <div className="script-box">
                   <div className="script-quote">
-                    "Hi, I'm presenting <strong>Triage Inbox</strong> — an evidence-first multi-agent system built for software repository maintainers.<br /><br />
-                    Every Monday morning, maintainers face triage overload across release notes and PR reviews. When tired maintainers skim, critical bugs and breaking changes quietly slip into production. Here are 4 concrete real-world incidents that happen every day."
+                    "A renamed CLI flag shipped as a 'minor fix.' Downstream CI broke the moment teams upgraded. The CHANGELOG said <em>minor</em> — the commit body said <strong>BREAKING</strong>. Nobody read the body.<br /><br />
+                    That's the job I built <strong>Triage Inbox</strong> for — an evidence-first multi-agent system for repository maintainers. Every release and every PR review is a stack of small, evidence-heavy judgments, and when a tired maintainer skims, breaking changes and unfixed bugs slip into production. Here are four incidents that happen every single day — and the agent reads the body so no one has to."
                   </div>
                 </div>
 
@@ -853,23 +854,20 @@ export default function App() {
               <div>
                 <div className="script-box">
                   <div className="script-quote">
-                    "My solution attacks this with a parallel multi-agent graph: A Router classifies the task; focused domain specialists use on-demand Git tools to drill into commit bodies; and a Two-Layer Verifier validates proof before any action is recommended to the human maintainer."
+                    "So let's watch it actually run. A Router classifies the item, a focused specialist uses on-demand Git tools to drill into the commit body where the breaking change hides, and a two-layer Verifier proves every claim against the real artifact before a maintainer sees it. This isn't a diagram — it's the recorded pipeline, step by step. And you can run the exact same thing live on any public repo."
                   </div>
                 </div>
 
-                <div style={{ margin: "20px 0" }}>
+                <div style={{ margin: "20px 0 16px" }}>
                   <AgentGraph activeCaseId="case03_changelog_misclassified_breaking" />
                 </div>
 
-                <div style={{ textAlign: "center", margin: "16px 0" }}>
-                  <button
-                    className="filter-btn active"
-                    style={{ padding: "12px 24px", fontSize: 14, cursor: "pointer" }}
-                    onClick={() => handleSelectCase("case03_changelog_misclassified_breaking")}
-                  >
-                    🔍 Inspect Live Trajectory Trace (Case #3: Misclassified Breaking Change)
-                  </button>
-                </div>
+                {/* INLINE REAL RUN — the climax: watch the pipeline work */}
+                <PitchPipelineRun
+                  entries={manifest["case03_changelog_misclassified_breaking"]?.agent || []}
+                  onOpenLive={() => navigateTab("github")}
+                  onInspectFull={() => handleSelectCase("case03_changelog_misclassified_breaking")}
+                />
               </div>
             )}
 
@@ -878,7 +876,7 @@ export default function App() {
               <div>
                 <div className="script-box">
                   <div className="script-quote">
-                    "I evaluated both systems across 10 benchmark cases on GPT-4o, scored fairly for both arms. The honest result: a flat prompt already recalls the real problems on these small artifacts — recall is 0.90 either way. What it lacks is precision: it over-flags, at 0.82 precision and 0.2 false alarms per task. The multi-agent pipeline keeps that recall and drives precision to 1.00 with zero false alarms — F1 0.86 to 0.95. And because it fetches artifacts on demand instead of dumping them, it keeps working on real repos far too large to fit in one prompt. Verification at the seam is what buys the precision."
+                    "Here's the honest result across 10 cases on GPT-4o, scored fairly for both arms — and I want to be straight about it, because the number matters less than what it means. A flat prompt already <em>finds</em> the real problems: recall is 0.90 either way. But it cries wolf — 0.82 precision, a false alarm on one task in five. And a maintainer who gets false alarms does one thing: they mute the tool. The verifier is the line between a tool they trust and one they turn off. It keeps the same recall and takes precision to 1.00 with zero false alarms — every alert now carries proof. And because the agent fetches artifacts on demand instead of dumping them, it still works on a real 500-commit release that can't fit in a prompt at all. That's the whole ballgame: verification at the seam buys trust."
                   </div>
                 </div>
 

@@ -259,6 +259,7 @@ export default function App() {
   // Audits Sub-View Toggle: "real" (Real GitHub Audits) vs "benchmark" (10-Case Benchmark Suite)
   const [auditViewMode, setAuditViewMode] = useState<"real" | "benchmark">("real");
   const [caseFilter, setCaseFilter] = useState<"all" | "changelog" | "review" | "hard" | "wins">("all");
+  const [liveScorecardFilter, setLiveScorecardFilter] = useState<string>("all");
   const [caseSearchTerm, setCaseSearchTerm] = useState<string>("");
   const [videoStep, setVideoStep] = useState<number>(1);
 
@@ -431,7 +432,12 @@ export default function App() {
     return { wins, ties, losses };
   }, [results]);
 
-  // Dynamically compute real-time metrics across all live GitHub runs
+  // Dynamically compute real-time metrics (Filtered per individual run or combined)
+  const activeAudits = useMemo(() => {
+    if (liveScorecardFilter === "all") return savedLiveAudits;
+    return savedLiveAudits.filter((a) => a.item_id === liveScorecardFilter);
+  }, [savedLiveAudits, liveScorecardFilter]);
+
   const liveStats = useMemo(() => {
     let totalCommits = 0;
     let totalFindings = 0;
@@ -439,7 +445,7 @@ export default function App() {
     let totalVerified = 0;
     let totalFalseAlarmsBlocked = 0;
 
-    for (const audit of savedLiveAudits) {
+    for (const audit of activeAudits) {
       totalCommits += audit.artifacts?.commits_count || 0;
       const baseCount = audit.baseline?.result?.findings?.length || 0;
       totalBaseClaims += baseCount;
@@ -450,8 +456,12 @@ export default function App() {
       totalFalseAlarmsBlocked += Math.max(0, baseCount - verifiedCount);
     }
 
+    const selectedSingle = activeAudits.length === 1 ? activeAudits[0] : null;
+
     return {
-      totalRuns: savedLiveAudits.length,
+      totalRuns: activeAudits.length,
+      isSingle: activeAudits.length === 1,
+      singleAudit: selectedSingle,
       totalCommits,
       totalFindings,
       totalBaseClaims,
@@ -459,7 +469,7 @@ export default function App() {
       totalFalseAlarmsBlocked,
       groundingPrecision: "100.0%",
     };
-  }, [savedLiveAudits]);
+  }, [activeAudits]);
 
   const filteredCaseIds = useMemo(() => {
     if (!results || !cases) return [];
@@ -940,22 +950,64 @@ export default function App() {
                             🟢 LIVE REPO TELEMETRY
                           </span>
                           <span style={{ fontSize: 12, fontFamily: "var(--mono)", color: "var(--accent)", fontWeight: 700 }}>
-                            {liveStats.totalRuns} Live Repositories Analyzed
+                            {liveStats.isSingle ? `Focusing on: ${liveStats.singleAudit?.repo}` : `${liveStats.totalRuns} Repositories Combined`}
                           </span>
                         </div>
                         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, letterSpacing: "-0.02em" }}>
-                          Real-Time Live GitHub Verification Scorecard
+                          {liveStats.isSingle ? `Live Verification Scorecard: ${liveStats.singleAudit?.repo}` : "Real-Time Live GitHub Verification Scorecard"}
                         </h2>
                         <span style={{ fontSize: 12.5, color: "var(--text-dim)", display: "block", marginTop: 3 }}>
-                          Empirical metrics calculated live across real GitHub REST API commit trees · Zero synthetic assumptions
+                          {liveStats.isSingle
+                            ? `Isolated live audit telemetry for ${liveStats.singleAudit?.title}`
+                            : "Empirical metrics calculated live across real GitHub REST API commit trees · Zero synthetic assumptions"}
                         </span>
                       </div>
 
-                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                        {liveStats.isSingle && (
+                          <button
+                            className="filter-btn"
+                            onClick={() => {
+                              setLiveData(liveStats.singleAudit);
+                              setCurrentTab("github");
+                              window.location.hash = "#/github";
+                            }}
+                            style={{ background: "var(--accent)", color: "white", fontWeight: 700, padding: "5px 12px", fontSize: 12 }}
+                          >
+                            🚀 Open in 4-Tab Live Studio ➔
+                          </button>
+                        )}
                         <span className="action-badge auto_ok" style={{ fontSize: 12, padding: "5px 14px", fontWeight: 700 }}>
                           ✓ Live Grounding: {liveStats.groundingPrecision} (0 False Positives)
                         </span>
                       </div>
+                    </div>
+
+                    {/* INTERACTIVE REPO FILTER SELECTOR BAR */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, overflowX: "auto", paddingBottom: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-dim)", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                        Filter Scorecard:
+                      </span>
+                      <button
+                        className={`filter-btn ${liveScorecardFilter === "all" ? "active" : ""}`}
+                        onClick={() => setLiveScorecardFilter("all")}
+                        style={{ fontSize: 12, padding: "4px 12px" }}
+                      >
+                        🌐 All Repos Combined ({savedLiveAudits.length})
+                      </button>
+                      {savedLiveAudits.map((a) => (
+                        <button
+                          key={a.item_id}
+                          className={`filter-btn ${liveScorecardFilter === a.item_id ? "active" : ""}`}
+                          onClick={() => setLiveScorecardFilter(a.item_id)}
+                          style={{ fontSize: 12, padding: "4px 12px", display: "flex", alignItems: "center", gap: 6 }}
+                        >
+                          <span>{a.repo}</span>
+                          <span className={`action-badge ${a.agent.result.recommended_action || "auto_ok"}`} style={{ fontSize: 9.5, padding: "1px 5px" }}>
+                            {a.agent.result.recommended_action || "auto_ok"}
+                          </span>
+                        </button>
+                      ))}
                     </div>
 
                     {/* 4 MODERN KPI CARDS WITH ACCENTS */}

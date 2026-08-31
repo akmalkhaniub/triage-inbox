@@ -10,11 +10,11 @@
       "content": [
         {
           "type": "text",
-          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"Item involves auditing a real release, comparing changelog entries and commits.\"}"
+          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item is about auditing the changelog for a real release, specifically for a version update from 3.0.0 to 3.1.0.\"}"
         }
       ]
     }
   ],
-  "input_tokens": 240,
-  "output_tokens": 106
+  "input_tokens": 268,
+  "output_tokens": 48
 }

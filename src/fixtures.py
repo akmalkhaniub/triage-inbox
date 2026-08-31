@@ -52,7 +52,12 @@ class Fixture:
         return self.artifact.get("changelog", [])
 
     def commit(self, sha: str) -> dict[str, Any] | None:
-        return next((c for c in self.commits() if c["sha"] == sha), None)
+        target = sha.strip().lower()
+        return next((c for c in self.commits() if 
+                     c.get("sha", "").lower() == target or 
+                     c.get("sha", "").lower().startswith(target) or
+                     c.get("full_sha", "").lower().startswith(target) or
+                     target.startswith(c.get("sha", "").lower())), None)
 
     def changelog_line(self, n: int) -> dict[str, Any] | None:
         return next((l for l in self.changelog() if l["line"] == n), None)

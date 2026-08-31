@@ -26,8 +26,12 @@ def changelog_tools(fx: Fixture) -> list[Tool]:
 
     def list_commits() -> list[dict]:
         # summary view: sha + type + subject only (agent drills in as needed)
-        return [{"sha": c["sha"], "type": c["type"], "subject": c["subject"]}
-                for c in fx.commits()]
+        return [{
+            "sha": str(c.get("sha", ""))[:7],
+            "type": str(c.get("type", "commit")),
+            "subject": str(c.get("subject", c.get("message", ""))),
+            "author": str(c.get("author", "unknown")),
+        } for c in fx.commits()]
 
     def get_commit(sha: str) -> dict | str:
         c = fx.commit(sha)

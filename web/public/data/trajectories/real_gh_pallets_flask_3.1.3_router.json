@@ -10,11 +10,11 @@
       "content": [
         {
           "type": "text",
-          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item mentions reconciling a real release and includes changelog_preview, indicating a need for audit of the changelog against commits.\"}"
+          "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item is about auditing the CHANGELOG against the release commits for a new version.\"}"
         }
       ]
     }
   ],
-  "input_tokens": 268,
-  "output_tokens": 42
+  "input_tokens": 261,
+  "output_tokens": 32
 }

@@ -215,7 +215,7 @@ const SEED_REAL_AUDITS: LiveTriageData[] = [
   },
 ];
 
-type TabType = "video" | "audits" | "github" | "architecture" | "reproduce";
+type TabType = "video" | "audits" | "verification" | "github" | "architecture" | "reproduce";
 
 export default function App() {
   const [results, setResults] = useState<Results | null>(null);
@@ -257,6 +257,7 @@ export default function App() {
   // Audits Sub-View Toggle: "real" (Real GitHub Audits) vs "benchmark" (10-Case Benchmark Suite)
   const [auditViewMode, setAuditViewMode] = useState<"real" | "benchmark">("real");
   const [caseFilter, setCaseFilter] = useState<"all" | "changelog" | "review" | "hard" | "wins">("all");
+  const [caseSearchTerm, setCaseSearchTerm] = useState<string>("");
   const [videoStep, setVideoStep] = useState<number>(1);
 
   // Persistent Live Audits List
@@ -312,11 +313,15 @@ export default function App() {
       const hash = window.location.hash.replace(/^#\/?/, "").toLowerCase();
       if (hash.startsWith("case/") || hash === "queue") {
         const caseId = hash.replace("case/", "").replace("queue", "");
-        setCurrentTab("audits");
+        setCurrentTab("verification");
         if (caseId) setSelected(caseId);
         return;
       }
-      if (["video", "audits", "github", "architecture", "reproduce"].includes(hash)) {
+      if (hash === "audits" || hash === "verification") {
+        setCurrentTab("verification");
+        return;
+      }
+      if (["video", "verification", "audits", "github", "architecture", "reproduce"].includes(hash)) {
         setCurrentTab(hash as TabType);
       }
     };
@@ -335,7 +340,7 @@ export default function App() {
     if (id) {
       window.location.hash = `#/case/${id}`;
     } else {
-      window.location.hash = `#/audits`;
+      window.location.hash = `#/verification`;
     }
   };
 
@@ -417,13 +422,21 @@ export default function App() {
       const isHard = isHardTitle(meta?.title || "");
       const isWin = af > bf + 0.001;
 
+      if (caseSearchTerm.trim()) {
+        const query = caseSearchTerm.toLowerCase();
+        const titleMatch = (meta?.title || "").toLowerCase().includes(query);
+        const idMatch = id.toLowerCase().includes(query);
+        const typeMatch = row.item_type.toLowerCase().includes(query);
+        if (!titleMatch && !idMatch && !typeMatch) return false;
+      }
+
       if (caseFilter === "changelog") return !isReview;
       if (caseFilter === "review") return isReview;
       if (caseFilter === "hard") return isHard;
       if (caseFilter === "wins") return isWin;
       return true;
     });
-  }, [results, cases, caseIds, caseFilter]);
+  }, [results, cases, caseIds, caseFilter, caseSearchTerm]);
 
   // Handle GitHub Repo Search
   const handleSearchRepos = async () => {
@@ -836,7 +849,7 @@ export default function App() {
         {/* ========================================================================= */}
         {/* TAB 3: REPOSITORY VERIFICATION REPORTS & BENCHMARK                       */}
         {/* ========================================================================= */}
-        {currentTab === "audits" && (
+        {(currentTab === "verification" || currentTab === "audits") && (
           <section id="audits">
             <div className="page-head">
               <div className="page-title-area">
@@ -991,7 +1004,40 @@ export default function App() {
             {/* VIEW MODE B: BENCHMARK EVALUATION TEST SUITE */}
             {auditViewMode === "benchmark" && (
               <div>
-                <div className="queue-filter-bar">
+                {/* VERDICT TAXONOMY GUIDE */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 10, margin: "14px 0 16px" }}>
+                  <div style={{ background: "var(--bg-elev2)", border: "1px solid var(--border)", borderLeft: "4px solid var(--good)", borderRadius: 8, padding: "10px 14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                      <span className="action-badge auto_ok" style={{ fontSize: 10 }}>auto_ok</span>
+                      <strong style={{ fontSize: 12.5 }}>Autonomous Fast-Track</strong>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 11.5, color: "var(--text-dim)" }}>
+                      0 discrepancies detected. Releases &amp; PRs pass verification cleanly with no human attention required.
+                    </p>
+                  </div>
+
+                  <div style={{ background: "var(--bg-elev2)", border: "1px solid var(--border)", borderLeft: "4px solid var(--warn)", borderRadius: 8, padding: "10px 14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                      <span className="action-badge needs_human" style={{ fontSize: 10 }}>needs_human</span>
+                      <strong style={{ fontSize: 12.5 }}>Maintainer Assist Mode</strong>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 11.5, color: "var(--text-dim)" }}>
+                      Surfaces only grounded discrepancies with exact code quotes. Saves hours by reviewing flagged items in seconds.
+                    </p>
+                  </div>
+
+                  <div style={{ background: "var(--bg-elev2)", border: "1px solid var(--border)", borderLeft: "4px solid var(--bad)", borderRadius: 8, padding: "10px 14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                      <span className="action-badge escalate" style={{ fontSize: 10 }}>escalate</span>
+                      <strong style={{ fontSize: 12.5 }}>Critical Escalation</strong>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 11.5, color: "var(--text-dim)" }}>
+                      Halts workflow for severe breaking changes or ignored security advisories requiring maintainer intervention.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="queue-filter-bar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div className="filter-btn-group">
                     <button className={`filter-btn ${caseFilter === "all" ? "active" : ""}`} onClick={() => setCaseFilter("all")}>All Benchmark Cases ({caseIds.length})</button>
                     <button className={`filter-btn ${caseFilter === "changelog" ? "active" : ""}`} onClick={() => setCaseFilter("changelog")}>Release Notes Audits</button>
@@ -999,9 +1045,25 @@ export default function App() {
                     <button className={`filter-btn ${caseFilter === "hard" ? "active" : ""}`} onClick={() => setCaseFilter("hard")}>Hard Edge Cases</button>
                     <button className={`filter-btn ${caseFilter === "wins" ? "active" : ""}`} onClick={() => setCaseFilter("wins")}>Agent Benchmark Wins ({tally.wins})</button>
                   </div>
-                  <span style={{ fontSize: 13, color: "var(--text-faint)" }}>
-                    Showing <strong>{filteredCaseIds.length}</strong> items · Click any card for visual graph &amp; proof traces
-                  </span>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 260, justifyContent: "flex-end" }}>
+                    <input
+                      type="text"
+                      className="gh-input"
+                      placeholder="🔍 Search cases by title, repo, or keyword..."
+                      value={caseSearchTerm}
+                      onChange={(e) => setCaseSearchTerm(e.target.value)}
+                      style={{ maxWidth: 300, padding: "6px 12px", fontSize: 12.5 }}
+                    />
+                    {caseSearchTerm && (
+                      <button className="filter-btn" onClick={() => setCaseSearchTerm("")} style={{ fontSize: 11, padding: "4px 8px" }}>
+                        Clear ✕
+                      </button>
+                    )}
+                    <span style={{ fontSize: 12, color: "var(--text-faint)", whiteSpace: "nowrap" }}>
+                      Showing <strong>{filteredCaseIds.length}</strong> items
+                    </span>
+                  </div>
                 </div>
 
                 <div className="queue-grid">

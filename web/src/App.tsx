@@ -290,10 +290,10 @@ export default function App() {
   const [isRunningLive, setIsRunningLive] = useState<boolean>(false);
   const [liveData, setLiveData] = useState<LiveTriageData | null>(null);
   const [liveError, setLiveError] = useState<string | null>(null);
+  const [forceRefresh, setForceRefresh] = useState<boolean>(false);
 
   const [activeArtifactTab, setActiveArtifactTab] = useState<"commits" | "changelog" | "diffs" | "comments">("commits");
 
-const [expandedTrajStep, setExpandedTrajStep] = useState<number | null>(null);
 
   // Default to LIGHT mode
   const [theme, setTheme] = useState<"dark" | "light">(() => {
@@ -481,6 +481,7 @@ const [expandedTrajStep, setExpandedTrajStep] = useState<number | null>(null);
       api_key: apiKey.trim() || undefined,
       github_token: githubToken.trim() || undefined,
       run_both: runBothArms,
+      force_refresh: forceRefresh,
     };
 
     if (runnerType === "changelog") {
@@ -1427,15 +1428,23 @@ const [expandedTrajStep, setExpandedTrajStep] = useState<number | null>(null);
                 </div>
               </div>
 
-              {/* ACTION BUTTON */}
+              {/* ACTION BUTTON & ARTIFACT CACHE CONTROLS */}
               <div style={{ marginTop: 20, display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
                 <button
                   className="run-btn"
                   onClick={handleRunLiveTriage}
                   disabled={isRunningLive || !repoInput.trim()}
                 >
-                  {isRunningLive ? "⏳ Querying GitHub REST API & Running Triage Agents…" : "🚀 Execute Multi-Agent Repository Triage"}
+                  {isRunningLive ? "⏳ Executing Multi-Agent Pipeline & Verifying Proofs…" : "🚀 Execute Multi-Agent Repository Triage"}
                 </button>
+                <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "var(--text-dim)", cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={forceRefresh}
+                    onChange={(e) => setForceRefresh(e.target.checked)}
+                  />
+                  <span>🔄 Force re-download from GitHub (bypass local cache)</span>
+                </label>
                 {isRunningLive && (
                   <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
                     Downloading Git commits/diffs, executing multi-agent reasoning, and verifying proofs…
@@ -1738,38 +1747,75 @@ const [expandedTrajStep, setExpandedTrajStep] = useState<number | null>(null);
                           </span>
                         </div>
 
-                        {traj.steps.map((step, sIdx) => {
-                          const stepKey = tIdx * 100 + sIdx;
-                          const isExpanded = expandedTrajStep === stepKey;
-
+                        {traj.steps.map((step: any, sIdx: number) => {
+                          const isTool = step.kind === "tool" || !!step.name;
                           return (
-                            <div className="step" key={sIdx}>
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }} onClick={() => setExpandedTrajStep(isExpanded ? null : stepKey)}>
-                                <div className="s-kind">Step #{sIdx + 1} · {step.tool_calls ? "🔧 On-Demand Tool Call" : "💭 Model Thought"}</div>
-                                <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600 }}>
-                                  {isExpanded ? "Collapse ▲" : "Expand ▼"}
+                            <div className="step" key={sIdx} style={{ margin: "8px 0", padding: "10px 14px", background: "var(--bg-elev2)", borderRadius: 8, border: "1px solid var(--border)" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                                <div className="s-kind" style={{ fontWeight: 700, fontSize: 13, color: isTool ? "var(--accent)" : "var(--text)" }}>
+                                  Step #{sIdx + 1} · {isTool ? `🔧 Tool Call: ${step.name}` : "💭 Model Reasoning & Response"}
+                                </div>
+                                <span style={{ fontSize: 11, fontFamily: "var(--mono)", color: "var(--text-faint)" }}>
+                                  {step.stop_reason ? `stop: ${step.stop_reason}` : isTool ? "executed" : ""}
                                 </span>
                               </div>
 
-                              {step.thought && (
-                                <div className="s-text" style={{ fontSize: 12.5, margin: "4px 0" }}>
-                                  {step.thought}
+                              {/* TOOL EXECUTION STEP */}
+                              {isTool ? (
+                                <div>
+                                  <div className="toolcall" style={{ margin: "4px 0 8px" }}>
+                                    <strong>Parameters:</strong> <code>{JSON.stringify(step.input || step.args || {})}</code>
+                                  </div>
+                                  {step.result !== undefined && (
+                                    <div>
+                                      <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-faint)", textTransform: "uppercase" }}>Returned Output:</span>
+                                      <pre className="toolresult" style={{ margin: "4px 0 0", maxHeight: 220, overflowY: "auto", fontSize: 11.5, background: "var(--bg)", padding: 8, borderRadius: 6 }}>
+                                        {typeof step.result === "string" ? step.result : JSON.stringify(step.result, null, 2)}
+                                      </pre>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                /* MODEL THOUGHT / TEXT / BLOCKS */
+                                <div>
+                                  {Array.isArray(step.content) && step.content.map((b: any, bIdx: number) => {
+                                    if (b.type === "text" && b.text?.trim()) {
+                                      return (
+                                        <div className="s-text" key={bIdx} style={{ fontSize: 12.5, margin: "6px 0", whiteSpace: "pre-wrap", color: "var(--text)" }}>
+                                          {b.text.trim()}
+                                        </div>
+                                      );
+                                    }
+                                    if (b.type === "thinking" && b.thinking) {
+                                      return (
+                                        <div key={bIdx} style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic", background: "var(--bg)", padding: 8, borderRadius: 6, margin: "6px 0", borderLeft: "3px solid var(--accent)" }}>
+                                          💭 <strong>Extended Thinking:</strong> {b.thinking}
+                                        </div>
+                                      );
+                                    }
+                                    if (b.type === "tool_use") {
+                                      return (
+                                        <div className="toolcall" key={bIdx} style={{ margin: "6px 0" }}>
+                                          <strong>🔧 Invoked Tool:</strong> <span className="tc-name">{b.name}</span>(<code>{JSON.stringify(b.input || {})}</code>)
+                                        </div>
+                                      );
+                                    }
+                                    return null;
+                                  })}
+
+                                  {/* Fallback for legacy thought / raw text */}
+                                  {step.thought && (
+                                    <div className="s-text" style={{ fontSize: 12.5, margin: "4px 0" }}>
+                                      {step.thought}
+                                    </div>
+                                  )}
+                                  {step.text && (
+                                    <div className="s-text" style={{ fontSize: 12.5, margin: "4px 0" }}>
+                                      {step.text}
+                                    </div>
+                                  )}
                                 </div>
                               )}
-
-                              {step.tool_calls && step.tool_calls.map((tc: any, tcIdx: number) => (
-                                <div key={tcIdx}>
-                                  <div className="toolcall">
-                                    <strong>{tc.name}</strong>({JSON.stringify(tc.args || {})})
-                                  </div>
-                                </div>
-                              ))}
-
-                              {step.tool_results && step.tool_results.map((tr: any, trIdx: number) => (
-                                <div key={trIdx} className="toolresult" style={{ maxHeight: isExpanded ? 400 : 90 }}>
-                                  {typeof tr.result === "string" ? tr.result : JSON.stringify(tr.result, null, 2)}
-                                </div>
-                              ))}
                             </div>
                           );
                         })}

@@ -235,6 +235,7 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                     self._send_json(400, {"error": "Missing 'repo' parameter"})
                     return
 
+                force_refresh = payload.get("force_refresh", False)
                 if triage_type == "changelog":
                     base_tag = payload.get("base_tag", "").strip()
                     head_tag = payload.get("head_tag", "").strip()
@@ -242,13 +243,13 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                     if not base_tag or not head_tag:
                         self._send_json(400, {"error": "Both 'base_tag' and 'head_tag' are required for release triage"})
                         return
-                    fx = fetch_release_fixture(repo=repo, base_tag=base_tag, head_tag=head_tag, changelog_file=file_path)
+                    fx = fetch_release_fixture(repo=repo, base_tag=base_tag, head_tag=head_tag, changelog_file=file_path, force_refresh=force_refresh)
                 elif triage_type == "pr":
                     pr_number = int(payload.get("pr_number", 0))
                     if pr_number <= 0:
                         self._send_json(400, {"error": "Valid 'pr_number' is required for PR review triage"})
                         return
-                    fx = fetch_pr_fixture(repo=repo, pr_number=pr_number)
+                    fx = fetch_pr_fixture(repo=repo, pr_number=pr_number, force_refresh=force_refresh)
                 else:
                     self._send_json(400, {"error": f"Unknown triage type: {triage_type}"})
                     return

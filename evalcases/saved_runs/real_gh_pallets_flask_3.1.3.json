@@ -1,0 +1,250 @@
+{
+  "success": true,
+  "item_id": "real_gh_pallets_flask_3.1.3",
+  "title": "Audit real release: pallets/flask (3.1.2 -> 3.1.3)",
+  "item_type": "changelog_audit",
+  "repo": "pallets/flask",
+  "artifacts": {
+    "commits_count": 23,
+    "commits": [
+      {
+        "sha": "85793d6",
+        "full_sha": "85793d6c223dd845e8f218403a5ced83041d37e1",
+        "message": "release version 3.1.2 (#5800)",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "dbd4c28",
+        "full_sha": "dbd4c2882593f6118103120aa96fa9acdf7deedb",
+        "message": "Changed the static annotated type of select_jinja_autoescape method in src/flask/sansio/app.py",
+        "body": "",
+        "author": "subhajitsaha01"
+      },
+      {
+        "sha": "da6d075",
+        "full_sha": "da6d075dfde71b2e2a64f39b29ba957d5ffb00b0",
+        "message": "update dev dependencies",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "9170000",
+        "full_sha": "917000097fc17875104176e2c71318ab25c508c3",
+        "message": "test py3.14",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "607d194",
+        "full_sha": "607d1948b8747776f4a45d5b7c7eaeb57b6b9f80",
+        "message": "split free threading envs",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "ad68a12",
+        "full_sha": "ad68a12645d96fe51558da13e18544ba458d7af0",
+        "message": "drop experimental 3.13t test env",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "97bddc1",
+        "full_sha": "97bddc1f61a59522386d36ec37b2b220a01de262",
+        "message": "update dev dependencies",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "64dd080",
+        "full_sha": "64dd0809c2fc732ed30539235232a268f9bd96ac",
+        "message": "update dev dependencies",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "25642fd",
+        "full_sha": "25642fd1fd65985fc98f95e64bc2c7ff353d6c2b",
+        "message": "fix annotation for select_jinja_autoescape (#5808)",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "30da640",
+        "full_sha": "30da640ffe23b6e461fa91d387ffea6b9d9fa847",
+        "message": "clarify 415 vs 400 errors for request.json (#5827)",
+        "body": "",
+        "author": "ADITYA SAH"
+      },
+      {
+        "sha": "709f83f",
+        "full_sha": "709f83f6a32da8cdaec196d7b785ab6827322008",
+        "message": "pre-commit: Add codespell",
+        "body": "",
+        "author": "Christian Clauss"
+      },
+      {
+        "sha": "3709c4a",
+        "full_sha": "3709c4a9a87e6ce8c26dc4a951e1df52ac9ecad0",
+        "message": "update ruff hook and noqa",
+        "body": "co-authored-by: Christian Clauss <cclauss@me.com>",
+        "author": "David Lord"
+      },
+      {
+        "sha": "5559ef4",
+        "full_sha": "5559ef42b5334075cbde82b2870ca725ac606fa4",
+        "message": "pre-commit: Add codespell (#5844)",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "fe3b215",
+        "full_sha": "fe3b215d3ade4db68262dae1a3cdc464a1fc524f",
+        "message": "Increase required flit_core version to 3.11",
+        "body": "Needed since Flask 3.1.1 after having set the \"license\" keyword to an\nSPDX license expression. Avoids this possible build error:\n\n  flit_core.config.ConfigError: license field should be <class 'dict'>, not <class 'str'>\n\nFixes: 0109e496f (\"use uv\").",
+        "author": "Markus Heidelberg"
+      },
+      {
+        "sha": "4f79d5b",
+        "full_sha": "4f79d5b59a56bc4356a97f2e81a35f98cb18d7b3",
+        "message": "Increase required flit_core version to 3.11 (#5865)",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "ac5664d",
+        "full_sha": "ac5664d2281533eacafd64f5cc7d5edcdaccab60",
+        "message": "document using gevent for async",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "407eb76",
+        "full_sha": "407eb76b27884848383a37c7274654f0271e4bc4",
+        "message": "document using gevent for async (#5900)",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "3d03098",
+        "full_sha": "3d03098a97ddc6a908aa4a50c2ef7381f8297d0a",
+        "message": "Abort if the instance folder cannot be created",
+        "body": "According to the comment, the instance folder should exist in any case.\nBut a PermissionError was ignored silently.\n\nSince Python 3.9 is the minimum required version, it is safe to use\n\"exist_ok\" added in Python 3.2 and avoid exception handling.",
+        "author": "Markus Heidelberg"
+      },
+      {
+        "sha": "4e652d3",
+        "full_sha": "4e652d3f68b90d50aa2301d3b7e68c3fafd9251d",
+        "message": "Abort if the instance folder cannot be created (#5903)",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "27be933",
+        "full_sha": "27be9338405382445a7cb01151e084559b98d602",
+        "message": "start version 3.1.3",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "c17f379",
+        "full_sha": "c17f379390731543eea33a570a47bd4ef76a54fa",
+        "message": "request context tracks session access",
+        "body": "",
+        "author": "David Lord"
+      },
+      {
+        "sha": "089cb86",
+        "full_sha": "089cb86dd22bff589a4eafb7ab8e42dc357623b4",
+        "message": "Merge commit from fork",
+        "body": "request context tracks session access",
+        "author": "David Lord"
+      },
+      {
+        "sha": "22d9247",
+        "full_sha": "22d924701a6ae2e4cd01e9a15bbaf3946094af65",
+        "message": "release version 3.1.3",
+        "body": "",
+        "author": "David Lord"
+      }
+    ],
+    "changelog_length": 546,
+    "changelog_preview": "# Release 3.1.3\n\nThis is the Flask 3.1.3 security fix release, which fixes a security issue but does not otherwise change behavior and should not result in breaking changes compared to the latest feature release.\n\nPyPI: https://pypi.org/project/Flask/3.1.3/\nChanges: https://flask.palletsprojects.com/page/changes/#version-3-1-3\n\n- The session is marked as accessed for operations that only access the keys but not the values, such as `in` and `len`. [GHSA-68rp-wp8r-4726](https://github.com/pallets/flask/security/advisories/GHSA-68rp-wp8r-4726)",
+    "review_comments": [],
+    "diff_hunks_count": 0,
+    "diff_files": []
+  },
+  "agent": {
+    "result": {
+      "item_id": "real_gh_pallets_flask_3.1.3",
+      "item_type": "changelog_audit",
+      "recommended_action": "auto_ok",
+      "summary": "0/0 findings verified; action=auto_ok.",
+      "findings": []
+    },
+    "trajectories": [
+      {
+        "agent": "router",
+        "item_id": "real_gh_pallets_flask_3.1.3",
+        "system": "You route items in a repository maintainer's triage queue to the\ncorrect specialist. Given a short preview of one item, classify it as exactly one\nof: changelog_audit, review_resolution, dep_bump, flaky_test, issue_triage.\n\nGuidance:\n- changelog_audit: the item is about reconciling a CHANGELOG / release notes with commits.\n- review_resolution: the item is about whether a PR addressed its review comments.\n- dep_bump: a dependency-version-bump PR to assess for safety.\n- flaky_test: a failing CI test to judge as real-vs-flaky.\n- issue_triage: a new bug report to sort as actionable / needs-info / duplicate.\n\nOutput ONLY JSON: {\"item_type\": \"<one of the above>\", \"why\": \"<short reason>\"}",
+        "steps": [
+          {
+            "kind": "model",
+            "step": 0,
+            "stop_reason": "end_turn",
+            "content": [
+              {
+                "type": "text",
+                "text": "{\"item_type\": \"changelog_audit\", \"why\": \"The item is an audit of the changelog and commits corresponding to a version bump release.\"}"
+              }
+            ]
+          }
+        ],
+        "input_tokens": 240,
+        "output_tokens": 110
+      },
+      {
+        "agent": "changelog_auditor",
+        "item_id": "real_gh_pallets_flask_3.1.3",
+        "system": "You are a release-notes auditor for a software repository.\n\nYour job: compare the CHANGELOG **as written** against the **actual commits** in\nthe release, and report only the DISCREPANCIES. Do not list lines that are fine.\n\nDiscrepancy types:\n- \"phantom\": a CHANGELOG line claims a change that no commit supports.\n- \"missing\": a commit made a user-facing change (feat / fix / breaking) that no\n  CHANGELOG line mentions. Ignore purely internal commits (chore, docs, test,\n  refactor with no user impact) -- those are not expected in the changelog.\n- \"misclassified\": a CHANGELOG line exists but sits under the wrong section for\n  the commit's true impact. The most important case: a BREAKING change listed\n  under an ordinary \"Added\"/\"Fixed\"/\"Changed\" heading instead of \"Breaking\".\n\nMethod:\n1. Call list_commits, then read_changelog.\n2. You CANNOT judge breaking-ness from a subject alone. Call get_commit to read\n   the body for EVERY commit that is even possibly breaking -- specifically any\n   whose subject mentions rename / remove / drop / delete / replace / change /\n   migrate, and (because major releases concentrate breaking changes) every\n   commit when the release version is a major bump (x.0.0). The BREAKING CHANGE\n   marker usually appears only in the body.\n3. Decide the discrepancies. Tie EACH to evidence: the commit sha and/or the\n   changelog line, and quote the exact text you relied on.\n\nOutput ONLY a JSON array (no prose) of objects:\n[\n  {\n    \"verdict\": \"phantom\" | \"missing\" | \"misclassified\",\n    \"subject\": \"changelog:<line>\"  (for phantom/misclassified)  or  \"commit:<sha>\" (for missing),\n    \"evidence\": [ {\"kind\": \"changelog_line\"|\"commit\", \"ref\": \"changelog:<line>\"|\"commit:<sha>\", \"quote\": \"<exact text>\"} ],\n    \"confidence\": 0.0-1.0,\n    \"rationale\": \"<one sentence>\"\n  }\n]\nIf there are no discrepancies, output [].",
+        "steps": [
+          {
+            "kind": "model",
+            "step": 0,
+            "stop_reason": "end_turn",
+            "content": []
+          }
+        ],
+        "input_tokens": 610,
+        "output_tokens": 2000
+      }
+    ]
+  },
+  "baseline": {
+    "result": {
+      "item_id": "real_gh_pallets_flask_3.1.3",
+      "item_type": "changelog_audit",
+      "recommended_action": "auto_ok",
+      "summary": "baseline produced 0 findings (unverified).",
+      "findings": []
+    },
+    "trajectories": [
+      {
+        "agent": "baseline",
+        "item_id": "real_gh_pallets_flask_3.1.3",
+        "system": "You are a repository maintainer's assistant. You will be given one\nqueue item -- either a CHANGELOG to audit against commits, or a PR whose review\ncomments you must check against the pushed diff. Do the appropriate task.\n\nIf it is a CHANGELOG audit, report discrepancies (phantom / missing /\nmisclassified). If it is a PR review check, report one verdict per review\ncomment (addressed / partial / ignored).\n\nOutput ONLY a JSON array of findings:\n[ {\"verdict\": \"...\", \"subject\": \"...\", \"evidence\": [{\"kind\":\"...\",\"ref\":\"...\",\"quote\":\"...\"}],\n   \"confidence\": 0.0-1.0, \"rationale\": \"...\"} ]",
+        "steps": [
+          {
+            "kind": "model",
+            "step": 0,
+            "stop_reason": "end_turn",
+            "content": []
+          }
+        ],
+        "input_tokens": 2426,
+        "output_tokens": 2000
+      }
+    ]
+  }
+}

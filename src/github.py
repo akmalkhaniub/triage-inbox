@@ -90,7 +90,29 @@ def fetch_release_fixture(
     base_tag: str,
     head_tag: str,
     changelog_file: str = "CHANGELOG.md",
+    force_refresh: bool = False,
 ) -> Fixture:
+    repo = repo.strip("/")
+    item_id = f"real_gh_{repo.replace('/', '_')}_{head_tag}"
+    cache_path = Path("evalcases/saved_runs") / f"{item_id}.json"
+    
+    # 0. Check local cache first for instant re-evals with different models
+    if not force_refresh and cache_path.exists():
+        try:
+            cached_data = json.loads(cache_path.read_text(encoding="utf-8"))
+            if "artifacts" in cached_data or "artifact" in cached_data:
+                art = cached_data.get("artifact") or cached_data.get("artifacts")
+                # Ensure artifact shape
+                if "commits" in art:
+                    return Fixture(path=cache_path, raw={
+                        "item_id": item_id,
+                        "item_type": "changelog_audit",
+                        "title": f"Audit real release: {repo} ({base_tag} -> {head_tag})",
+                        "artifact": art,
+                        "ground_truth": {"source": "cached_github", "expected_findings": []},
+                    })
+        except Exception:
+            pass
     """Fetch real commits between base_tag and head_tag + the real CHANGELOG file."""
     repo = repo.strip("/")
     # 1. Fetch compare data

@@ -945,13 +945,6 @@ export default function App() {
                             <span className={`action-badge ${audit.agent.result.recommended_action || "auto_ok"}`}>
                               Verdict: {audit.agent.result.recommended_action || "auto_ok"}
                             </span>
-                            <button
-                              onClick={(e) => handleDeleteLiveAudit(audit.item_id, e)}
-                              style={{ background: "none", border: "none", color: "var(--text-faint)", cursor: "pointer", fontSize: 14, padding: "2px 6px" }}
-                              title="Delete this audit report"
-                            >
-                              ✕
-                            </button>
                           </div>
                         </div>
 
@@ -1953,18 +1946,52 @@ python run_one.py evalcases/cases/case03_changelog_misclassified_breaking.json`}
       {selectedLiveAudit && (
         <div className="drawer-overlay" onClick={() => setSelectedLiveAudit(null)}>
           <div className="drawer" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 940 }}>
-            <div className="dh">
+            <div className="dh" style={{ padding: "16px 24px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg)" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                   <span className={`tag ${selectedLiveAudit.item_type === "review_resolution" ? "review" : "changelog"}`}>
                     {selectedLiveAudit.item_type === "review_resolution" ? "PR Review Resolution Audit" : "Release CHANGELOG Audit"}
                   </span>
-                  <span className="badge-model">Live GitHub REST API</span>
-                  <span style={{ fontSize: 12, fontFamily: "var(--mono)", color: "var(--text-faint)" }}>{selectedLiveAudit.repo}</span>
+                  <span className="badge-model" style={{ background: "var(--accent-light)", color: "var(--accent)", border: "1px solid var(--border)", padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>
+                    Live GitHub REST API
+                  </span>
+                  <span style={{ fontSize: 12, fontFamily: "var(--mono)", color: "var(--text-dim)" }}>{selectedLiveAudit.repo}</span>
                 </div>
-                <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800 }}>{selectedLiveAudit.title}</h2>
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>{selectedLiveAudit.title}</h2>
               </div>
-              <button className="d-close" onClick={() => setSelectedLiveAudit(null)} title="Close (Esc)">✕</button>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <button
+                  className="filter-btn"
+                  onClick={(e) => {
+                    handleDeleteLiveAudit(selectedLiveAudit.item_id, e);
+                    setSelectedLiveAudit(null);
+                  }}
+                  style={{ fontSize: 11.5, color: "var(--bad)", padding: "4px 10px" }}
+                  title="Remove this audit run from stored history"
+                >
+                  🗑️ Delete Run
+                </button>
+                <button
+                  className="filter-btn"
+                  onClick={() => {
+                    setLiveData(selectedLiveAudit);
+                    setSelectedLiveAudit(null);
+                    setCurrentTab("github");
+                    window.location.hash = "#/github";
+                  }}
+                  style={{ fontSize: 11.5, background: "var(--accent)", color: "white", padding: "4px 10px", fontWeight: 600 }}
+                  title="Load into 4-Tab Live Studio on #/github"
+                >
+                  🚀 Open in 4-Tab Studio ➔
+                </button>
+                <button
+                  onClick={() => setSelectedLiveAudit(null)}
+                  style={{ background: "var(--bg-elev2)", border: "1px solid var(--border)", borderRadius: 6, width: 32, height: 32, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}
+                  title="Close (Esc)"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* TELEMETRY STRIP */}

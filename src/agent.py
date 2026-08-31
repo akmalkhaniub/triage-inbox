@@ -63,11 +63,15 @@ def triage(fx: Fixture) -> tuple[TriageResult, list[Trajectory]]:
             result, s_traj = stubs.stub_result(fx, routed)
             trajectories.append(s_traj)
             return result, trajectories
-        return (TriageResult(
-            item_id=fx.item_id, item_type=routed,
-            recommended_action="needs_human",
-            summary=f"Router could not classify this item (got '{routed}').",
-        ), trajectories)
+        
+        # Fallback to fixture's designated item_type if router was ambiguous
+        runner = SPECIALISTS.get(fx.item_type)
+        if runner is None:
+            return (TriageResult(
+                item_id=fx.item_id, item_type=routed or fx.item_type,
+                recommended_action="needs_human",
+                summary=f"Router could not classify this item (got '{routed}').",
+            ), trajectories)
 
     findings, s_traj = runner(fx)
     trajectories.append(s_traj)

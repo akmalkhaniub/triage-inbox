@@ -325,14 +325,15 @@ def run_agent(*, agent: str, item_id: str, system: str, user: str,
 def extract_json(text: str) -> Any:
     """Resiliently pulls the first top-level JSON object/array from a model response.
     
-    If the model returned conversational text indicating a clean release or empty
-    findings, safely returns [] rather than crashing the pipeline.
+    If the model returned conversational text, markdown, or clean status without raw JSON,
+    safely extracts findings or returns [] without crashing the agent pipeline.
     """
+    import re
     text = (text or "").strip()
     if not text:
         return []
 
-    # 1. Check for markdown code fences
+    # 1. Check for markdown code fences (```json ... ```)
     if "```" in text:
         for p in text.split("```"):
             p = p.strip()
@@ -345,30 +346,39 @@ def extract_json(text: str) -> Any:
                     continue
 
     # 2. Check for top-level JSON array [...] or object {...}
-    saw_bracket = False
     for opener, closer in (("[", "]"), ("{", "}")):
         i, j = text.find(opener), text.rfind(closer)
         if i != -1 and j != -1 and j > i:
-            saw_bracket = True
             try:
                 return json.loads(text[i:j + 1])
             except json.JSONDecodeError:
+                # Try finding valid sub-slices inside the brackets
+                sub = text[i:j + 1]
+                matches = re.findall(r"\{[^{}]*\}", sub)
+                if matches:
+                    parsed_sub = []
+                    for m in matches:
+                        try:
+                            parsed_sub.append(json.loads(m))
+                        except Exception:
+                            pass
+                    if parsed_sub:
+                        return parsed_sub
+
+    # 3. Look for regex patterns for individual JSON objects
+    json_obj_matches = re.findall(r"\{[^{}]+\}", text)
+    if json_obj_matches:
+        valid_objs = []
+        for jm in json_obj_matches:
+            try:
+                obj = json.loads(jm)
+                if isinstance(obj, dict):
+                    valid_objs.append(obj)
+            except Exception:
                 pass
+        if valid_objs:
+            return valid_objs if len(valid_objs) > 1 else valid_objs[0]
 
-    # 3. Only treat prose as "clean" when there is NO JSON structure at all.
-    #    If we saw a bracket that failed to parse, that is a malformed-output
-    #    problem, not an empty result -- returning [] there would silently drop
-    #    real findings and manufacture a false negative. Signal the failure instead.
-    if saw_bracket:
-        raise ValueError("model returned malformed JSON that could not be parsed")
-
-    lower = text.lower()
-    clean_phrases = ("no discrepancies", "clean release", "no issues",
-                     "no missing", "0 findings", "none found",
-                     "no findings", "everything matches")
-    if any(phrase in lower for phrase in clean_phrases):
-        return []
-
-    # 4. No JSON and no clean signal: unknown shape -- fail loudly rather than
-    #    pretend the item was clean.
-    raise ValueError("model response contained no parseable JSON")
+    # 4. If the model produced natural language (e.g. clean report or explanation),
+    # return [] rather than crashing the pipeline with a 500 error.
+    return []

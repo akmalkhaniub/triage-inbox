@@ -356,8 +356,8 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
 
 
 def run_server(port: int = 8000):
-    server = ThreadingHTTPServer(("127.0.0.1", port), TriageAPIHandler)
-    print(f"Triage Inbox API Server running at http://127.0.0.1:{port}")
+    server = ThreadingHTTPServer(("0.0.0.0", port), TriageAPIHandler)
+    print(f"Triage Inbox API Server running on 0.0.0.0:{port}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

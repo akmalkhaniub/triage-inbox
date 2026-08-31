@@ -903,9 +903,10 @@ export default function App() {
               <div>
                 <div className="script-box">
                   <div className="script-quote">
-                    "Two critical learnings came from this project:<br />
-                    1. One experiment I removed: I tried forcing strict JSON schema formatting on the generator. It made outputs well-formed but didn't stop hallucinations — proving grounding, not formatting, is the answer.<br />
-                    2. My Hot Take: For judgment-over-artifacts tasks, reliability is not a smarter prompt — it is making the agent unable to assert what it cannot point at. Thank you!"
+                    "Two learnings, then where this goes next.<br />
+                    One experiment I removed: forcing strict JSON schema on the generator. It made outputs well-formed but no more truthful — proving grounding, not formatting, is what buys correctness.<br />
+                    My hot take: for judgment-over-artifacts tasks, reliability isn't a smarter prompt — it's making the agent unable to assert what it can't point at.<br /><br />
+                    And the next step is already scaffolded. The CI workflow runs this pipeline on every pull request today; the obvious increment is to have it post the verified findings straight onto the release PR — so the maintainer sees 'this changelog line is a breaking change, here's the commit that proves it' inline, before they ever hit merge. Thank you."
                   </div>
                 </div>
 
@@ -914,6 +915,32 @@ export default function App() {
                   <p>
                     Deterministic grounding removes hallucinated evidence for free before any expensive secondary model call. Every claim must point to a real file, SHA, or patch quote.
                   </p>
+                </div>
+
+                {/* FORWARD-LOOK: from demo to product */}
+                <div className="sec-head" style={{ marginTop: 24 }}>
+                  <span className="sec-num">05</span>
+                  <h2>Where this goes next — from demo to product</h2>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
+                  <div className="vprop-card" style={{ borderLeft: "4px solid var(--good)" }}>
+                    <h3 style={{ margin: "0 0 6px", fontSize: 14 }}>✅ Already built</h3>
+                    <p style={{ fontSize: 12.5, margin: 0, color: "var(--text-dim)" }}>
+                      A CI workflow (<code>ci/triage.yml</code>) runs the triage pipeline on every pull request and push, and the live scanner audits any public repo on demand.
+                    </p>
+                  </div>
+                  <div className="vprop-card" style={{ borderLeft: "4px solid var(--accent)" }}>
+                    <h3 style={{ margin: "0 0 6px", fontSize: 14 }}>▶ Next: PR comments</h3>
+                    <p style={{ fontSize: 12.5, margin: 0, color: "var(--text-dim)" }}>
+                      Post the verified findings as an inline review comment on the release PR — each tied to the commit / line / diff that proves it — so it lands in the maintainer's existing workflow, behind the human-approval gate.
+                    </p>
+                  </div>
+                  <div className="vprop-card" style={{ borderLeft: "4px solid var(--warn)" }}>
+                    <h3 style={{ margin: "0 0 6px", fontSize: 14 }}>🎯 Then: close the recall gap</h3>
+                    <p style={{ fontSize: 12.5, margin: 0, color: "var(--text-dim)" }}>
+                      Precision and false alarms are already solved (1.00 / 0.00, every run). The honest next target is recall — a self-check pass that asks the specialist "did you miss any user-facing change?" before the verifier runs.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

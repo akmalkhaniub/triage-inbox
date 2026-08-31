@@ -87,12 +87,16 @@ Turn Evaluation Mode to **Side-by-Side**.*
 > you can't prove an absence from one artifact. We now hand it the full artifact.
 > A verifier's context has to match the shape of the claim."
 
-## 4:30 – 4:45 · Hot take & close  *(screen: hero / logo)*
+## 4:30 – 4:55 · Hot take, forward-look & close  *(screen: Part 5 / hero)*
 
 > "Our hot take: for judgment-over-artifacts work, reliability isn't a smarter prompt —
 > it's making the agent **unable to assert what it can't point at.** Let the generator
-> be bold, and verify at the seam where claims meet evidence. That's Triage Inbox.
-> Thanks for watching."
+> be bold, and verify at the seam where claims meet evidence.
+> And this isn't a demo dead-end: the CI workflow already runs this pipeline on every
+> pull request — the next step is to post the verified findings straight onto the
+> release PR, so the maintainer sees the breaking change and its proof inline before
+> they merge. Precision is already solved; the honest next target is recall. That's
+> Triage Inbox. Thanks for watching."
 
 ---
 

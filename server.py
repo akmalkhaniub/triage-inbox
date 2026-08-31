@@ -286,7 +286,7 @@ class TriageAPIHandler(BaseHTTPRequestHandler):
                             "agent": t.agent,
                             "item_id": t.item_id,
                             "system": t.system,
-                            "steps": [s.detail for s in t.steps],
+                            "steps": [{"kind": s.kind, **s.detail} for s in t.steps],
                             "input_tokens": t.input_tokens,
                             "output_tokens": t.output_tokens,
                         })

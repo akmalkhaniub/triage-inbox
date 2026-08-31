@@ -1480,7 +1480,7 @@ export default function App() {
             )}
 
             {/* RAW FETCHED DATA PREVIEW CARD */}
-            {rawPreviewData && !liveData && (
+            {rawPreviewData && (
               <div className="gh-box" style={{ marginTop: 20, margin: "20px 0 0" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
                   <div>

@@ -4,6 +4,7 @@ import TrajectoryPanel from "./TrajectoryPanel";
 import LiveTrajectoryCard from "./LiveTrajectoryCard";
 import MetricsComparison from "./MetricsComparison";
 import PitchPipelineRun from "./PitchPipelineRun";
+import PresentationMode from "./PresentationMode";
 import AgentGraph from "./AgentGraph";
 import { STORY, CHOICES } from "./content";
 import type { Cases, Manifest, Results } from "./types";
@@ -263,6 +264,7 @@ export default function App() {
   const [liveScorecardFilter, setLiveScorecardFilter] = useState<string>("all");
   const [caseSearchTerm, setCaseSearchTerm] = useState<string>("");
   const [videoStep, setVideoStep] = useState<number>(1);
+  const [presenting, setPresenting] = useState<boolean>(false);
 
   // Persistent Live Audits List
   const [savedLiveAudits, setSavedLiveAudits] = useState<LiveTriageData[]>(() => {
@@ -675,13 +677,21 @@ export default function App() {
         {/* ========================================================================= */}
         {currentTab === "video" && (
           <section id="video" className="video-suite">
-            <div className="page-head">
+            <div className="page-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
               <div className="page-title-area">
                 <h1>🎬 Solution Pitch &amp; Live Presentation</h1>
                 <p>
                   A visual first-person presentation grounded in concrete real-world repository incidents, failure modes, multi-agent architecture, and verified benchmark evidence.
                 </p>
               </div>
+              <button
+                className="filter-btn active"
+                style={{ padding: "10px 18px", fontSize: 14, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+                onClick={() => { setVideoStep(1); setPresenting(true); window.scrollTo({ top: 0 }); }}
+                title="Hands-free auto-advancing teleprompter — hit record and read"
+              >
+                🎥 Presentation Mode
+              </button>
             </div>
 
             {/* STEP SELECTOR */}
@@ -2589,6 +2599,11 @@ Full artifact:
           activeModel={results.model}
           onClose={() => handleSelectCase(null)}
         />
+      )}
+
+      {/* HANDS-FREE TELEPROMPTER for recording the pitch video in one take */}
+      {presenting && currentTab === "video" && (
+        <PresentationMode step={videoStep} setStep={setVideoStep} onExit={() => setPresenting(false)} />
       )}
     </>
   );
